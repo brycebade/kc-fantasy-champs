@@ -8,7 +8,6 @@ body {
   flex-direction: column;
   min-height: 100vh;
   padding-top: 100px;
-  padding-bottom: 72px;
 }
 
 main, .main {
@@ -70,6 +69,12 @@ HEADER
 }
 
 /*
+
+MAIN
+
+*/
+
+/*
 FOOTER
 */
 
@@ -77,12 +82,13 @@ footer {
   background-color:  #121212;
   color: #fff;
   padding: 16px 24px;
-   left: 0;
+  left: 0;
   right: 0;
   bottom: 0;
-  padding: 16px 24px;
   z-index: 999;
-}
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .footer__logo {
