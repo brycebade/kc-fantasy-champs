@@ -28,7 +28,7 @@ export const teams = [
         name: "Kelce-3PO",
         owner: "Bryce Bade Jr",
         logo: ""
-    }
+    },
     {
         id: "team6",
         name: "Krafty motherTuckers",
