@@ -55,3 +55,15 @@
     --color-base-200: #0d0d0d;
     --color-base-300: #1a1a1a;
 }
+
+details summary {
+    list-style: none;
+}
+
+details summary::-webkit-details-marker {
+    display: none;
+}
+
+details summary::after {
+    display: none;
+}

@@ -3,6 +3,8 @@ export const teams = [
         id: "team-1",
         currentName: "Victorious Secret",
         currentOwnerId: "owner-2",
+        slug: "victorious-secret",
+        active: true,
         history: [
             {
                 name: "Victorious Secret",
@@ -16,6 +18,8 @@ export const teams = [
         id: "team-2",
         currentName: "Average Joe's",
         currentOwnerId: "owner-5",
+        slug: "average-joes",
+        active: true,
         history: [
             {
                 name: "The Final Solution",
@@ -35,6 +39,8 @@ export const teams = [
         id: "team-3",
         currentName: "Here So I Won't Get Fined",
         currentOwnerId: "owner-6",
+        slug: "here-so-i-wont-get-fined",
+        active: true,
         history: [
             {
                 name: "Smashley",
@@ -54,6 +60,8 @@ export const teams = [
         id: "team-4",
         currentName: "Competitive Pricks",
         currentOwnerId: "owner-3",
+        slug: "competitive-pricks",
+        active: true,
         history: [
             {
                 name: "It's A McCluster Fuck",
@@ -115,6 +123,8 @@ export const teams = [
         id: "team-5",
         currentName: "Patrick is Ma'Homie",
         currentOwnerId: "owner-7",
+        slug: "patrick-is-mahomie",
+        active: true,
         history: [
             {
                 name: "The Hali Llama",
@@ -134,6 +144,8 @@ export const teams = [
         id: "team-6",
         currentName: "Redzone Kings",
         currentOwnerId: "owner-9",
+        slug: "redzone-kings",
+        active: true,
         history: [
             {
                 name: "LUCKy Picks",
@@ -153,6 +165,8 @@ export const teams = [
         id: "team-7",
         currentName: "Schmuck Face",
         currentOwnerId: "owner-10",
+        slug: "schmuck-face",
+        active: true,
         history: [
             {
                 name: "The Schmukettes",
@@ -172,6 +186,8 @@ export const teams = [
         id: "team-8",
         currentName: "Pack Attack",
         currentOwnerId: "owner-12",
+        slug: "pack-attack",
+        active: true,
         history: [
             {
                 name: "Brown Coat Revolution",
@@ -191,6 +207,8 @@ export const teams = [
         id: "team-9",
         currentName: "Krafty motherTuckers",
         currentOwnerId: "owner-13",
+        slug: "krafty-mothertuckers",
+        active: true,
         history: [
             {
                 name: "Ganja Boys",
@@ -216,6 +234,8 @@ export const teams = [
         id: "team-10",
         currentName: "Slick's",
         currentOwnerId: "owner-8",
+        slug: "slicks",
+        active: true,
         history: [
             {
                 name: "Big Chungus",
@@ -241,6 +261,8 @@ export const teams = [
         id: "team-11",
         currentName: "Good Juju",
         currentOwnerId: "owner-18",
+        slug: "good-juju",
+        active: true,
         history: [
             {
                 name: "Dickens Cider",
@@ -272,6 +294,8 @@ export const teams = [
         id: "team-12",
         currentName: "Kelce-3PO",
         currentOwnerId: "owner-19",
+        slug: "kelce-3po",
+        active: true,
         history: [
             {
                 name: "Johnson Johnson and Johnson",
