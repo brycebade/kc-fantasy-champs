@@ -214,8 +214,8 @@ export const owners = [
         name: "Scott Link",
         current: false,
         activeYears: [
-            2020,
-            2021
+            2019,
+            2020
         ]
     },
     {
@@ -256,6 +256,7 @@ export const owners = [
         name: "Julie Stokes",
         current: true,
         activeYears: [
+            2022,
             2023,
             2024,
             2025
