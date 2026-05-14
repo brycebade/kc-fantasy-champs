@@ -118,7 +118,7 @@ export const owners = [
             2022,
             2023,
             2024,
-            2025,
+            2025
         ]
     },
     {
@@ -237,7 +237,7 @@ export const owners = [
         current: false,
         activeYears: [
             2020,
-            2021,
+            2021
         ]
     },
     {
