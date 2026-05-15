@@ -1,4 +1,4 @@
-import { teams } from "./teams.js";
+import { teams } from "./src/data/teams.js";
 
 const teamsDropdown = document.getElementById("teamsDropdown")
 
