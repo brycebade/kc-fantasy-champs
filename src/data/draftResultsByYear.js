@@ -129,7 +129,7 @@ export const draftResultsByYear = {
         [10, 9, "team-9", "Pittsburgh Steelers", "DEF", "PIT"],
         [10, 10, "team-1", "Chris Godwin", "WR", "TB"],
         [10, 11, "team-12", "Sam Darnold", "QB", "SEA"],
-        [10, 12, "team-10", "Philadephia Eagles", "DEF", "PHI"],
+        [10, 12, "team-10", "Philadelphia Eagles", "DEF", "PHI"],
 
         [11, 1, "team-10", "Jordan Mason", "RB", "MIN"],
         [11, 2, "team-12", "Sam LaPorta", "TE", "DET"],
@@ -155,7 +155,7 @@ export const draftResultsByYear = {
         [12, 9, "team-9", "Jordan Love", "QB", "GB"],
         [12, 10, "team-1", "Rhamondre Stevenson", "RB", "NE"],
         [12, 11, "team-12", "Najee Harris", "RB", "LAC"],
-        [12, 12, "team-10", "Tanks Bigsby", "RB", "PHI"],
+        [12, 12, "team-10", "Tank Bigsby", "RB", "PHI"],
 
         [13, 1, "team-10", "Bryce Young", "QB", "CAR"],
         [13, 2, "team-12", "Hunter Henry", "TE", "NE"],
@@ -207,8 +207,8 @@ export const getDraftPicksForYear = (year) => {
         return {
             year,
             round,
-            pick: pickNumber
-            overall: index + 1
+            pick: pickNumber,
+            overall: index + 1,
             teamId,
             player,
             position,
