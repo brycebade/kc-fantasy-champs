@@ -1,26 +1,35 @@
 import { draftOrder } from "../data/draftOrder.js"
 import { teams } from "../data/teams.js"
 
-const draftOrderList= document.getElementById("draftOrderList")
+export const renderDraftOrder = () => {
+    const draftOrderList= document.getElementById("draftOrderList")
 
-const currentDraftYear = 2026
+    if (!draftOrderList) {
+        console.log("draftOrderList element not found")
+        return
+    }
 
-const currentDraftOrder = draftOrder
-    .filter((entry) => entry.draftYear === currentDraftYear)
-    .sort((a, b) => a.pick - b.pick)
+    const currentDraftYear = 2026
 
-currentDraftOrder.forEach((entry) => {
-    const team = teams.find((team) => team.id === entry.teamId)
+    const currentDraftOrder = draftOrder
+        .filter((entry) => entry.season === currentDraftYear)
+        .sort((a, b) => a.pick - b.pick)
 
-    const listItem = document.createElement("li")
+    currentDraftOrder.forEach((entry) => {
+        const team = teams.find((team) => team.id === entry.teamId)
 
-    listItem.className = 
-        "flex items-center justify-between gap-4 rounded-lg bg-base-200 px-4 py-3"
+        const listItem = document.createElement("li")
 
-    listItem.innerHTML = `
-        <span class="font-bold text-primary">#${entry.pick}</span>
-        <span class="font-semibold text-right">${team ? team.currentName : "Unknown Team"}</span>   
-    `
+        listItem.className = 
+            "flex items-center gap-3 rounded-lg bg-base-200 px-3 py-2 text-sm"
 
-    draftOrderList.appendChild(listItem)
-})
+        listItem.innerHTML = `
+            <span class="font-bold text-primary w-8">#${entry.pick}</span>
+            <span class="font-semibold text-right">${team ? team.currentName : "Unknown Team"}</span>   
+        `
+
+        draftOrderList.appendChild(listItem)
+
+        
+    })
+}

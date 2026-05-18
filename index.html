@@ -6,7 +6,7 @@
     <title>KC Fantasy Champs</title>
     <link rel="stylesheet" href="./output.css">
 </head>
-<body>
+<body class="bg-base-200 min-h-screen">
     <div class="navbar bg-base-200 px-4 py-2 shadow-md">
 
         <div class="flex-1 flex items-center gap-3">
@@ -35,13 +35,17 @@
         </div>
     </div>
 
-    <aside class="card bg-base-100 shadow-md border border-base-300">
-        <div class="card-body">
-            <h2 class="card-title text-primary">2026 Draft Order</h2>
-            
-            <ol id="draftOrderList" class="space-y-2 mt-4"></ol>
-        </div>
-    </aside>
+    <main class="p-4">
+        <aside class="max-w-sm">
+            <div class="card bg-base-100 shadow-md border border-base-300">
+                <div class="card-body p-4">
+                    <h2 class="card-title text-primary">2026 Draft Order</h2>
+                
+                    <ol id="draftOrderList" class="space-y-2 mt-4"></ol>
+                </div>
+            </div>
+        </aside>
+    </main>
     
     <script type="module" src="./index.js"></script>
 </body>
