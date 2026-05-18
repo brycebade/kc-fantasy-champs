@@ -26,12 +26,12 @@ teamPicks.forEach((pick) => {
     const row = document.createElement("tr")
 
     row.innerHTML = `
-        <td class="px-6 py-4">${pick.round}</td>
-        <td class="px-6 py-4">${pick.pick}</td>
-        <td class="px-6 py-4">${pick.overall}</td>
-        <td class="px-6 py-4">${pick.player}</td>
-        <td class="px-6 py-4">${pick.position}</td>
-        <td class="px-6 py-4">${pick.nflTeam}</td>
+        <td class="px-4 py-3">${pick.round}</td>
+        <td class="px-4 py-3">${pick.pick}</td>
+        <td class="px-4 py-3">${pick.overall}</td>
+        <td class="px-4 py-3 font-semibold whitespace-nowrap">${pick.player}</td>
+        <td class="px-4 py-3">${pick.position}</td>
+        <td class="px-4 py-3">${pick.nflTeam}</td>
     `
     
     draftTableBody.appendChild(row)
