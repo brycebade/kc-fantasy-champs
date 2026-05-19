@@ -39,20 +39,21 @@ teamPicks.forEach((pick) => {
     draftTableBody.appendChild(row)
 
     card.innerHTML = `
-    <div class="card-body p-4">
-        <div class="flex justify-between items-start gap-3">
-            <div>
-                <h2 class="card-title text-lg leading-tight:>${pick.player}</h2>
-                <p class="text-sm opacity-70">${pick.position} • ${pick.nflTeam}</p>
-            </div>
+        <div class="card bg-base-100 border border-base-300 shadow-sm">
+            <div class="card-body p-4">
+                <p class="text-xs uppercase tracking-wide text-primary font-bold>
+                    Round ${pick.round} • Pick ${pick.pick} • Overall ${pick.overall}
+                </p>
 
-            <div class="text-right text-sm">
-                <p><span class=font-bold">Round:</span> ${pick.round}</p>
-                <p><span class=font-bold">Pick:</span> ${pick.pick}</p>
-                <p><span class=font-bold">Overall:</span> ${pick.overall}</p>
+                <h2 class="text-lg font-bold text-base-content leading-tight">
+                    ${pick.player}
+                </h2>
+
+                <p class="text-sm opacity-80">
+                    ${pick.position} • ${pick.nflTeam}
+                </p>
             </div>
         </div>
-    </div>
     `
 
     draftCards.appendChild(card)

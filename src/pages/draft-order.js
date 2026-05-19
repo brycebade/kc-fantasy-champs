@@ -21,7 +21,7 @@ export const renderDraftOrder = () => {
         const listItem = document.createElement("li")
 
         listItem.className = 
-            "flex items-center gap-3 rounded-lg bg-base-200 px-3 py-2 text-sm"
+            "flex items-center gap-3 rounded-md px-2 py-1 text-sm"
 
         listItem.innerHTML = `
             <span class="font-bold text-primary w-8">#${entry.pick}</span>
