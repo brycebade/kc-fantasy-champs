@@ -27,13 +27,15 @@ teamPicks.forEach((pick) => {
     const row = document.createElement("tr")
     const card = document.createElement("div")
 
+    row.className = "hover:bg-base-300 cursor-default"
+
     row.innerHTML = `
-        <td class="text-center px-4 py-3">${pick.round}</td>
-        <td class="text-center px-4 py-3">${pick.pick}</td>
-        <td class="text-center px-4 py-3">${pick.overall}</td>
-        <td class="text-center px-4 py-3 font-semibold whitespace-nowrap">${pick.player}</td>
-        <td class="text-center px-4 py-3">${pick.position}</td>
-        <td class="text-center px-4 py-3">${pick.nflTeam}</td>
+        <td class="text-center">${pick.round}</td>
+        <td class="text-center">${pick.pick}</td>
+        <td class="text-center">${pick.overall}</td>
+        <td class="text-left font-semibold">${pick.player}</td>
+        <td class="text-center">${pick.position}</td>
+        <td class="text-center">${pick.nflTeam}</td>
     `
     
     draftTableBody.appendChild(row)
@@ -41,7 +43,7 @@ teamPicks.forEach((pick) => {
     card.innerHTML = `
         <div class="card bg-base-100 border border-base-300 shadow-sm">
             <div class="card-body p-4">
-                <p class="text-xs uppercase tracking-wide text-primary font-bold>
+                <p class="text-xs uppercase tracking-wide text-primary font-bold">
                     Round ${pick.round} • Pick ${pick.pick} • Overall ${pick.overall}
                 </p>
 

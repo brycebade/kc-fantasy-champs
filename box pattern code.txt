@@ -1,0 +1,10 @@
+I would use this pattern everywhere:
+
+<div class="rounded-box border border-base-300 bg-base-100 shadow-md">
+
+For now, keep kcTheme as the default. Later you can add a toggle for:
+
+kcTheme      = normal light theme
+nightGame    = dark mode
+playoffs     = black/gold playoff theme
+championship = trophy-style theme

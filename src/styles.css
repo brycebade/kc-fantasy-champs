@@ -56,6 +56,14 @@
     --color-base-300: #1a1a1a;
 }
 
+.apply-card {
+    @apply rounded-xl border border-base-300 bg-base-100 shadow-md;
+}
+
+.app-card-body {
+    @apply p-4;
+}
+
 details summary {
     list-style: none;
 }
