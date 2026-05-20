@@ -6,37 +6,11 @@ export const getTeams = async () => {
         .select("*")
         .order("current_name")
 
+        console.log("teams data:", data)
+        console.log("teams error:", error)
+
         if (error) {
             console.log("Error fetching teams:", error)
-            return []
-        }
-
-        return data
-}
-
-export const getTeamHistory = async () => {
-    const { data, error } = await supabase
-        .from("team_history")
-        .select("*")
-        .eq("team_id", teamId)
-        .order("start_year")
-
-        if (error) {
-            console.log("Error fetching team history:", error)
-            return []
-        }
-
-        return data
-}
-
-export const getOwners = async () => {
-    const { data, error } = await supabase 
-        .from("owners")
-        .select("*")
-        .order("name")
-
-        if (error) {
-            console.log("Error fetching owners:", error)
             return []
         }
 

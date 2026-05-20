@@ -1,4 +1,4 @@
-import { teams } from "../data/teams.js"
+import ()
 
 export const renderTeamsDropdown = () => {
     const teamsDropdown = document.getElementById("teamsDropdown")
