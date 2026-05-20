@@ -6,16 +6,14 @@ export const renderTeamsDropdown = async () => {
     if (!teamsDropdown) return
 
     const teams = await getTeams()
-    
-    const currentTeams = teams
-        .filter((team) => {
-            return team.active === true
-    })
-        .sort((a, b) => {
-            return a.currentName.localeCompare(b.currentName)
-        })
 
     teamsDropdown.innerHTML = ""
+    
+    const currentTeams = teams
+        .filter((team) => team.active === true)
+        .sort((a, b) => {
+            return (a.current_name || "").localeCompare(b.current_name || "")
+        })
 
     currentTeams.forEach((team) => {
         const li = document.createElement("li")

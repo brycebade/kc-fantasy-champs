@@ -1,5 +1,5 @@
 import { getTeams } from "../api/teamsApi.js"
-import { getDraftPicksForYear } from "../data/draftResultsByYear.js"
+import { getDraftResultsByYear } from "../api/draftResultsApi.js"
 import { renderTeamsDropdown } from "../components/navbar.js"
 
 const teamName = document.getElementById("teamName")
@@ -23,10 +23,10 @@ const renderTeamPage = async () => {
         return
     }
 
-    const picks2025 = getDraftPicksForYear(2025)
+    const picks2025 = await getDraftResultsByYear(2025)
 
     const teamPicks = picks2025.filter((pick) => {
-        return pick.teamId === selectedTeam.id
+        return pick.team_id === selectedTeam.id
     })
 
     teamName.textContent = `${selectedTeam.current_name} Draft Results`
@@ -43,7 +43,7 @@ const renderTeamPage = async () => {
             <td class="text-center">${pick.overall}</td>
             <td class="text-left font-semibold">${pick.player}</td>
             <td class="text-center">${pick.position}</td>
-            <td class="text-center">${pick.nflTeam}</td>
+            <td class="text-center">${pick.nfl_team}</td>
         `
         
         draftTableBody.appendChild(row)

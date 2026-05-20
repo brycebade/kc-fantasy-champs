@@ -1,7 +1,7 @@
-import { draftOrder } from "../data/draftOrder.js"
+import { getDraftOrder } from "../api/draftOrderApi.js"
 import { getTeams } from "../api/teamsApi.js"
 
-export const renderDraftOrder = () => {
+export const renderDraftOrder = async () => {
     const draftOrderList= document.getElementById("draftOrderList")
 
     if (!draftOrderList) {
@@ -11,12 +11,15 @@ export const renderDraftOrder = () => {
 
     const currentDraftYear = 2026
 
-    const currentDraftOrder = draftOrder
-        .filter((entry) => entry.season === currentDraftYear)
-        .sort((a, b) => a.pick - b.pick)
+    const draftOrder = await getDraftOrder(currentDraftYear)
+    const teams = await getTeams()
 
-    currentDraftOrder.forEach((entry) => {
-        const team = teams.find((team) => team.id === entry.teamId)
+    draftOrderList.innerHTML = ""
+
+    draftOrder.forEach((entry) => {
+        const team = teams.find((team) => {
+            return team.id === entry.team_id
+        })
 
         const listItem = document.createElement("li")
 
@@ -28,7 +31,6 @@ export const renderDraftOrder = () => {
             <span class="font-semibold text-right">${team ? team.current_name : "Unknown Team"}</span>   
         `
 
-        draftOrderList.appendChild(listItem)
-        
+        draftOrderList.appendChild(listItem)     
     })
 }
