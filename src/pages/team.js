@@ -69,3 +69,5 @@ const renderTeamPage = async () => {
         draftCards.appendChild(card)
     })
 }
+
+renderTeamPage()
