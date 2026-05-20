@@ -1,5 +1,5 @@
 import { draftOrder } from "../data/draftOrder.js"
-import { teams } from "../data/teams.js"
+import { getTeams } from "../api/teamsApi.js"
 
 export const renderDraftOrder = () => {
     const draftOrderList= document.getElementById("draftOrderList")
@@ -25,11 +25,10 @@ export const renderDraftOrder = () => {
 
         listItem.innerHTML = `
             <span class="font-bold text-primary w-8">#${entry.pick}</span>
-            <span class="font-semibold text-right">${team ? team.currentName : "Unknown Team"}</span>   
+            <span class="font-semibold text-right">${team ? team.current_name : "Unknown Team"}</span>   
         `
 
         draftOrderList.appendChild(listItem)
-
         
     })
 }

@@ -2,13 +2,13 @@ import { getTeams } from "../api/teamsApi.js"
 import { getDraftPicksForYear } from "../data/draftResultsByYear.js"
 import { renderTeamsDropdown } from "../components/navbar.js"
 
-renderTeamsDropdown()
-
 const teamName = document.getElementById("teamName")
 const draftTableBody = document.getElementById("draftTableBody")
 const draftCards = document.getElementById("draftCards")
 
 const renderTeamPage = async () => {
+    await renderTeamsDropdown()
+
     const params = new URLSearchParams(window.location.search)
     const teamSlug = params.get("team")
 
