@@ -60,7 +60,7 @@ const renderTeamPage = async () => {
                     </h2>
 
                     <p class="text-sm opacity-80">
-                        ${pick.position} • ${pick.nflTeam}
+                        ${pick.position} • ${pick.nfl_team}
                     </p>
                 </div>
             </div>
