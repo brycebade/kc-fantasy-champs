@@ -21,11 +21,26 @@
 
         <div class="desktop-nav flex-none ">
             <ul class="menu menu-horizontal px-1">
-                <li><a href="">Standings</a></li>
+                <li class="relative">
+                    <details name="desktop-navbar-dropdown">
+                        <summary>Standings</summary>
+
+                        <div class="absolute right-0 top-full mt-2 w-80 rounded-box bg-base-100 p-4 shadow z-[9999]">
+                            <div id="standingsPreview" class="space-y-2 text-sm"></div>
+                
+                            <a 
+                                id="fullStandingsLink"
+                                href="standings.html"
+                                class="btn btn-primary btn-sm mt-4 w-full">
+                                Full standings
+                            </a>
+                        </div>
+                    </details>
+                </li>
                 <li><a href="">Schedule</a></li>
 
                 <li class="relative">
-                    <details>
+                    <details name="desktop-navbar-dropdown">
                         <summary>Draft Results</summary>
                     
                     <ul 
@@ -47,16 +62,16 @@
             </button>
 
             <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box w-56 p-2 shadow z-50">
-                <li><a href="">Standings</a></li>
+                <li><a href="standings.html">Standings</a></li>
                 <li><a href="">Schedule</a></li>
 
-                <li class="relative">
+                <li>
                     <details>
                         <summary>Draft Results</summary>
 
                         <ul
                         id="teamsDropdownMobile"
-                        class="menu bg-base-100 rounded-box w-56 p-2 shadow absolute right-full top-0 mr-2 z-50">
+                        class="pl-4">
                         </ul>
                     </details>
                 </li>

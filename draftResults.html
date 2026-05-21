@@ -6,27 +6,57 @@
     <title>Team Page</title>
     <link rel="stylesheet" href="./output.css">
 </head>
-<body class="bg-base-200 text-base-content min-h-screen">
-    <div class="navbar bg-base-200 px-4 py-2 shadow-md">
-        <div class="flex-1 flex items-center gap-3">
+<body class="bg-base-200 text-base-content min-h-screen overflow-x-hidden">
+    <div class="navbar bg-base-200 px-4 py-2 shadow-md overflow-visible">
+
+        <div class="flex-1 flex items-center gap-2 min-w-0">
             <img 
                 src="./assets/kc-fantasy-champs-transparentbg-logo.png" 
                 alt="KC Fantasy Champs Logo"
-                class="w-12 h-12 object-contain shrink-0">
-            <a class="text-2xl font-bold tracking-wide" href="index.html">KC Fantasy Champs</a>
+                class="object-contain shrink-0"
+                style="width: 40px; height: 40px;"
+                >
+            <a class="text-sm md:text-2xl font-bold tracking-wide leading-tight truncate" href="index.html">KC Fantasy Champs</a>
         </div>
 
-        <div class="flex-none">
+        <div class="desktop-nav flex-none ">
             <ul class="menu menu-horizontal px-1">
                 <li><a href="">Standings</a></li>
                 <li><a href="">Schedule</a></li>
+
                 <li class="relative">
                     <details>
                         <summary>Draft Results</summary>
-                        <ul 
-                        id="teamsDropdown" 
-                        class="menu bg-base-100 rounded-box w-56 p-2 shadow absolute right-0 mt-2 z-50"
-                        >
+                    
+                    <ul 
+                        id="teamsDropdownDesktop"
+                        class="absolute right-0 top-full mt-2 menu bg-base-100 rounded-box p-2 shadow z-[9999]"
+                        style="width: max-content; min-width: 14rem;"
+                    ></ul>
+                    </details>
+                </li>
+            </ul>
+        </div>
+
+        <div class="mobile-nav flex-none dropdown dropdown-end">
+            <button tabindex="0" class="btn btn-ghost btn-square">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+
+            <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box w-56 p-2 shadow z-50">
+                <li><a href="">Standings</a></li>
+                <li><a href="">Schedule</a></li>
+
+                <li>
+                    <details>
+                        <summary>Draft Results</summary>
+
+                        <ul
+                        id="teamsDropdownMobile"
+                        class="pl-4">
                         </ul>
                     </details>
                 </li>
@@ -58,6 +88,6 @@
         <div id="draftCards" class="grid gap-3 sm:hidden"></div>
     </main>
     
-    <script type="module" src="./src/pages/team.js"></script>
+    <script type="module" src="./src/pages/draftResult.js"></script>
 </body>
 </html>

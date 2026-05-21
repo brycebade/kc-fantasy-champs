@@ -39,7 +39,15 @@ export const renderTeamsDropdown = async () => {
 
     if (mobileDropdown) {
       const mobileLi = document.createElement("li")
-      mobileLi.innerHTML = teamLink
+
+      mobileLi.innerHTML = `
+      <a 
+        href="./draftResults.html?team=${team.slug}"
+        class="text-sm"
+        style="white-space: nowrap;">
+        ${team.current_name}</a>
+      `
+      
       mobileDropdown.appendChild(mobileLi)
     }
   })
