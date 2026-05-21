@@ -6,9 +6,6 @@ export const getTeams = async () => {
         .select("*")
         .order("current_name")
 
-        console.log("teams data:", data)
-        console.log("teams error:", error)
-
         if (error) {
             console.log("Error fetching teams:", error)
             return []

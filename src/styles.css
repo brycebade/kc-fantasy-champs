@@ -75,3 +75,21 @@ details summary::-webkit-details-marker {
 details summary::after {
     display: none;
 }
+
+.desktop-nav {
+    display: flex;
+}
+
+.mobile-nav {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .desktop-nav {
+        display: none;
+    }
+
+    .mobile-nav {
+        display: flex;
+    }
+}
