@@ -1143,6 +1143,9 @@
   .pb-3 {
     padding-bottom: calc(var(--spacing) * 3);
   }
+  .pl-4 {
+    padding-left: calc(var(--spacing) * 4);
+  }
   .text-center {
     text-align: center;
   }
@@ -1233,6 +1236,19 @@
           --btn-noise: none;
         }
       }
+    }
+  }
+  .btn-sm {
+    @layer daisyui.l1.l2 {
+      --fontsize: 0.75rem;
+      --btn-p: 0.75rem;
+      --size: calc(var(--size-field, 0.25rem) * 8);
+    }
+  }
+  .btn-primary {
+    @layer daisyui.l1.l2.l3 {
+      --btn-color: var(--color-primary);
+      --btn-fg: var(--color-primary-content);
     }
   }
   .hover\:bg-base-300 {
