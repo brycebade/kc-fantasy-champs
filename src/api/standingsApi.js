@@ -5,11 +5,11 @@ export const getStandings = async (season) => {
         .from("standings")
         .select("*")
         .eq("season", season)
-        .order("wins", { ascending: false })
+        .order("win", { ascending: false })
         .order("points_for", { ascending: false })
 
         if (error) {
-            console.log("Error fetching owners:", error)
+            console.log("Error fetching standings:", error)
             return []
         }
 
