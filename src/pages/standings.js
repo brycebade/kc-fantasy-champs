@@ -5,6 +5,18 @@ import { getHeadToHeadWinner } from "../utils/standingsUtils.js"
 
 const season = 2025
 
+const isSeasonFinished = (matchups) => {
+    const week17Matchups = matchups.filter((matchup) => {
+        return Number(matchup.week) === 17
+    })
+
+    const allWeek17GamesComplete = week17Matchups.every((matchup) => {
+        return matchup.winner_team_id
+    })
+
+    return week17Matchups.length === 6 && allWeek17GamesComplete
+}
+
 const sortStandings = (standings, matchups) => {
     const regularSeasonMatchups = matchups.filter((matchup) => {
         return matchup.matchup_type === "regular"
@@ -34,6 +46,12 @@ const findTeam = (teams, teamId) => {
     })
 }
 
+const sortByFinalRank = (standings) => {
+    standings.sort((a, b) => {
+        return a.final_rank - b.final_rank
+    })
+}
+
 export const renderStandings = async () => {
     const standingsTableBody = document.getElementById("standingsTableBody")
 
@@ -43,7 +61,13 @@ export const renderStandings = async () => {
     const teams = await getTeams()
     const matchups = await getMatchups(season)
 
-    sortStandings(standings, matchups)
+    const seasonFinished = isSeasonFinished(matchups)
+
+    if (seasonFinished) {
+        sortByFinalRank(standings)
+    } else {
+        sortStandings(standings, matchups)
+    }
 
     standingsTableBody.innerHTML = ""
 
@@ -75,7 +99,13 @@ export const renderCompactStandings = async () => {
     const teams = await getTeams()
     const matchups = await getMatchups(season)
 
-    sortStandings(standings, matchups)
+    const seasonFinished = isSeasonFinished(matchups)
+
+    if (seasonFinished) {
+        sortByFinalRank(standings)
+    } else {
+        sortStandings(standings, matchups)
+    }
 
     standingsPreview.innerHTML = ""
     
