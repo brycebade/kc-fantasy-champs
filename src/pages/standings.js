@@ -1,23 +1,54 @@
 import { getStandings } from "../api/standingsApi.js"
 import { getTeams } from "../api/teamsApi.js"
+import { getMatchups } from "../api/matchupsAPI.js"
+import { getHeadToHeadWinner } from "../utils/standingsUtils.js"
+
+const season = 2025
+
+const sortStandings = (standings, matchups) => {
+    const regularSeasonMatchups = matchups.filter((matchup) => {
+        return matchup.matchup_type === "regular"
+    })
+
+    standings.sort((a, b) => {
+        if (b.win !== a.win) {
+            return b.win - a.win
+        }
+
+        const winner = getHeadToHeadWinner(
+            a.team_id,
+            b.team_id,
+            regularSeasonMatchups
+        )
+
+        if (winner === String(a.team_id).trim()) return -1
+        if (winner === String(b.team_id).trim()) return 1
+
+        return b.points_for - a.points_for
+    })
+}
+
+const findTeam = (teams, teamId) => {
+    return teams.find((team) => {
+        return String(team.id).trim() === String(teamId).trim()
+    })
+}
 
 export const renderStandings = async () => {
     const standingsTableBody = document.getElementById("standingsTableBody")
 
     if (!standingsTableBody) return
 
-    const standings = await getStandings(2025)
+    const standings = await getStandings(season)
     const teams = await getTeams()
+    const matchups = await getMatchups(season)
 
-    console.log("standings", standings)
-    console.log("teams", teams)
+    sortStandings(standings, matchups)
 
     standingsTableBody.innerHTML = ""
 
     standings.forEach((standing, index) => {
-        const team = teams.find((team) => {
-            return String(team.id).trim() === String(standing.team_id).trim()
-        })
+        const team = findTeam(teams, standing.team_id)
 
         const tr = document.createElement("tr")
 
@@ -40,15 +71,17 @@ export const renderCompactStandings = async () => {
 
     if (!standingsPreview) return
 
-    const standings = await getStandings(2025)
+    const standings = await getStandings(season)
     const teams = await getTeams()
+    const matchups = await getMatchups(season)
+
+    sortStandings(standings, matchups)
 
     standingsPreview.innerHTML = ""
-
+    
     standings.forEach((standing, index) => {
-        const team = teams.find((team) => {
-            return String(team.id).trim() === String(standing.team_id).trim()
-        })
+        const team = findTeam(teams, standing.team_id)
+    
 
         const row = document.createElement("div")
 
@@ -66,5 +99,4 @@ export const renderCompactStandings = async () => {
 
         standingsPreview.appendChild(row)
     })
-
 }
