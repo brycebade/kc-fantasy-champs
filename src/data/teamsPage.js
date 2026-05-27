@@ -12,7 +12,7 @@ const renderTeams = async () => {
         teamCard.classList.add("card", "bg-base-100", "shadow-md", "rounded-xl")
 
         teamCard.innerHTML = `
-            <div class ="card-body>
+            <div class ="card-body">
                 <h2 class="card-title">${team.current_name}</h2>
                 <p>Team ID: ${team.id}</p>
                 <p>Owner ID: ${team.current_owner_id}<p>
