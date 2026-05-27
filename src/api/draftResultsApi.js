@@ -27,7 +27,8 @@ export const getDraftSeasonsByTeam = async (teamId) => {
         return []
     }
 
-    return data
+    const uniqueSeasons = [...new Map(data.map(s => [s.season, s])).values()]
+    return uniqueSeasons
 }
 
 export const getDraftResultsByTeamAndYear = async (teamId, season) => {

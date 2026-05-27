@@ -13,3 +13,18 @@ export const getOwners = async () => {
 
         return data
 }
+
+export const getOwnerById = async (ownerId) => {
+    const { data, error } = await supabase
+        .from("owners")
+        .select("*")
+        .eq("id", ownerId)
+        .single()
+
+        if (error) {
+            console.log("Error fetching owner:", error)
+            return null
+        }
+
+        return data
+}
