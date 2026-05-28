@@ -46,3 +46,20 @@ export const getDraftResultsByTeamAndYear = async (teamId, season) => {
 
     return data
 }
+
+export const getRosterByTeam = async (teamId, season) => {
+    const { data, error } = await supabase
+    .from("draft_results_by_year")
+    .select("*")
+    .eq("team_id", teamId)
+    .eq("season", season)
+    .eq("is_on_roster", true)
+    .order("round", { ascending: true })
+
+    if (error) {
+        console.log("Error fetching roster:", error)
+        return []
+    }
+
+    return data
+}
