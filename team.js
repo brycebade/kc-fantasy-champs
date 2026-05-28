@@ -22,6 +22,12 @@ const getKeeperCost = (player) => {
     return `Round ${player.round -1}`
 }
 
+const getFinishLabel = (rank) => {
+    if (rank === 1) return `Champion`
+    if (rank === 12) return `Toilet Bowl Champion`
+    return `${rank}`
+}
+
 const loadTeam = async () => {
     const teams = await getTeams()
     const selectedTeam = teams.find(t => t.slug === teamSlug)
@@ -134,7 +140,7 @@ const loadTeamHistory = async (team) => {
                         Season ${standing.season} • Wins ${standing.win} • Losses ${standing.loss}
                     </p>
                     <h2 class="text-lg font-bold text-base-content leading-tight">
-                        Final Place: ${standing.final_rank}
+                        Final Place: ${getFinishLabel(standing.final_rank)}
                     </h2>
                     <p class="text-sm opacity-80">
                         Points For: ${standing.points_for} • Points Against: ${standing.points_against}
