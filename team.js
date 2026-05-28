@@ -4,6 +4,7 @@ import { getDraftSeasonsByTeam, getDraftResultsByTeamAndYear } from "./src/api/d
 import { getOwnerById } from "./src/api/ownersApi.js";
 import { getRosterByTeam } from "./src/api/draftResultsApi.js";
 import { getFAPickupsByTeam } from "./src/api/faPickupsApi.js";
+import { getStandingsByTeam } from "./src/api/standingsApi.js";
 
 const params = new URLSearchParams(window.location.search)
 const teamSlug = params.get("team")
@@ -37,6 +38,7 @@ const loadTeam = async () => {
 
     await loadDraftHistory(selectedTeam)
     await loadRoster(selectedTeam)
+    await loadTeamHistory(selectedTeam)
 }
 
 const loadDraftHistory = async (selectedTeam) => {
@@ -109,6 +111,33 @@ const loadRoster = async (selectedTeam) => {
                     </h2>
                     <p class="text-sm opacity-60">
                         Keeper Cost: ${getKeeperCost(roster)}
+                    </p>
+                </div>
+            </div>
+        `
+        container.appendChild(row)
+    })
+}
+
+const loadTeamHistory = async (team) => {
+    const standings = await getStandingsByTeam(team.id)
+
+    const container = document.getElementById("teamHistoryContainer")
+    container.innerHTML = ""
+
+    standings.forEach((standing)  => {
+        const row = document.createElement("div")
+        row.innerHTML = `
+            <div class="card bg-base-100 border border-base-300 shadow-sm mb-2">
+                <div class="card-body p-4">
+                    <p class="text-xs uppercase tracking-wide text-primary font-bold">
+                        Season ${standing.season} • Wins ${standing.win} • Losses ${standing.loss}
+                    </p>
+                    <h2 class="text-lg font-bold text-base-content leading-tight">
+                        Final Place: ${standing.final_rank}
+                    </h2>
+                    <p class="text-sm opacity-80">
+                        Points For: ${standing.points_for} • Points Against: ${standing.points_against}
                     </p>
                 </div>
             </div>

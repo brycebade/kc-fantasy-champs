@@ -13,3 +13,18 @@ export const getStandings = async (season) => {
 
         return data
 }
+
+export const getStandingsByTeam = async (teamId) => {
+    const { data, error } = await supabase
+        .from("standings")
+        .select("*")
+        .eq("team_id", teamId)
+        .order("season", { ascending: false })
+
+        if (error) {
+            console.log("Error fetching team standings:", error)
+            return []
+        }
+
+        return data
+}
