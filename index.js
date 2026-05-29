@@ -3,6 +3,7 @@ import { renderDraftOrder } from "./src/pages/draft-order.js"
 import { renderStandings } from "./src/pages/standings.js"
 import { renderCompactStandings } from "./src/pages/standings.js"
 import { renderEvents } from "./src/pages/events.js"
+import { renderFantasyNews } from "./src/pages/fantasyNews.js"
 
 const init = async () => {
     renderNavbar()
@@ -10,6 +11,8 @@ const init = async () => {
     renderStandings()
     renderCompactStandings()
     renderEvents()
+
+    await renderFantasyNews()
 }
 
 init()
