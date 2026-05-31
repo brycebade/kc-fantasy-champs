@@ -6,7 +6,7 @@ export const renderFantasyNews = async () => {
     fantasyNewsContainer.innerHTML = "<p>Loading fantasy news...</p>"
 
     const RSS_URL = "https://www.rotowire.com/rss/news.php?sport=NFL"
-    const API_URL = `https://api.allorigins.win/get?url=${encodeURIComponent(RSS_URL)}`
+    const API_URL = `https://corsproxy.io/?${encodeURIComponent(RSS_URL)}`
 
     try {
         const response = await fetch(API_URL)
@@ -15,27 +15,19 @@ export const renderFantasyNews = async () => {
             throw new Error(`HTTP error: ${response.status}`)
         }
 
-        const data = await response.json()
-
-        if (!data.contents) {
-            fantasyNewsContainer.innerHTML = `
-                <div class="card bg-base-100 shadow-md border border-base-300">
-                    <div class="card-body">
-                        <p class="text-base-content/70">Loading Fantasy News...</p>
-                    </div>
-                </div>
-            `
-            return
-        }
-
+        const text = await response.text()
+        console.log("raw text:", text)
         const parser = new DOMParser()
-        const xml = parser.parseFromString(data.contents, "text/xml")
+        const xml = parser.parseFromString(text, "text/xml")
+        console.log("xml contents:", xml)
+        console.log("items found:", xml.querySelectorAll("item").length)
         const items = xml.querySelectorAll("item")
 
         fantasyNewsContainer.innerHTML = ""
 
         items.forEach((item, index) => {
             if (index >= 6) return
+
             const title = item.querySelector("title")?.textContent || "No title"
             const link =
                 item.querySelector("link")?.textContent ||
@@ -53,7 +45,6 @@ export const renderFantasyNews = async () => {
                         <span>•</span>
                         <span>Fantasy Update</span>
                     </div>
-
                     <h3 class="card-title text-base md:text-lg leading-snug">${title}</h3>
                     <p class="text-sm text-base-content/70 line-clamp-3">${description}</p>
                     <div class="card-actions justify-end mt-2">
