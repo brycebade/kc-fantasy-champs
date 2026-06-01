@@ -1,6 +1,6 @@
 import { getStandings } from "../api/standingsApi.js"
 import { getTeams } from "../api/teamsApi.js"
-import { getMatchups } from "../api/matchupsAPI.js"
+import { getMatchups } from "../api/matchupsApi.js"
 import { getHeadToHeadWinner } from "../utils/standingsUtils.js"
 
 const season = 2025

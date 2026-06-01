@@ -1,4 +1,9 @@
-import { getRegularSeasonMatchups, getPlayoffMatchups, getCurrentSeason } from "../api/matchupsAPI.js"
+import { 
+    getRegularSeasonMatchups, 
+    getPlayoffMatchups,
+    getCompletedRegularSeasonMatchups, 
+    getCurrentSeason } from "../api/matchupsApi.js"
+
 import { getStandings } from "../api/standingsApi.js"
 import { getTeams } from "../api/teamsApi.js"
 
@@ -11,42 +16,52 @@ const getRankingsMode = (currentWeek) => {
 
 export const renderPowerRankings = async () => {
     const container = document.getElementById("powerRankingsContainer")
+
     if (!container) return
 
-    const season = await getCurrentSeason()
-    const matchups = await getRegularSeasonMatchups(season)
+    container.innerHTML = `<p class="text-base-content/70">Loading Power Rankings...</p>`
 
-    let currentWeek = 0
+    try {
+        const season = await getCurrentSeason()
 
-    if (matchups.length > 0) {
-        const weeks = matchups.map(m => m.week)
-        currentWeek = Math.max(...weeks)
+        const currentWeek = 14
+
+        const teams = await getTeams()
+        const matchups = await getCompletedRegularSeasonMatchups(season, currentWeek)
+
+        console.log("Power Rankings Season:", season)
+        console.log("Power Rankings Team:", teams)
+        console.log("Power Rankings Matchups:", matchups)
+
+        container.innerHTML = `
+            <div class="mt-4 space-y-2 text-sm">
+                <p>
+                    <span class="font-semibold">Season</span>
+                    ${season}
+                </p>
+                <p>
+                    <span class="font-semibold">Current Week:</span>
+                    ${currentWeek}
+                </p>
+                <p>
+                    <span class="font-semibold">Teams Loaded:</span>
+                    ${teams.length}
+                </p>
+                <p>
+                    <span class="font-semibold">Completed Matchups Loaded:</span>
+                    ${matchups.length}
+                </p>
+            </div>
+        `   
+    } catch (error) {
+        console.error("Error rendering power rankings:", error)
+
+        container.innerHTML = `
+            <div class="card bg-base-100 shadow-md border border-base-300">
+                <div class="card-body">
+                    <p class="text-sm text-error">Power rankings could no be loaded</p>
+                </div>
+            </div>
+        `
     }
-
-    const mode = getRankingsMode(currentWeek) 
-
-    if (mode === "offseason") {
-        await renderOffseasonRankings()
-    } else if (mode === "regular") {
-        await renderAlgorithmRankings(currentWeek, matchups)
-    } else if (mode === "playoffs") {
-        await renderPlayoffRankings()
-    } else {
-        await renderFinalRankings()
-    }
-}
-
-export const renderOffseasonRankings = async (season) => {
-    const container = document.getElementById("powerRankingsContainer")
-    if (!container) return 
-
-    const teams = await getTeams()
-    const standings = await getStandings(season)
-
-    const sorted = standings.sort((a, b) => a.final_rank - b.final_rank)
-
-    sorted.forEach((standing) => {
-        const team = teams.find(t => t.id === standing.team_id)
-    })
-
 }
