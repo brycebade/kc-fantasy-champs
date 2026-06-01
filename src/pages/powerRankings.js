@@ -35,3 +35,18 @@ export const renderPowerRankings = async () => {
         await renderFinalRankings()
     }
 }
+
+export const renderOffseasonRankings = async (season) => {
+    const container = document.getElementById("powerRankingsContainer")
+    if (!container) return 
+
+    const teams = await getTeams()
+    const standings = await getStandings(season)
+
+    const sorted = standings.sort((a, b) => a.final_rank - b.final_rank)
+
+    sorted.forEach((standing) => {
+        const team = teams.find(t => t.id === standing.team_id)
+    })
+
+}
