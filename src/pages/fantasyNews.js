@@ -16,11 +16,8 @@ export const renderFantasyNews = async () => {
         }
 
         const text = await response.text()
-        console.log("raw text:", text)
         const parser = new DOMParser()
         const xml = parser.parseFromString(text, "text/xml")
-        console.log("xml contents:", xml)
-        console.log("items found:", xml.querySelectorAll("item").length)
         const items = xml.querySelectorAll("item")
 
         fantasyNewsContainer.innerHTML = ""
