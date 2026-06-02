@@ -113,7 +113,7 @@ const calculateRawTeamStats = (teams, teamGameLogs) => {
 
         return {
             teamId: team.id,
-            teamName: team.current_name,
+            teamName: team.current_name || team.team_name || team.name || team.id,
             gamesPlayed: games.length,
             wins,
             losses,
@@ -196,6 +196,86 @@ const normalizeTeamStats = (rawTeamStats) => {
     return normalizedStats
 }
 
+const getPowerRankingWeights = (currentWeek) => {
+    if (currentWeek <= 5) {
+        return {
+            recentForm: 0.20,
+            totalPoints: 0.30,
+            winPct: 0.20,
+            strengthOfSchedule: 0.05,
+            averageMargin: 0.20,
+            pointsAgainst: 0.05
+        }
+    }
+
+    if (currentWeek <= 10) {
+        return {
+            recentForm: 0.20,
+            totalPoints: 0.25,
+            winPct: 0.25,
+            strengthOfSchedule: 0.07,
+            averageMargin: 0.20,
+            pointsAgainst: 0.03
+        }
+    }
+
+    return {
+        recentForm: 0.25,
+        totalPoints: 0.20,
+        winPct: 0.25,
+        strengthOfSchedule: 0.07,
+        averageMargin: 0.20,
+        pointsAgainst: 0.03
+    }
+}
+
+const calculatePowerScores = (normalizedTeamStats, currentWeek) => {
+    const weights = getPowerRankingWeights(currentWeek)
+
+    const teamsWithPowerScores = normalizedTeamStats.map((team) => {
+        const powerScore = 
+            team.normalized.recentForm * weights.recentForm +
+            team.normalized.totalPoints * weights.totalPoints +
+            team.normalized.winPct * weights.winPct +
+            team.normalized.strengthOfSchedule * weights.strengthOfSchedule +
+            team.normalized.averageMargin * weights.averageMargin +
+            team.normalized.pointsAgainst * weights.pointsAgainst
+
+        return {
+            ...team,
+            powerScore: roundToTwo(powerScore)
+        }
+    })
+
+    return teamsWithPowerScores
+}
+
+const rankTeams = (teamsWithPowerScores) => {
+    const sortedTeams = [...teamsWithPowerScores].sort((a, b) => {
+        if (b.powerScore !== a.powerScore) {
+            return b.powerScore - a.powerScore
+        }
+
+        if (b.strengthOfSchedule !== a.strengthOfSchedule) {
+            return b.strengthOfSchedule - a.strengthOfSchedule
+        }
+
+        if (b.totalPoints !== a.totalPoints) {
+            return b.totalPoints - a.totalPoints
+        }
+
+        return b.pointsAgainst - a.pointsAgainst
+    })
+
+    const rankedTeams = sortedTeams.map((team, index) => {
+        return {
+            ...team,
+            rank: index + 1
+        }
+    })
+    return rankedTeams
+}
+
 export const renderPowerRankings = async () => {
     const container = document.getElementById("powerRankingsContainer")
 
@@ -214,33 +294,40 @@ export const renderPowerRankings = async () => {
         const teamGameLogs = buildTeamLogs(teams, matchups)
         const rawTeamStats = calculateRawTeamStats(teams, teamGameLogs)
         const normalizedTeamStats = normalizeTeamStats(rawTeamStats)
-
-        console.log("Normalized Team Stats:", normalizedTeamStats)
-        console.log("Raw Team Stats:", rawTeamStats)
-        console.log("Team Game Logs:", teamGameLogs)
+        const teamsWithPowerScores = calculatePowerScores(normalizedTeamStats, currentWeek)
+        const rankedTeams = rankTeams(teamsWithPowerScores)
+ 
         console.log("Power Rankings Season:", season)
         console.log("Power Rankings Team:", teams)
         console.log("Power Rankings Matchups:", matchups)
+        console.log("Team Game Logs:", teamGameLogs)
+        console.log("Raw Team Stats", rawTeamStats)
+        console.log("Normalized Team Stats:", normalizedTeamStats)
+        console.log("Teams With Power Scores:", teamsWithPowerScores)
+        console.log("Ranked Teams:", rankedTeams)
 
         container.innerHTML = `
-            <div class="mt-4 space-y-2 text-sm">
-                <p>
-                    <span class="font-semibold">Season</span>
-                    ${season}
-                </p>
-                <p>
-                    <span class="font-semibold">Current Week:</span>
-                    ${currentWeek}
-                </p>
-                <p>
-                    <span class="font-semibold">Teams Loaded:</span>
-                    ${teams.length}
-                </p>
-                <p>
-                    <span class="font-semibold">Completed Matchups Loaded:</span>
-                    ${matchups.length}
-                </p>
-            </div>
+            <div class="mt-4 divide-y divide-base-300 border border-base-300 rounded-lg overflow-hidden bg-base-100">
+                ${rankedTeams.map((team) => {
+                    return `
+                        <div class="flex items-center gap-3 px-3 py-2">
+                            <span class="font-bold text-sm w-8 shrink-0 text-right text-primary">
+                                #${team.rank}
+                            </span>
+
+                            <div class="min-w-0">
+                                <p class="text-sm font-semibold truncate">
+                                    ${team.teamName}
+                                </p>
+
+                                <p class="text-xs opacity-70">
+                                    ${team.wins}-${team.losses}
+                                </p>
+                            </div>
+                        </div>
+                    `
+                }).join("")}
+            </div>   
         `   
     } catch (error) {
         console.error("Error rendering power rankings:", error)
