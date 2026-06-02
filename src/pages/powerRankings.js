@@ -51,6 +51,151 @@ const buildTeamLogs = (teams, matchups) => {
     return teamGameLogs
 }
 
+const average = (numbers) => {
+    if (numbers.length === 0) return 0
+
+    const total = numbers.reduce((sum, number) => {
+        return sum + number
+    }, 0)
+
+    return roundToTwo(total / numbers.length)
+}
+
+const normalize = (value, min, max) => {
+    if (max === min) {
+        return 50
+    }
+
+    return roundToTwo(((value - min) / (max - min)) * 100)
+}
+
+const calculateRawTeamStats = (teams, teamGameLogs) => {
+    const baseStats = teams.map((team) => {
+        const games = teamGameLogs[team.id]
+
+        const wins = games.filter((game) => game.won).length
+        const ties = games.filter((game) => game.tied).length
+        const losses = games.length - wins - ties
+
+        const totalPoints = games.reduce((sum, game) => {
+            return sum + game.pointsFor
+        }, 0)
+
+        const pointsAgainst = games.reduce((sum, game) => {
+            return sum + game.pointsAgainst
+        }, 0)
+
+        const averageMargin = average(games.map((game) => {
+            return game.margin
+        }))
+
+        const recentGames = games.slice(-3)
+
+        const recentForm = average(recentGames.map((game) => {
+            return game.pointsFor
+        }))
+
+        let winPct
+
+        if (games.length === 0) {
+            winPct = 0
+        } else {
+            winPct = roundToTwo((wins + ties * 0.5) / games.length)
+        }
+
+        let averagePointsFor
+
+        if (games.length === 0) {
+            averagePointsFor = 0
+        } else {
+            averagePointsFor = roundToTwo(totalPoints / games.length)
+        }
+
+        return {
+            teamId: team.id,
+            teamName: team.current_name,
+            gamesPlayed: games.length,
+            wins,
+            losses,
+            ties,
+            totalPoints: roundToTwo(totalPoints),
+            pointsAgainst: roundToTwo(pointsAgainst),
+            averagePointsFor,
+            averageMargin,
+            recentForm,
+            winPct
+        }
+    })
+
+    const statsWithStrengthOfSchedule = baseStats.map((teamStats) => {
+        const games = teamGameLogs[teamStats.teamId]
+
+        const opponentAverageScores = games.map((game) => {
+            const opponentStats = baseStats.find((stat) => {
+                return stat.teamId === game.opponentId
+            })
+
+            if (!opponentStats) {
+                return 0
+            }
+
+            return opponentStats.averagePointsFor
+        })
+
+        const strengthOfSchedule = average(opponentAverageScores)
+
+        return {
+            ...teamStats,
+            strengthOfSchedule
+        }
+    })
+
+    return statsWithStrengthOfSchedule
+}
+
+const normalizeTeamStats = (rawTeamStats) => {
+    const statKeys = [
+        "recentForm",
+        "totalPoints",
+        "winPct",
+        "strengthOfSchedule",
+        "averageMargin",
+        "pointsAgainst"
+    ]
+
+    const minMaxValues = {}
+
+    statKeys.forEach((key) => {
+        const values = rawTeamStats.map((team) => {
+            return team[key]
+        })
+
+        minMaxValues[key] = {
+            min: Math.min(...values),
+            max: Math.max(...values)
+        }
+    })
+
+    const normalizedStats = rawTeamStats.map((team) => {
+        const normalized = {}
+
+        statKeys.forEach((key) => {
+            normalized[key] = normalize(
+                team[key],
+                minMaxValues[key].min,
+                minMaxValues[key].max
+            )
+        })
+
+        return {
+            ...team,
+            normalized
+        }
+    })
+
+    return normalizedStats
+}
+
 export const renderPowerRankings = async () => {
     const container = document.getElementById("powerRankingsContainer")
 
@@ -67,7 +212,11 @@ export const renderPowerRankings = async () => {
         const matchups = await getCompletedRegularSeasonMatchups(season, currentWeek)
         
         const teamGameLogs = buildTeamLogs(teams, matchups)
+        const rawTeamStats = calculateRawTeamStats(teams, teamGameLogs)
+        const normalizedTeamStats = normalizeTeamStats(rawTeamStats)
 
+        console.log("Normalized Team Stats:", normalizedTeamStats)
+        console.log("Raw Team Stats:", rawTeamStats)
         console.log("Team Game Logs:", teamGameLogs)
         console.log("Power Rankings Season:", season)
         console.log("Power Rankings Team:", teams)
