@@ -278,29 +278,49 @@ const rankTeams = (teamsWithPowerScores) => {
 }
 
 const buildStandingsRankings = (teams, standings) => {
-    const sortedStandings = [...standings].sort((a, b) => {
-        if (b.wins !== a.wins) {
-            return b.wins - a.wins
-        }
-
-        if (a.losses !== b.losses) {
-            return a.losses = b.losses
-        }
-
-        return b.points_for - a.points_for
+    const hasFinalRank = standings.every((standing) => {
+        return standing.final_rank !== null && standing.final_rank !== undefined
     })
+
+    let sortedStandings
+
+    if (hasFinalRank) {
+        sortedStandings = [...standings].sort((a, b) => {
+            return a.final_rank - b.final_rank
+        })
+    } else {
+        sortedStandings = [...standings].sort((a, b) => {
+            if (b.win !== a.win) {
+                return b.win - a.win
+            }
+
+            if (a.loss !== b.loss) {
+                return a.loss - b.loss
+            }
+
+            return b.points_for - a.points_for
+        })
+    }
 
     const rankedStandings = sortedStandings.map((standing, index) => {
         const team = teams.find((team) => {
             return team.id === standing.team_id
         })
 
+        let rank
+
+        if (hasFinalRank) {
+            rank = standing.final_rank
+        } else {
+            rank = index + 1
+        }
+
         return {
-            rank: index + 1,
-            teamId: standings.team_id,
+            rank,
+            teamId: standing.team_id,
             teamName: team?.current_name || team?.team_name || team?.name || standing.team_id,
-            wins: standing.wins,
-            losses: standing.losses
+            wins: standing.win,
+            losses: standing.loss
         }
     })
 
@@ -328,7 +348,9 @@ const renderRankingsList = (container, rankedTeams, subtitle) => {
                         </div>
 
                         <span class="text-xs font-medium opacity-70 shrink-0">
-                            ${team.wins}-${team.losses}
+                            ${team.wins !== undefined && team.losses !== undefined
+                                ? `${team.wins}-${team.losses}`
+                                : ""}
                         </span>
                     </div>
                 `
@@ -369,6 +391,9 @@ export const renderPowerRankings = async () => {
 
         if (phase === "final") {
             const standings = await getStandings(season)
+
+            console.log("Final standings data:", standings)
+
             const rankedStandings = buildStandingsRankings(teams, standings)
 
             renderRankingsList(
