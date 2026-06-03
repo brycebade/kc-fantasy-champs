@@ -277,6 +277,65 @@ const rankTeams = (teamsWithPowerScores) => {
     return rankedTeams
 }
 
+const buildStandingsRankings = (teams, standings) => {
+    const sortedStandings = [...standings].sort((a, b) => {
+        if (b.wins !== a.wins) {
+            return b.wins - a.wins
+        }
+
+        if (a.losses !== b.losses) {
+            return a.losses = b.losses
+        }
+
+        return b.points_for - a.points_for
+    })
+
+    const rankedStandings = sortedStandings.map((standing, index) => {
+        const team = teams.find((team) => {
+            return team.id === standing.team_id
+        })
+
+        return {
+            rank: index + 1,
+            teamId: standings.team_id,
+            teamName: team?.current_name || team?.team_name || team?.name || standing.team_id,
+            wins: standing.wins,
+            losses: standing.losses
+        }
+    })
+
+    return rankedStandings
+}
+
+const renderRankingsList = (container, rankedTeams, subtitle) => {
+    container.innerHTML = `
+        <p class="mt-2 mb-3 text-xs opacity-70">
+            ${subtitle}
+        </p>
+
+        <div class="divide-y divide-base-300">
+            ${rankedTeams.map((team) => {
+                return `
+                    <div class="flex items-center justify-between gap-3 py-2">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="font-bold text-sm w-8 shrink-0 text-right text-primary">
+                                #${team.rank}
+                            </span>
+
+                            <p class="text-sm font-semibold truncate">
+                                ${team.teamName}
+                            </p>
+                        </div>
+
+                        <span class="text-xs font-medium opacity-70 shrink-0">
+                            ${team.wins}-${team.losses}
+                        </span>
+                    </div>
+                `
+            }).join("")}
+    `
+}
+
 export const renderPowerRankings = async () => {
     const container = document.getElementById("powerRankingsContainer")
 
@@ -292,19 +351,54 @@ export const renderPowerRankings = async () => {
         const season = seasonSettings.season
         const currentWeek = seasonSettings.current_week
         const phase = seasonSettings.phase
+        
+        const teams = await getTeams()
 
-        if (phase !== "regular") {
+        if (phase === "offseason") {
+            const standings = await getStandings(season)
+            const rankedStandings = buildStandingsRankings(teams, standings)
+
+            renderRankingsList(
+                container,
+                rankedStandings,
+                `${season} offseason rankings based on standings`
+            )
+
+            return
+        }
+
+        if (phase === "final") {
+            const standings = await getStandings(season)
+            const rankedStandings = buildStandingsRankings(teams, standings)
+
+            renderRankingsList(
+                container,
+                rankedStandings,
+                `${season} final rankings`
+            )
+
+            return
+        }
+
+        if (phase === "playoffs") {
             container.innerHTML = `
                 <p class="text-sm opacity-70">
-                    Power rankings are only available during the regular season right now
+                    Playoff rankings will be based on bracket results
+                </p>
+            `
+        }
+        
+        if (phase !== "regular") {
+            container.innerHTML = `
+                <p class="text-sm text-erro">
+                    Unknown rankings phase: ${phase}
                 </p>
             `
             return
         }
 
-        const teams = await getTeams()
         const matchups = await getCompletedRegularSeasonMatchups(season, currentWeek)
-        
+
         const teamGameLogs = buildTeamLogs(teams, matchups)
         const rawTeamStats = calculateRawTeamStats(teams, teamGameLogs)
         const normalizedTeamStats = normalizeTeamStats(rawTeamStats)
@@ -320,34 +414,11 @@ export const renderPowerRankings = async () => {
         console.log("Teams With Power Scores:", teamsWithPowerScores)
         console.log("Ranked Teams:", rankedTeams)
 
-        container.innerHTML = `
-            <p class="mt-2 mb-3 text-sm opacity-70">
-                Regular Season Rankings Through Week ${currentWeek}
-            </p>
-
-            <div class="divide-y divide-base-300">
-                ${rankedTeams.map((team) => {
-                    return `
-                        <div class="flex items-center justify-between gap-3 px-3 py-2">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <span class="font-bold text-sm w-8 shrink-0 text-right text-primary">
-                                    #${team.rank}
-                                </span>
-
-                                <p class="text-sm font-semibold truncate">
-                                    ${team.teamName}
-                                </p>
-                            </div>
-
-                                <span class="text-xs font-medium opacity-70 shrink-0">
-                                    ${team.wins}-${team.losses}
-                                </span>
-                            </div>
-                        </div>
-                    `
-                }).join("")}
-            </div>   
-        `   
+        renderRankingsList(
+            container,
+            rankedTeams,
+            `Regular Seson Rankings Through Week ${currentWeek}`
+        )   
     } catch (error) {
         console.error("Error rendering power rankings:", error)
 
