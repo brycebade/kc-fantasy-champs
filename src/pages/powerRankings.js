@@ -6,6 +6,7 @@ import {
 
 import { getStandings } from "../api/standingsApi.js"
 import { getTeams } from "../api/teamsApi.js"
+import { getCurrentSeasonSettings } from "../api/seasonSettingsApi.js"
 
 const roundToTwo = (number) => {
     return Math.round(number * 100) / 100
@@ -284,9 +285,22 @@ export const renderPowerRankings = async () => {
     container.innerHTML = `<p class="text-base-content/70">Loading Power Rankings...</p>`
 
     try {
-        const season = await getCurrentSeason()
+        const seasonSettings = await getCurrentSeasonSettings()
 
-        const currentWeek = 14
+        console.log("Season Settings:", seasonSettings)
+
+        const season = seasonSettings.season
+        const currentWeek = seasonSettings.current_week
+        const phase = seasonSettings.phase
+
+        if (phase !== "regular") {
+            container.innerHTML = `
+                <p class="text-sm opacity-70">
+                    Power rankings are only available during the regular season right now
+                </p>
+            `
+            return
+        }
 
         const teams = await getTeams()
         const matchups = await getCompletedRegularSeasonMatchups(season, currentWeek)
@@ -307,22 +321,27 @@ export const renderPowerRankings = async () => {
         console.log("Ranked Teams:", rankedTeams)
 
         container.innerHTML = `
-            <div class="mt-4 divide-y divide-base-300 border border-base-300 rounded-lg overflow-hidden bg-base-100">
+            <p class="mt-2 mb-3 text-sm opacity-70">
+                Regular Season Rankings Through Week ${currentWeek}
+            </p>
+
+            <div class="divide-y divide-base-300">
                 ${rankedTeams.map((team) => {
                     return `
-                        <div class="flex items-center gap-3 px-3 py-2">
-                            <span class="font-bold text-sm w-8 shrink-0 text-right text-primary">
-                                #${team.rank}
-                            </span>
+                        <div class="flex items-center justify-between gap-3 px-3 py-2">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <span class="font-bold text-sm w-8 shrink-0 text-right text-primary">
+                                    #${team.rank}
+                                </span>
 
-                            <div class="min-w-0">
                                 <p class="text-sm font-semibold truncate">
                                     ${team.teamName}
                                 </p>
+                            </div>
 
-                                <p class="text-xs opacity-70">
+                                <span class="text-xs font-medium opacity-70 shrink-0">
                                     ${team.wins}-${team.losses}
-                                </p>
+                                </span>
                             </div>
                         </div>
                     `
