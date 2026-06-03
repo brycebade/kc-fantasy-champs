@@ -358,6 +358,89 @@ const renderRankingsList = (container, rankedTeams, subtitle) => {
     `
 }
 
+const buildPlayoffPlacementRankings = (teams, standings, playoffMatchups) => {
+    const placementRankMap = {
+        championship_final: {
+            winnerRank: 1,
+            loserRank: 2
+        },
+        third_place: {
+            winnerRank: 3,
+            loserRank: 4
+        },
+        fifth_place: {
+            winnerRank: 5,
+            loserRank: 6
+        },
+        seventh_place: {
+            winnerRank: 7,
+            loserRank: 8
+        },
+        ninth_place: {
+            winnerRank: 9,
+            loserRank: 10
+        },
+        toilet_final: {
+            winnerRank: 11,
+            loserRank: 12
+        }
+    }
+
+    const completedPlacementGames = playoffMatchups.filter((matchup) => {
+        return (
+            matchup.placement_type &&
+            matchup.winner_team_id &&
+            matchup.loser_team_id
+        )
+    })
+
+    const rankings = []
+
+    completedPlacementGames.forEach((matchup) => {
+        const placementRanks = placementRankMap[matchup.placement_type]
+
+        if (!placementRanks) return
+
+        const winnerTeam = teams.find((team) => {
+            return team.id === matchup.winner_team_id
+        })
+
+        const loserTeam = teams.find((team) => {
+            return team.id === matchup.loser_team_id
+        })
+
+        const winnerStanding = standings.find((standing) => {
+            return standing.team_id === matchup.winner_team_id
+        })
+
+        const loserStanding = standings.find((standing) => {
+            return standing.team_id === matchup.loser_team_id
+        })
+
+        rankings.push({
+            rank: placementRanks.winnerRank,
+            teamId: matchup.winner_team_id,
+            teamName: winnerTeam?.current_name || winnerTeam?.team_name || winnerTeam?.name || matchup.winner_team_id,
+            wins: winnerStanding?.win,
+            losses: winnerStanding?.loss
+        })
+
+        rankings.push({
+            rank: placementRanks.loserRank,
+            teamId: matchup.loser_team_id,
+            teamName: loserTeam?.current_name || loserTeam?.team_name || loserTeam?.name || matchup.loser_team_id,
+            wins: loserStanding?.win,
+            losses: loserStanding?.loss
+        })
+    })
+
+    const sortedRankings = rankings.sort((a, b) => {
+        return a.rank - b.rank
+    })
+
+    return sortedRankings
+}
+
 export const renderPowerRankings = async () => {
     const container = document.getElementById("powerRankingsContainer")
 
@@ -406,11 +489,35 @@ export const renderPowerRankings = async () => {
         }
 
         if (phase === "playoffs") {
-            container.innerHTML = `
-                <p class="text-sm opacity-70">
-                    Playoff rankings will be based on bracket results
-                </p>
-            `
+            const standings = await getStandings(season)
+            const playoffMatchups = await getPlayoffMatchups(season)
+
+            const playoffRankings = buildPlayoffPlacementRankings(
+                teams,
+                standings,
+                playoffMatchups
+            )
+
+            console.log("Playoff Matchups:", playoffMatchups)
+            console.log("Playoff Placement Rankings:", playoffRankings)
+
+            if (playoffRankings.length === 0) {
+                container.innerHTML = `
+                    <p class="text-sm opacity-70">
+                        Playoff rankings will update after placement games are completed
+                    </p>
+                `
+
+                return
+            }
+
+            renderRankingsList(
+                container,
+                playoffRankings,
+                `${season} playoff placement rankings`
+            )
+
+            return
         }
         
         if (phase !== "regular") {
