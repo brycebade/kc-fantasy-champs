@@ -419,7 +419,7 @@ const buildPlayoffTeamLogs = (playoffSeedData, playoffMatchups) => {
             pointsFor: team1Score,
             pointsAgainst: team2Score,
             won: matchup.winner_team_id === matchup.team_1_id,
-            loss: matchup.loser_team_id === matchup.team_1_id
+            lost: matchup.loser_team_id === matchup.team_1_id
         }
 
         const team2Game = {
@@ -432,7 +432,7 @@ const buildPlayoffTeamLogs = (playoffSeedData, playoffMatchups) => {
             pointsFor: team2Score,
             pointsAgainst: team1Score,
             won: matchup.winner_team_id === matchup.team_2_id,
-            loss: matchup.loser_team_id === matchup.team_2_id
+            lost: matchup.loser_team_id === matchup.team_2_id
         }
 
         playoffTeamLogs[matchup.team_1_id].push(team1Game)
@@ -440,6 +440,190 @@ const buildPlayoffTeamLogs = (playoffSeedData, playoffMatchups) => {
     })
 
     return playoffTeamLogs
+}
+
+const getPlacementResult = (game) => {
+    if (!game.placementType) return null
+
+    if (game.placementType === "championship_final") {
+        if (game.won) {
+            return 1
+        } else {
+            return 2
+        }
+    }
+
+    if (game.placementType === "third_place") {
+        if (game.won) {
+            return 3
+        } else {
+            return 4
+        }
+    }
+
+    if (game.placementType === "fifth_place") {
+        if (game.won) {
+            return 5 
+        } else {
+            return 6
+        }
+    }
+
+    if (game.placementType === "seventh_place") {
+        if (game.won) {
+            return 7 
+        } else {
+            return 8
+        }
+    }
+
+    if (game.placementType === "ninth_place") {
+        if (game.won) {
+            return 9 
+        } else {
+            return 10
+        }
+    }
+
+    if (game.placementType === "toilet_final") {
+        if (game.won) {
+            return 11 
+        } else {
+            return 12
+        }
+    }
+
+    return null
+}
+
+const determinePlayoffTeamStatuses = (playoffSeedData, playoffTeamLogs) => {
+    return playoffSeedData.map((team) => {
+        const games = playoffTeamLogs[team.teamId] || []
+
+        const placementGame = games.find((game) => {
+            return game.placementType
+        })
+
+        if (placementGame) {
+            const finalRank = getPlacementResult(placementGame)
+
+            return {
+                ...team,
+                playoffStatus: "placement_complete",
+                finalRank
+            }
+        }
+
+        const bracketGames = games.filter((game) => {
+            return game.bracketType === team.bracketType
+        })
+
+        const losses = bracketGames.filter((game) => {
+            return game.loserTeam
+        })
+
+        const wins = bracketGames.filter((game) => {
+            return game.won
+        })
+
+        if (team.bracketType === "championship") {
+            if (games.length === 0 && team.bracketSee <= 2) {
+                return {
+                    ...team,
+                    playoffStatus: "championship_bye",
+                    finalRank: null
+                }
+            }
+
+            const quarterfinalLoss = losses.find((game) => {
+                return game.playoffRound === "quarterfinals"
+            })
+
+            if (quarterfinalLoss) {
+                return {
+                    ...team,
+                    playoffStatus: "fifth_place_pending",
+                    finalRank: null
+                }
+            }
+
+            const semifinalLoss = losses.find((game) => {
+                return game.playoffRound === "semifinals"
+            })
+
+            if (semifinalLoss) {
+                return {
+                    ...team,
+                    playoffStatus: "third_place_pending",
+                    finalRank: null
+                }
+            }
+
+            const semifinalWin = wins.find((game) => {
+                return game.playoffRound === "semifinals"
+            })
+
+            if (semifinalWin) {
+                return {
+                    ...team,
+                    playoffStatus: "championship_final_pending",
+                    finalRank: null
+                }
+            }
+
+            return {
+                ...team,
+                playoffStatus: "championship_alive",
+                finalRank: null
+            }
+        }
+
+        if (team.bracketType === "toilet") {
+            const toiletLosses = losses.length
+
+            const round3Game = games.find((game) => {
+                return game.playoffRound === "round3"
+            })
+
+            if (round3Game && round3Game.placementType === "toilet_final") {
+                const finalRank = getPlacementResult(round3Game)
+
+                return {
+                    ...team,
+                    playoffStatus: "placement_complete",
+                    finalRank 
+                }
+            }
+
+            if (toiletLosses >= 2) {
+                return {
+                    ...team,
+                    playoffStatus: "last_place_game_pending",
+                    finalRank: null
+                }
+            }
+
+            if (toiletLosses === 1) {
+                return {
+                    ...team,
+                    playoffStatus: "toilet_danger",
+                    finalRank: null
+                }
+            }
+
+            return {
+                ...team,
+                playoffStatus: "toilet_safe",
+                finalRank: null
+            }
+        }
+
+        return {
+            ...team,
+            playoffStatus: "unknown",
+            finalRank: null
+        }
+    })
 }
 
 const buildPlayoffPlacementRankings = (teams, standings, playoffMatchups) => {
@@ -576,10 +760,12 @@ export const renderPowerRankings = async () => {
 
             const playoffSeedData = buildPlayoffSeedData(teams, standings)
             const playoffTeamLogs = buildPlayoffTeamLogs(playoffSeedData, playoffMatchups)
+            const playoffStatuses = determinePlayoffTeamStatuses(playoffSeedData, playoffTeamLogs)
 
             console.log("Playoff Seed Data:", playoffSeedData)
             console.log("Playoff Matchups:", playoffMatchups)
             console.log("Playoff Team Logs:", playoffTeamLogs)
+            console.log("Playoff Statuses:", playoffStatuses)
 
             const playoffRankings = buildPlayoffPlacementRankings(
                 teams,
