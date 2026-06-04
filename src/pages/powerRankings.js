@@ -507,10 +507,12 @@ const determinePlayoffTeamStatuses = (playoffSeedData, playoffTeamLogs) => {
         if (placementGame) {
             const finalRank = getPlacementResult(placementGame)
 
-            return {
-                ...team,
-                playoffStatus: "placement_complete",
-                finalRank
+            if (finalRank !== null) {
+                return {
+                    ...team,
+                    playoffStatus: "placement_complete",
+                    finalRank
+                }
             }
         }
 
@@ -579,6 +581,14 @@ const determinePlayoffTeamStatuses = (playoffSeedData, playoffTeamLogs) => {
         }
 
         if (team.bracketType === "toilet") {
+            if (games.length === 0 && team.bracketSeed <= 2) {
+                return {
+                    ...team,
+                    playoffStatus: "toilet_bye",
+                    finalRank: null
+                }
+            }
+
             const toiletLosses = losses.length
 
             const round3Game = games.find((game) => {
@@ -624,6 +634,80 @@ const determinePlayoffTeamStatuses = (playoffSeedData, playoffTeamLogs) => {
             finalRank: null
         }
     })
+}
+
+const getPlayoffStatusSortValue = (team) => {
+    if (team.finalRank !== null && team.finalRank !== undefined) {
+        return team.finalRank
+    }
+
+    if (team.playoffStatus === "championship_final_pending") {
+        return 1
+    }
+
+    if (team.playoffStatus === "championship_bye") {
+        return 1
+    }
+
+    if (team.playoffStatus === "championship_alive") {
+        return 3
+    }
+
+    if (team.playoffStatus === "third_place_pending") {
+        return 3
+    }
+
+    if (team.playoffStatus === "fifth_place_pending") {
+        return 5
+    }
+
+    if (team.playoffStatus === "toilet_bye") {
+        return 7
+    }
+
+    if (team.playoffStatus === "toilet_safe") {
+        return 7
+    }
+
+    if (team.playoffStatus === "toilet_danger") {
+        return 9
+    }
+
+    if (team.playoffStatus === "last_place_game_pending") {
+        return 11
+    }
+
+    return 99
+}
+
+const rankLivePlayoffTeams = (playoffStatuses) => {
+    const sortedTeams = [...playoffStatuses].sort((a, b) => {
+        const aSortValue = getPlayoffStatusSortValue(a)
+        const bSortValue = getPlayoffStatusSortValue(b)
+
+        if (aSortValue !== bSortValue) {
+            return aSortValue - bSortValue
+        }
+
+        if (a.bracketType === "championship" && b.bracketType === "toilet") {
+            return -1
+        }
+
+        if (a.bracketType === "toilet" && b.bracketType === "championship") {
+            return 1
+        }
+
+        return a.overallSeed - b.overallSeed
+    })
+
+    const rankedTeams = sortedTeams.map((team, index) => {
+        return {
+            ...team,
+            rank: index + 1
+        }
+    })
+
+    return rankedTeams
 }
 
 const buildPlayoffPlacementRankings = (teams, standings, playoffMatchups) => {
@@ -761,11 +845,13 @@ export const renderPowerRankings = async () => {
             const playoffSeedData = buildPlayoffSeedData(teams, standings)
             const playoffTeamLogs = buildPlayoffTeamLogs(playoffSeedData, playoffMatchups)
             const playoffStatuses = determinePlayoffTeamStatuses(playoffSeedData, playoffTeamLogs)
+            const livePlayoffRankings = rankLivePlayoffTeams(playoffStatuses)
 
             console.log("Playoff Seed Data:", playoffSeedData)
             console.log("Playoff Matchups:", playoffMatchups)
             console.log("Playoff Team Logs:", playoffTeamLogs)
             console.log("Playoff Statuses:", playoffStatuses)
+            console.log("Live Playoff Rankings:", livePlayoffRankings)
 
             const playoffRankings = buildPlayoffPlacementRankings(
                 teams,
@@ -773,22 +859,10 @@ export const renderPowerRankings = async () => {
                 playoffMatchups
             )
 
-            console.log("Playoff Placement Rankings:", playoffRankings)
-
-            if (playoffRankings.length === 0) {
-                container.innerHTML = `
-                    <p class="text-sm opacity-70">
-                        Playoff rankings will update after placement games are completed
-                    </p>
-                `
-
-                return
-            }
-
             renderRankingsList(
                 container,
-                playoffRankings,
-                `${season} playoff placement rankings`
+                livePlayoffRankings,
+                `${season} Live Playoff Rankings`
             )
 
             return
