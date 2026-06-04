@@ -7,7 +7,7 @@ export const getOwners = async () => {
         .order("name")
 
         if (error) {
-            console.log("Error fetching owners:", error)
+            console.error("Error fetching owners:", error)
             return []
         }
 
@@ -22,7 +22,7 @@ export const getOwnerById = async (ownerId) => {
         .single()
 
         if (error) {
-            console.log("Error fetching owner:", error)
+            console.error("Error fetching owner:", error)
             return null
         }
 

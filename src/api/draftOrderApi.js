@@ -8,7 +8,7 @@ export const getDraftOrder = async (season) => {
         .order("pick")
 
         if (error) {
-            console.log("Error fetching draft order:", error)
+            console.error("Error fetching draft order:", error)
             return []
         }
 

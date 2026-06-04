@@ -10,7 +10,7 @@ export const getEvents = async () => {
     .order("date", { ascending: true })
 
     if (error) {
-        console.log("Error fetching events:", error)
+        console.error("Error fetching events:", error)
         return []
     }
 

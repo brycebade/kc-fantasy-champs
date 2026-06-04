@@ -10,7 +10,7 @@ export const getFAPickupsByTeam = async (teamId, season) => {
     .order("player")
 
     if (error) {
-        console.log("Error fetching FA Pickups:", error)
+        console.error("Error fetching FA Pickups:", error)
         return []
     }
 

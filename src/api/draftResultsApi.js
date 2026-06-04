@@ -8,7 +8,7 @@ export const getDraftResultsByYear = async (season) => {
         .order("overall")
 
         if (error) {
-            console.log("Error fetching draft results:", error)
+            console.error("Error fetching draft results:", error)
             return []
         }
 
@@ -23,7 +23,7 @@ export const getDraftSeasonsByTeam = async (teamId) => {
     .order("season", { ascending: false })
 
     if (error) {
-        console.log("Error fetching draft seasons:", error)
+        console.error("Error fetching draft seasons:", error)
         return []
     }
 
@@ -40,7 +40,7 @@ export const getDraftResultsByTeamAndYear = async (teamId, season) => {
     .order("overall")
 
     if (error) {
-        console.log("Error fetching draft results:", error)
+        console.error("Error fetching draft results:", error)
         return []
     }
 
@@ -57,7 +57,7 @@ export const getRosterByTeam = async (teamId, season) => {
     .order("round", { ascending: true })
 
     if (error) {
-        console.log("Error fetching roster:", error)
+        console.error("Error fetching roster:", error)
         return []
     }
 

@@ -7,7 +7,7 @@ export const getStandings = async (season) => {
         .eq("season", season)
 
         if (error) {
-            console.log("Error fetching standings:", error)
+            console.error("Error fetching standings:", error)
             return []
         }
 
@@ -22,7 +22,7 @@ export const getStandingsByTeam = async (teamId) => {
         .order("season", { ascending: false })
 
         if (error) {
-            console.log("Error fetching team standings:", error)
+            console.error("Error fetching team standings:", error)
             return []
         }
 

@@ -70,6 +70,35 @@ const normalize = (value, min, max) => {
     return roundToTwo(((value - min) / (max - min)) * 100)
 }
 
+const buildPlayoffSeedData = (teams, standings) => {
+    return standings.map((standing) => {
+        const team = teams.find((team) => {
+            return team.id === standing.team_id
+        })
+
+        let bracketType
+        let bracketSeed
+
+        if(standing.seed <= 6) {
+            bracketType = "championship"
+            bracketSeed = "standing.seed"
+        } else {
+            bracketType = "toilet"
+            bracketSeed = standing.seed - 6
+        }
+
+        return {
+            teamId: standing.team_id,
+            teamName: team?.current_name || team?.team_name || team?.name || standing.team_id,
+            overallSeed: standing.seed,
+            bracketSeed,
+            bracketType,
+            wins: standing.win,
+            losses: standing.loss
+        }
+    })
+}
+
 const calculateRawTeamStats = (teams, teamGameLogs) => {
     const baseStats = teams.map((team) => {
         const games = teamGameLogs[team.id]
@@ -475,8 +504,6 @@ export const renderPowerRankings = async () => {
         if (phase === "final") {
             const standings = await getStandings(season)
 
-            console.log("Final standings data:", standings)
-
             const rankedStandings = buildStandingsRankings(teams, standings)
 
             renderRankingsList(
@@ -491,6 +518,11 @@ export const renderPowerRankings = async () => {
         if (phase === "playoffs") {
             const standings = await getStandings(season)
             const playoffMatchups = await getPlayoffMatchups(season)
+
+            const playoffSeedData = buildPlayoffSeedData(teams, standings)
+
+            console.log("Playoff Seed Data:", playoffSeedData)
+            console.log("Playoff Matchups:", playoffMatchups)
 
             const playoffRankings = buildPlayoffPlacementRankings(
                 teams,
@@ -536,15 +568,6 @@ export const renderPowerRankings = async () => {
         const normalizedTeamStats = normalizeTeamStats(rawTeamStats)
         const teamsWithPowerScores = calculatePowerScores(normalizedTeamStats, currentWeek)
         const rankedTeams = rankTeams(teamsWithPowerScores)
- 
-        console.log("Power Rankings Season:", season)
-        console.log("Power Rankings Team:", teams)
-        console.log("Power Rankings Matchups:", matchups)
-        console.log("Team Game Logs:", teamGameLogs)
-        console.log("Raw Team Stats", rawTeamStats)
-        console.log("Normalized Team Stats:", normalizedTeamStats)
-        console.log("Teams With Power Scores:", teamsWithPowerScores)
-        console.log("Ranked Teams:", rankedTeams)
 
         renderRankingsList(
             container,

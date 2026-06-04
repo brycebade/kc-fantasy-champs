@@ -8,7 +8,7 @@ export const getTeamHistory = async () => {
         .order("start_year")
 
         if (error) {
-            console.log("Error fetching team history:", error)
+            console.error("Error fetching team history:", error)
             return []
         }
 

@@ -5,7 +5,7 @@ export const renderDraftOrder = async () => {
     const draftOrderList= document.getElementById("draftOrderList")
 
     if (!draftOrderList) {
-        console.log("draftOrderList element not found")
+        console.error("draftOrderList element not found")
         return
     }
 
