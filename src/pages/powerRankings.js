@@ -70,35 +70,6 @@ const normalize = (value, min, max) => {
     return roundToTwo(((value - min) / (max - min)) * 100)
 }
 
-const buildPlayoffSeedData = (teams, standings) => {
-    return standings.map((standing) => {
-        const team = teams.find((team) => {
-            return team.id === standing.team_id
-        })
-
-        let bracketType
-        let bracketSeed
-
-        if(standing.seed <= 6) {
-            bracketType = "championship"
-            bracketSeed = "standing.seed"
-        } else {
-            bracketType = "toilet"
-            bracketSeed = standing.seed - 6
-        }
-
-        return {
-            teamId: standing.team_id,
-            teamName: team?.current_name || team?.team_name || team?.name || standing.team_id,
-            overallSeed: standing.seed,
-            bracketSeed,
-            bracketType,
-            wins: standing.win,
-            losses: standing.loss
-        }
-    })
-}
-
 const calculateRawTeamStats = (teams, teamGameLogs) => {
     const baseStats = teams.map((team) => {
         const games = teamGameLogs[team.id]
@@ -387,6 +358,90 @@ const renderRankingsList = (container, rankedTeams, subtitle) => {
     `
 }
 
+const buildPlayoffSeedData = (teams, standings) => {
+    return standings.map((standing) => {
+        const team = teams.find((team) => {
+            return team.id === standing.team_id
+        })
+
+        let bracketType
+        let bracketSeed
+
+        if(standing.seed <= 6) {
+            bracketType = "championship"
+            bracketSeed = "standing.seed"
+        } else {
+            bracketType = "toilet"
+            bracketSeed = standing.seed - 6
+        }
+
+        return {
+            teamId: standing.team_id,
+            teamName: team?.current_name || team?.team_name || team?.name || standing.team_id,
+            overallSeed: standing.seed,
+            bracketSeed,
+            bracketType,
+            wins: standing.win,
+            losses: standing.loss
+        }
+    })
+}
+
+const buildPlayoffTeamLogs = (playoffSeedData, playoffMatchups) => {
+    const playoffTeamLogs = {}
+
+    playoffSeedData.forEach((team) => {
+        playoffTeamLogs[team.teamId] = []
+    })
+
+    const completedPlayoffMatchups = playoffMatchups.filter((matchup) => {
+        return (
+            matchup.team_1_id &&
+            matchup.team_2_id &&
+            matchup.team_1_score !== null &&
+            matchup.team_2_score !== null &&
+            matchup.winner_team_id &&
+            matchup.loser_team_id
+        )
+    })
+
+    completedPlayoffMatchups.forEach((matchup) => {
+        const team1Score = Number(matchup.team_1_score)
+        const team2Score = Number(matchup.team_2_score)
+
+        const team1Game = {
+            week: matchup.week,
+            brakcetType: matchup.bracket_type,
+            playoffRound: matchup.playoff_round,
+            placementType: matchup.placement_type,
+            teamId: matchup.team_1_id,
+            opponentId: matchup.team_2_id,
+            pointsFor: team1Score,
+            pointsAgainst: team2Score,
+            won: matchup.winner_team_id === matchup.team_1_id,
+            loss: matchup.loser_team_id === matchup.team_1_id
+        }
+
+        const team2Game = {
+            week: matchup.week,
+            bracketType: matchup.bracket_type,
+            playoffRound: matchup.playoff_round,
+            placementType: matchup.placement_type,
+            teamId: matchup.team_2_id,
+            opponentId: matchup.team_2_id,
+            pointsFor: team2Score,
+            pointsAgainst: team1Score,
+            won: matchup.winner_team_id === matchup.team_2_id,
+            loss: matchup.loser_team_id === matchup.team_2_id
+        }
+
+        playoffTeamLogs[matchup.team_1_id].push(team1Game)
+        playoffTeamLogs[matchup.team_2_id].push(team2Game)
+    })
+
+    return playoffTeamLogs
+}
+
 const buildPlayoffPlacementRankings = (teams, standings, playoffMatchups) => {
     const placementRankMap = {
         championship_final: {
@@ -520,9 +575,11 @@ export const renderPowerRankings = async () => {
             const playoffMatchups = await getPlayoffMatchups(season)
 
             const playoffSeedData = buildPlayoffSeedData(teams, standings)
+            const playoffTeamLogs = buildPlayoffTeamLogs(playoffSeedData, playoffMatchups)
 
             console.log("Playoff Seed Data:", playoffSeedData)
             console.log("Playoff Matchups:", playoffMatchups)
+            console.log("Playoff Team Logs:", playoffTeamLogs)
 
             const playoffRankings = buildPlayoffPlacementRankings(
                 teams,
@@ -530,7 +587,6 @@ export const renderPowerRankings = async () => {
                 playoffMatchups
             )
 
-            console.log("Playoff Matchups:", playoffMatchups)
             console.log("Playoff Placement Rankings:", playoffRankings)
 
             if (playoffRankings.length === 0) {
