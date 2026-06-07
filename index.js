@@ -7,13 +7,12 @@ import { renderFantasyNews } from "./src/pages/fantasyNews.js"
 import { renderPowerRankings } from "./src/pages/powerRankings.js"
 
 const init = async () => {
-    renderNavbar()
-    renderDraftOrder()
-    renderPowerRankings()
-    renderStandings()
-    renderCompactStandings()
-    renderEvents()
-
+    await renderNavbar()
+    await renderDraftOrder()
+    await renderPowerRankings()
+    await renderStandings()
+    await renderCompactStandings()
+    await renderEvents()
     await renderFantasyNews()
 }
 

@@ -369,7 +369,7 @@ const buildPlayoffSeedData = (teams, standings) => {
 
         if(standing.seed <= 6) {
             bracketType = "championship"
-            bracketSeed = "standing.seed"
+            bracketSeed = standing.seed
         } else {
             bracketType = "toilet"
             bracketSeed = standing.seed - 6
@@ -411,7 +411,7 @@ const buildPlayoffTeamLogs = (playoffSeedData, playoffMatchups) => {
 
         const team1Game = {
             week: matchup.week,
-            brakcetType: matchup.bracket_type,
+            bracketType: matchup.bracket_type,
             playoffRound: matchup.playoff_round,
             placementType: matchup.placement_type,
             teamId: matchup.team_1_id,
@@ -428,7 +428,7 @@ const buildPlayoffTeamLogs = (playoffSeedData, playoffMatchups) => {
             playoffRound: matchup.playoff_round,
             placementType: matchup.placement_type,
             teamId: matchup.team_2_id,
-            opponentId: matchup.team_2_id,
+            opponentId: matchup.team_1_id,
             pointsFor: team2Score,
             pointsAgainst: team1Score,
             won: matchup.winner_team_id === matchup.team_2_id,
@@ -529,7 +529,7 @@ const determinePlayoffTeamStatuses = (playoffSeedData, playoffTeamLogs) => {
         })
 
         if (team.bracketType === "championship") {
-            if (games.length === 0 && team.bracketSee <= 2) {
+            if (games.length === 0 && team.bracketSeed <= 2) {
                 return {
                     ...team,
                     playoffStatus: "championship_bye",
