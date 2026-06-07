@@ -812,7 +812,7 @@ export const renderPowerRankings = async () => {
         const teams = await getTeams()
 
         if (phase === "offseason") {
-            const standings = await getStandings(season)
+            const standings = await getStandings(season - 1)
             const rankedStandings = buildStandingsRankings(teams, standings)
 
             renderRankingsList(
