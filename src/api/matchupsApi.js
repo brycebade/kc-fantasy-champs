@@ -85,3 +85,22 @@ export const getCurrentSeason = async () => {
 
     return data.season
 }
+
+export const getCompletedMatchupsThroughWeek = async (season, currentWeek) => {
+    const { data, error } = await supabase
+        .from("matchups")
+        .select("*")
+        .eq("season", season)
+        .lte("week", currentWeek)
+        .not("team_1_score", "is", null)
+        .not("team_2_score", "is", null)
+        .order("week", { ascending: true })
+        .order("team_1_id", { ascending: true })
+
+    if (error) {
+        console.error("Error fetching completed matchups through week:", error)
+        return []
+    }
+
+    return data
+}

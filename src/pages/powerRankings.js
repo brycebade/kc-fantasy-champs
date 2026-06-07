@@ -1,8 +1,8 @@
-import { 
-    getRegularSeasonMatchups, 
+import {  
     getPlayoffMatchups,
-    getCompletedRegularSeasonMatchups, 
-    getCurrentSeason } from "../api/matchupsApi.js"
+    getCompletedRegularSeasonMatchups,
+    getCompletedMatchupsThroughWeek, 
+} from "../api/matchupsApi.js"
 
 import { getStandings } from "../api/standingsApi.js"
 import { getTeams } from "../api/teamsApi.js"
@@ -355,6 +355,7 @@ const renderRankingsList = (container, rankedTeams, subtitle) => {
                     </div>
                 `
             }).join("")}
+        </div>
     `
 }
 
@@ -521,7 +522,7 @@ const determinePlayoffTeamStatuses = (playoffSeedData, playoffTeamLogs) => {
         })
 
         const losses = bracketGames.filter((game) => {
-            return game.loserTeam
+            return game.lost
         })
 
         const wins = bracketGames.filter((game) => {
@@ -803,8 +804,6 @@ export const renderPowerRankings = async () => {
     try {
         const seasonSettings = await getCurrentSeasonSettings()
 
-        console.log("Season Settings:", seasonSettings)
-
         const season = seasonSettings.season
         const currentWeek = seasonSettings.current_week
         const phase = seasonSettings.phase
@@ -839,30 +838,18 @@ export const renderPowerRankings = async () => {
         }
 
         if (phase === "playoffs") {
-            const standings = await getStandings(season)
-            const playoffMatchups = await getPlayoffMatchups(season)
+            const matchups = await getCompletedMatchupsThroughWeek(season, currentWeek)
 
-            const playoffSeedData = buildPlayoffSeedData(teams, standings)
-            const playoffTeamLogs = buildPlayoffTeamLogs(playoffSeedData, playoffMatchups)
-            const playoffStatuses = determinePlayoffTeamStatuses(playoffSeedData, playoffTeamLogs)
-            const livePlayoffRankings = rankLivePlayoffTeams(playoffStatuses)
-
-            console.log("Playoff Seed Data:", playoffSeedData)
-            console.log("Playoff Matchups:", playoffMatchups)
-            console.log("Playoff Team Logs:", playoffTeamLogs)
-            console.log("Playoff Statuses:", playoffStatuses)
-            console.log("Live Playoff Rankings:", livePlayoffRankings)
-
-            const playoffRankings = buildPlayoffPlacementRankings(
-                teams,
-                standings,
-                playoffMatchups
-            )
+            const teamGameLogs = buildTeamLogs(teams, matchups)
+            const rawTeamStats = calculateRawTeamStats(teams, teamGameLogs)
+            const normalizedTeamStats = normalizeTeamStats(rawTeamStats)
+            const teamsWithPowerScores = calculatePowerScores(normalizedTeamStats, currentWeek)
+            const rankedTeams = rankTeams(teamsWithPowerScores)
 
             renderRankingsList(
                 container,
-                livePlayoffRankings,
-                `${season} Live Playoff Rankings`
+                rankedTeams,
+                `Power Rankings Through Week ${currentWeek}`
             )
 
             return
@@ -870,7 +857,7 @@ export const renderPowerRankings = async () => {
         
         if (phase !== "regular") {
             container.innerHTML = `
-                <p class="text-sm text-erro">
+                <p class="text-sm text-error">
                     Unknown rankings phase: ${phase}
                 </p>
             `
@@ -888,7 +875,7 @@ export const renderPowerRankings = async () => {
         renderRankingsList(
             container,
             rankedTeams,
-            `Regular Seson Rankings Through Week ${currentWeek}`
+            `Regular Season Rankings Through Week ${currentWeek}`
         )   
     } catch (error) {
         console.error("Error rendering power rankings:", error)
@@ -896,7 +883,7 @@ export const renderPowerRankings = async () => {
         container.innerHTML = `
             <div class="card bg-base-100 shadow-md border border-base-300">
                 <div class="card-body">
-                    <p class="text-sm text-error">Power rankings could no be loaded</p>
+                    <p class="text-sm text-error">Power rankings could not be loaded</p>
                 </div>
             </div>
         `
