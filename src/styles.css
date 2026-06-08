@@ -1,9 +1,63 @@
+@import "tailwindcss";
+
+@plugin "daisyui" {
+    themes: false;
+}
+
+@plugin "daisyui/theme" {
+    name: "kcTheme";
+    default: true;
+    --color-primary: #E31837;
+    --color-secondary: #FFB81C;
+    --color-accent: #111827;
+    --color-neutral: #1f2937;
+    --color-base-100: #ffffff;
+    --color-base-200: #f3f4f6;
+    --color-base-300: #e5e7eb;
+}
+
+@plugin "daisyui/theme" {
+    name: "nightGame";
+    --color-primary: #E31837;
+    --color-secondary: #FFB81C;
+    --color-accent: #facc15;
+    --color-neutral: #020617;
+    --color-base-100: #0f172a;
+    --color-base-200: #111827;
+    --color-base-300: #1f2937;
+}
+
+@plugin "daisyui/theme" {
+    name: "playoffs";
+    --color-primary: #FFD700;
+    --color-secondary: #E31837;
+    --color-accent: #ffffff;
+    --color-neutral: #111111;
+    --color-base-100: #0a0a0a;
+    --color-base-200: #141414;
+    --color-base-300: #1f1f1f;
+}
+
+@plugin "daisyui/theme" {
+    name: "championship";
+    --color-primary: #FFD700;
+    --color-secondary: #ffffff;
+    --color-accent: #E31837;
+    --color-neutral: #000000;
+    --color-base-100: #050505;
+    --color-base-200: #0d0d0d;
+    --color-base-300: #1a1a1a;
+}
+
 .apply-card {
-    @apply rounded-xl border border-base-300 bg-base-100 shadow-md;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-base-300);
+    background-color: var(--color-base-100);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 }
 
 .app-card-body {
-    @apply p-4;
+    padding: 1rem;
 }
 
 details summary {
@@ -24,6 +78,17 @@ details summary::after {
 
 .mobile-nav {
     display: none;
+}
+
+.admin-login-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 @media (max-width: 767px) {

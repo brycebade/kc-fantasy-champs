@@ -5,19 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin | KC Fantasy Champs</title>
     <link rel="stylesheet" href="./output.css">
-    <link rel="stylesheet" href="./src/styles.css">
 </head>
-<body class="bg-base-200 text-base-content min-h-screen overflow-x-hidden">
+<body class="bg-base-200 text-base-content min-h-screen">
 
-    <div id=""passwordScreen>
-        <form onsubmit="return false">
-            <input type="password" id="passwordInput">
-            <button id="passwordSubmit">Submit</button>
-            <div id="errorMessage"></div>
-        </form>
+    <div id="passwordScreen" class="admin-login-screen">
+        <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl w-80">
+            <div class="card-body p-6">
+                <h2 class="card-title text-primary mb-4">Admin Login</h2>
+                <form onsubmit="return false">
+                    <input type="password" id="passwordInput" placeholder="Enter Password" class="input input-bordered w-full mb-3">
+                    <button id="passwordSubmit" class="btn btn-primary w-full">Submit</button>
+                    <div id="errorMessage" class="text-error text-sm mt-2"></div>
+                </form>
+            </div>
+        </div>
     </div>
 
-    <div id="adminDashboard" style="display: none;"></div>
+    <div id="adminDashboard" style="display: none;" class="max-w-3xl mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-primary mb-6">Admin Dashboard</h1>
+
+        <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl mb-6">
+            <div class="card-body p-4">
+                <div class="flex gap-4 mb-4">
+                    <select id="seasonSelect" class="select select-bordered">
+                        <option value="2026">2026</option>
+                        <option value="2025">2025</option>
+                    </select>
+                    <select id="weekSelect" class="select select-bordered"></select>
+                </div>
+                <div id="matchupsContainer"></div>
+                <button id="submitScores" class="btn btn-primary w-full mt-4">Submit Scores</button>
+            </div>
+        </div>
+    </div>
 
 
     <script type="module" src="./admin.js"></script>
