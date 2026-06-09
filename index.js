@@ -5,6 +5,7 @@ import { renderCompactStandings } from "./src/pages/standings.js"
 import { renderEvents } from "./src/pages/events.js"
 import { renderFantasyNews } from "./src/pages/fantasyNews.js"
 import { renderPowerRankings } from "./src/pages/powerRankings.js"
+import { renderNFLScores } from "./src/pages/nflScores.js"
 
 const init = async () => {
     await renderNavbar()
@@ -14,6 +15,7 @@ const init = async () => {
     await renderCompactStandings()
     await renderEvents()
     await renderFantasyNews()
+    await renderNFLScores()
 }
 
 init()

@@ -2,20 +2,11 @@ import { getEvents } from "../api/eventsApi.js"
 
 const formateDate = (date) => {
     if (!date) return `TBD`
-    return new Date(date).toLocaleDateString(`en-US`, {
+    return new Date(date + 'T00:00:00').toLocaleDateString(`en-US`, {
         month: `long`,
         day: `numeric`,
         year: `numeric`
     })
-}
-
-const formatTime = (time) => {
-    if (!time) return `TBD`
-    const [hours, minutes] = time.split(":")
-    const hour = parseInt(hours)
-    const ampm = hour >= 12 ? "PM" : "AM"
-    const hour12 = hour % 12 || 12
-    return `${hour12}:${minutes} ${ampm}`
 }
 
 export const renderEvents = async () => {
@@ -30,13 +21,13 @@ export const renderEvents = async () => {
         const row = document.createElement("div")
 
         const displayDate = formateDate(event.date)
-        const displayTime = formatTime(event.time)
+        const displayTime = event.time ? event.time : "TBD"
 
         row.innerHTML = `
             <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl p-4 w-full md:w-auto md:flex-1">
                 <div class="flex justify-between items-center">
                     <div>
-                        <p class=text-xs uppercase tracking-wide text-primary font-bold">${displayDate} • ${displayTime}</p>
+                        <p class="text-xs uppercase tracking-wide text-primary font-bold">${displayDate} • ${displayTime}</p>
                         <h2 class="text-lg font-bold mt-1">${event.name}</h2>
                         <p class="text-sm opacity-70">${event.location}</p>
                     </div>
