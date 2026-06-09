@@ -95,6 +95,60 @@ const submitScores = async () => {
     alert("Scores submitted successfully!")
 }
 
+const recalculateStandings = async (season) => {
+    const allMatchups = await getMatchups(season)
+
+    const completedMatchups = allMatchups.filter(m => 
+        m.matchup_type === "regular" &&
+        m.team_1_score !== null &&
+        m.team_2_scroe !== null
+    )
+
+    const teams = await getTeams()
+
+    teams.forEach(async (team) => {
+        const teamMatchups = completedMatchups.filter(m => 
+            m.team_1_id === team.id || m.team_2_id === team.id  
+        )
+
+        let wins = 0
+        let losses = 0
+        let pointsFor = 0
+        let pointsAgainst = 0
+
+        teamMatchups.forEach(m => {
+            const isTeam1 = m.team_1_id === team.id
+            const myScore = isTeam1 ? m.team_1_score : m.team_2_score
+            const oppScore = isTeam1 ? m.team_2_score : m.team_1_score
+
+            pointsFor += myScore
+            pointsAgainst += oppScore
+
+            if (myScore > oppScore) wins++
+            else if (myScore < oppScore) losses++
+        })
+
+        const { error } = await supabase
+            .from("standings")
+            .upsert({
+                id: `${season}_${team.id}_standing`,
+                team_id: team.id,
+                season: season,
+                win: wins,
+                loss: losses,
+                points_for: pointsFor,
+                points_against: pointsAgainst
+            }, { onConflict: "team_id, season" })
+
+        if (error) {
+            console.error("Error updating standings for", team.id, error)
+        }
+    })
+
+    await recalculateStandings(season)
+    alert("Scores submitted successfully!")
+}
+
 passwordSubmit.addEventListener("click", () => {
     const inputValue = document.getElementById("passwordInput").value
     
