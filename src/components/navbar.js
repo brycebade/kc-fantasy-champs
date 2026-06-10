@@ -1,4 +1,6 @@
 import { getTeams } from "../api/teamsApi.js";
+import { getMatchups } from "../api/matchupsApi.js"
+import { getCurrentSeasonSettings } from "../api/seasonSettingsApi.js"
 
 export const renderTeamsDropdown = async () => {
   const desktopDropdown = document.getElementById("teamsDropdownDesktop")
@@ -53,6 +55,38 @@ export const renderTeamsDropdown = async () => {
   })
 }
 
+export const renderSchedulePreview = async () =>  {
+  console.log("renderSchedulePreview called")
+  const preview = document.getElementById("schedulePreview")
+  if(!preview) {
+    console.log("schedulePreview not found")
+    return
+  }
+
+  const settings = await getCurrentSeasonSettings()
+  if (!settings) return
+
+  if (settings.phase === "offseason") {
+    preview.innerHTML = `<p class="opacity-70">Schedule Coming Soon!</p>`
+    return
+  }
+
+  const matchups = await getMatchups(settings.season)
+  const weekMatchups = matchups.filter(matchups => matchups.week === settings.current_week)
+  const teams = await getTeams()
+
+  preview.innerHTML = `<p class="font-bold mb-2">Week ${settings.current_week}</p>`
+
+  weekMatchups.forEach(matchup => {
+    const team1 = teams.find(t => t.id === matchup.team_1_id)
+    const team2 = teams.find(t => t.id === matchup.team_2_id)
+
+    const row = document.createElement("div")
+    row.innerHTML = `<p>${team1?.current_name || "TBD"} vs ${team2?.current_name || "TBD"}</p>`
+    preview.appendChild(row)
+  })
+}
+
 export const renderNavbar = async () => {
   const isHomePage = window.location.pathname === '/' || window.location.pathname.includes('index.html')
 
@@ -90,7 +124,16 @@ export const renderNavbar = async () => {
               }
               </li>
 
-              <li><a href="">Schedule</a></li>
+              <li class="relative">
+                <details name="desktop-navbar-dropdown">
+                  <summary>Schedule</summary>
+                  <div class="absolute right-0 top-full mt-2 w-80 rounded-box bg-base-100 p-4 shadow z-[9999]">
+                    <div id="schedulePreview" class="space-y-2 text-sm"></div>
+                    <a href="schedule.html?view=full" class="btn btn-primary btn-sm mt-4 w-full">Full Fantasy Schedule</a>
+                    <a href="nfl-schedule.html" class="btn btn-primary btn-sm mt-2 w-full">Full NFL Schedule</a>
+                  </div>
+                </details>
+              </li>
 
               <li class="relative">
                 <details name="desktop-navbar-dropdown">
@@ -129,7 +172,16 @@ export const renderNavbar = async () => {
 
             <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box w-56 p-2 shadow z-50">
               <li><a href="standings.html">Standings</a></li>
-              <li><a href="">Schedule</a></li>
+              <li>
+                <details>
+                  <summary>Schedule</summary>
+                  <ul class="pl-4">
+                    <li><a href="schedule.html" id="currentWeekLinkMobile">Current Week</a></li>
+                    <li><a href="schedule.html?view=full">Full Fantasy Schedule</a></li>
+                    <li><a href="nfl-schedule.html">Full NFL Schedule</a></li>
+                  </ul>
+                </details>
+              </li>
               <li>
                 <details>
                   <summary>Teams</summary>
@@ -154,5 +206,6 @@ export const renderNavbar = async () => {
     </div>
   `;
 
+  await renderSchedulePreview()
   await renderTeamsDropdown()
 }
