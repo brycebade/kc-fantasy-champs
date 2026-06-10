@@ -72,8 +72,6 @@ const submitScores = async () => {
         const loserId = score1 > score2 ? matchup.team_2_id : matchup.team_1_id
         const isTie = score1 === score2
 
-        console.log("Updating matchup:", matchup.id, "Score1:", score1, "Score2:", score2)
-
         const { error } = await supabase
             .from ("matchups")
             .update({
@@ -85,17 +83,18 @@ const submitScores = async () => {
             })
             .eq("id", matchup.id)
 
-            console.log("Update result for", matchup.id, "error:", error)
-
             if (error) {
                 console.error("Error updating matchup:", error)
             }
     }
 
+    recalculateStandings(season)
     alert("Scores submitted successfully!")
 }
 
 const recalculateStandings = async (season) => {
+    console.log("recalculateStandings called for season:", season)
+
     const allMatchups = await getMatchups(season)
 
     const completedMatchups = allMatchups.filter(m => 
@@ -144,9 +143,6 @@ const recalculateStandings = async (season) => {
             console.error("Error updating standings for", team.id, error)
         }
     })
-
-    await recalculateStandings(season)
-    alert("Scores submitted successfully!")
 }
 
 passwordSubmit.addEventListener("click", () => {
