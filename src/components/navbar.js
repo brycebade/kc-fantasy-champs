@@ -91,20 +91,20 @@ export const renderNavbar = async () => {
   if (!navbarContainer) return
 
   navbarContainer.innerHTML = `
-    <div class="navbar bg-base-200 px-4 py-2 shadow-md overflow-visible">
+    <div class="navbar bg-primary px-4 py-2 shadow-md overflow-visible">
 
         <div class="flex-1 flex items-center gap-2 min-w-0">
             <img 
                 src="./assets/kc-fantasy-champs-transparentbg-logo.png" 
                 alt="KC Fantasy Champs Logo"
-                class="object-contain shrink-0"
+                class="object-contain shrink-0 logo-outline"
                 style="width: 40px; height: 40px;"
                 >
-            <a class="text-sm md:text-2xl font-bold tracking-wide leading-tight truncate" href="index.html">KC Fantasy Champs</a>
+            <a class="text-sm md:text-2xl font-bold tracking-wide leading-tight truncate text-white" href="index.html">KC Fantasy Champs</a>
         </div>
 
         <div class="desktop-nav flex-none ">
-            <ul class="menu menu-horizontal px-1">
+            <ul class="menu menu-horizontal px-1 text-white">
 
               <li>${
                 isHomePage

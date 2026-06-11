@@ -1,7 +1,6 @@
 {
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.0",
-    "@tailwindcss/oxide-win32-x64-msvc": "^4.3.0",
     "daisyui": "^5.5.19",
     "tailwindcss": "^4.3.0"
   }

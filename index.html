@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KC Fantasy Champs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./output.css">
 </head>
 <body class="bg-base-200 text-base-content min-h-screen overflow-x-hidden">
@@ -15,16 +18,20 @@
 
         <aside class="left-column">
 
-            <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl">
+            <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl overflow-hidden">
+                <div class="bg-neutral text-white px-4 py-2">
+                    <h2 class="font-bold uppercase tracking-wide text-sm">2026 Draft Order</h2>
+                </div>
                 <div class="card-body p-4">
-                    <h2 class="card-title text-primary">2026 Draft Order</h2>
-                        <ol id="draftOrderList" class="space-y-2 mt-4"></ol>
+                        <ol id="draftOrderList" class="space-y-2"></ol>
                 </div>
             </div>
 
-            <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl">
+            <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl overflow-hidden">
+                <div class="bg-neutral text-white px-4 py-2">
+                    <h2 class="font-bold uppercase tracking-wide text-sm">Power Rankings</h2>
+                </div>
                 <div class="card-body p-4">
-                    <h2 class="card-title text-primary">Power Rankings</h2>
                     <p class="text-sm opacity-70 mt-2"></p>
                     <div id="powerRankingsContainer"></div>
                 </div>
@@ -35,10 +42,11 @@
 
             <div id="eventListContainer" class="mb-6"></div>
 
-            <section class="card bg-base-100 shadow-md border border-base-300 round-xl">
+            <section class="card bg-base-100 shadow-md border border-base-300 round-xl overflow-hidden">    
+                <div class="bg-neutral text-white px-4 py-2">
+                    <h2 class="font-bold uppercase tracking-wide text-sm">Around the League / Fantasy Football News</h2>
+                </div>
                 <div class="card-body p-4">
-                    <p class="text-sm uppercase tracking-wide text-primary font-bold">Around the League</p>
-                        <h2 class="text-2xl font-bold mb-4">Fantasy Football News</h2>
                     <div id="fantasyNewsContainer" class="grid gap-4 md:grid-cols-2"></div>
                 </div>
             </section>

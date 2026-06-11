@@ -7,6 +7,7 @@
       "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
+    --color-white: #fff;
     --spacing: 0.25rem;
     --container-xs: 20rem;
     --container-2xl: 42rem;
@@ -37,7 +38,6 @@
     --leading-snug: 1.375;
     --radius-md: 0.375rem;
     --radius-xl: 0.75rem;
-    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
     --default-transition-duration: 150ms;
     --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     --default-font-family: var(--font-sans);
@@ -2014,6 +2014,9 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  .overflow-hidden {
+    overflow: hidden;
+  }
   .overflow-visible {
     overflow: visible;
   }
@@ -2061,6 +2064,12 @@
   }
   .bg-base-200 {
     background-color: var(--color-base-200);
+  }
+  .bg-neutral {
+    background-color: var(--color-neutral);
+  }
+  .bg-primary {
+    background-color: var(--color-primary);
   }
   .object-contain {
     object-fit: contain;
@@ -2188,6 +2197,9 @@
   }
   .text-primary {
     color: var(--color-primary);
+  }
+  .text-white {
+    color: var(--color-white);
   }
   .uppercase {
     text-transform: uppercase;
@@ -2326,6 +2338,13 @@
     }
   }
 }
+.navbar a, h1, h2, h3, .card-title {
+  font-family: "Oswald", sans-serif;
+  letter-spacing: 0.02em;
+}
+.logo-outline {
+  filter: drop-shadow(1.5px 0 0 white) drop-shadow(-1.5px 0 0 white) drop-shadow(0 1.5px 0 white) drop-shadow(0 -1.5px 0 white);
+}
 .apply-card {
   border-radius: 0.75rem;
   border: 1px solid var(--color-base-300);
@@ -2430,15 +2449,6 @@ details summary::after {
   }
 }
 @layer base {
-  :root, [data-theme] {
-    background: var(--page-scroll-bg, var(--root-bg));
-    color: var(--color-base-content);
-  }
-  :where(:root, [data-theme]) {
-    --root-bg: var(--color-base-100);
-  }
-}
-@layer base {
   :root {
     background: var(--page-scroll-bg, var(--root-bg));
     --page-scroll-bg-on: linear-gradient(var(--root-bg, #0000), var(--root-bg, #0000))
@@ -2464,6 +2474,15 @@ details summary::after {
   }
 }
 @layer base {
+  :root, [data-theme] {
+    background: var(--page-scroll-bg, var(--root-bg));
+    color: var(--color-base-content);
+  }
+  :where(:root, [data-theme]) {
+    --root-bg: var(--color-base-100);
+  }
+}
+@layer base {
   :root {
     scrollbar-color: currentColor #0000;
     @supports (color: color-mix(in lab, red, red)) {
@@ -2478,43 +2497,15 @@ details summary::after {
     initial-value: 0%;
   }
 }
-@keyframes menu {
-  0% {
-    opacity: 0;
-  }
-}
-@keyframes dropdown {
-  0% {
-    opacity: 0;
-  }
-}
-@keyframes skeleton {
-  0% {
-    background-position: 150%;
-  }
-  100% {
-    background-position: -50%;
-  }
-}
 @keyframes rating {
   0%, 40% {
     scale: 1.1;
     filter: brightness(1.05) contrast(1.05);
   }
 }
-@keyframes progress {
-  50% {
-    background-position-x: -115%;
-  }
-}
-@keyframes toast {
+@keyframes menu {
   0% {
-    scale: 0.9;
     opacity: 0;
-  }
-  100% {
-    scale: 1;
-    opacity: 1;
   }
 }
 @keyframes rotator {
@@ -2528,12 +2519,40 @@ details summary::after {
     translate: 0 -100%;
   }
 }
+@keyframes progress {
+  50% {
+    background-position-x: -115%;
+  }
+}
 @keyframes radio {
   0% {
     padding: 5px;
   }
   50% {
     padding: 3px;
+  }
+}
+@keyframes dropdown {
+  0% {
+    opacity: 0;
+  }
+}
+@keyframes toast {
+  0% {
+    scale: 0.9;
+    opacity: 0;
+  }
+  100% {
+    scale: 1;
+    opacity: 1;
+  }
+}
+@keyframes skeleton {
+  0% {
+    background-position: 150%;
+  }
+  100% {
+    background-position: -50%;
   }
 }
 @layer base {

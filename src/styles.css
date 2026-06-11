@@ -49,6 +49,21 @@
     --color-base-300: #1a1a1a;
 }
 
+.navbar a,
+h1, h2, h3,
+.card-title {
+    font-family: "Oswald", sans-serif;
+    letter-spacing: 0.02em;
+}
+
+.logo-outline {
+    filter: 
+        drop-shadow(1.5px 0 0 white)
+        drop-shadow(-1.5px 0 0 white)
+        drop-shadow(0 1.5px 0 white)
+        drop-shadow(0 -1.5px 0 white)
+}
+
 .apply-card {
     border-radius: 0.75rem;
     border: 1px solid var(--color-base-300);
