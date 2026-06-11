@@ -33,44 +33,19 @@ export const renderFantasyNews = async () => {
             const description = item.querySelector("description")?.textContent || ""
 
             const row = document.createElement("div")
-            row.className = "card bg-base-100 shadow-md border-base-300"
-
+            row.className = "py-2 border-b border-base-300"
             row.innerHTML = `
-                <div class="card-body p-4">
-                    <div class="flex items-center gap-2 text-xs uppercase font-bold text-primary">
-                        <span>NFL News</span>
-                        <span>•</span>
-                        <span>Fantasy Update</span>
-                    </div>
-                    <h3 class="card-title text-base md:text-lg leading-snug">${title}</h3>
-                    <p class="text-sm text-base-content/70 line-clamp-3">${description}</p>
-                    <div class="card-actions justify-end mt-2">
-                        <a 
-                            href="${link}" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            class="btn btn-sm btn-primary"
-                        >
-                            Read More
-                        </a>
-                    </div>
-                </div>
+                <a 
+                    href="${link}" target="_blank" rel="noopener noreferrer"
+                    class="text-sm font-semibold hover:text-primary">
+                    ${title}
+                </a>
             `
-
             fantasyNewsContainer.appendChild(row)
         })
     } catch (error) {
         console.error("Fantasy news fetch failed:", error)
 
-        fantasyNewsContainer.innerHTML = `
-            <div class="card bg-base-100 shadow-md border border-base-300">
-                <div class="card-body">
-                    <h3 class="font-bold">News unavailable</h3>
-                    <p class="text-sm text-base-content/70">
-                        Fantasy news could not be loaded right now. Try refreshing the page.
-                    </p>
-                </div>
-            </div>
-        `
+        fantasyNewsContainer.innerHTML = `<p class="text-sm opacity-60 py-2">News Temporarily Unavailable</p>`
     }
 }

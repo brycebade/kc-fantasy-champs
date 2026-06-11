@@ -335,10 +335,18 @@ const renderRankingsList = (container, rankedTeams, subtitle) => {
 
         <div class="divide-y divide-base-300">
             ${rankedTeams.map((team) => {
+
+                let rankColor
+                if (team.rank === 1) {
+                    rankColor = "text-secondary"
+                } else {
+                    rankColor = "text-primary"
+                }
+
                 return `
                     <div class="flex items-center justify-between gap-3 py-2">
                         <div class="flex items-center gap-3 min-w-0">
-                            <span class="font-bold text-sm w-8 shrink-0 text-right text-primary">
+                            <span class="font-bold text-sm w-8 shrink-0 text-right ${rankColor}">
                                 #${team.rank}
                             </span>
 

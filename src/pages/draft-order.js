@@ -21,13 +21,20 @@ export const renderDraftOrder = async () => {
             return team.id === entry.team_id
         })
 
+        let draftColor
+        if (entry.pick === 1) {
+            draftColor = "text-secondary"
+        } else {
+            draftColor = "text-primary"
+        }
+
         const listItem = document.createElement("li")
 
         listItem.className = 
             "flex items-center gap-3 rounded-md px-2 py-1 text-sm"
 
         listItem.innerHTML = `
-            <span class="font-bold text-primary w-8">#${entry.pick}</span>
+            <span class="font-bold w-8 ${draftColor}">#${entry.pick}</span>
             <span class="font-semibold text-right">${team ? team.current_name : "Unknown Team"}</span>   
         `
 
