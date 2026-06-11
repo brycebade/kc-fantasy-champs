@@ -44,9 +44,6 @@ const loadSchedule = async () => {
     const matchups = await getMatchups(settings.season)
     const teams = await getTeams()
 
-    console.log("settings:", settings)
-    console.log("matchups", matchups)
-
     const container = document.getElementById("scheduleContainer")
     container.innerHTML = ""
 

@@ -93,8 +93,6 @@ const submitScores = async () => {
 }
 
 const recalculateStandings = async (season) => {
-    console.log("recalculateStandings called for season:", season)
-
     const allMatchups = await getMatchups(season)
 
     const completedMatchups = allMatchups.filter(m => 

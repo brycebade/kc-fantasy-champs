@@ -56,12 +56,8 @@ export const renderTeamsDropdown = async () => {
 }
 
 export const renderSchedulePreview = async () =>  {
-  console.log("renderSchedulePreview called")
   const preview = document.getElementById("schedulePreview")
-  if(!preview) {
-    console.log("schedulePreview not found")
-    return
-  }
+  if(!preview) return
 
   const settings = await getCurrentSeasonSettings()
   if (!settings) return
