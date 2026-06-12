@@ -64,15 +64,10 @@ h1, h2, h3,
         drop-shadow(0 -1.5px 0 white)
 }
 
-.apply-card {
-    border-radius: 0.75rem;
-    border: 1px solid var(--color-base-300);
-    background-color: var(--color-base-100);
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-}
-
-.app-card-body {
-    padding: 1rem;
+.medal-text {
+    text-shadow:
+        0 0 2px rgba(255,255,255,0.8),
+        1px 1px 1px rgba(255,255,255,0.5);
 }
 
 details summary {

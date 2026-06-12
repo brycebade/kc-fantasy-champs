@@ -104,25 +104,25 @@ export const renderNavbar = async () => {
         </div>
 
         <div class="desktop-nav flex-none ">
-            <ul class="menu menu-horizontal px-1 text-white">
+            <ul class="menu menu-horizontal px-1">
 
               <li>${
                 isHomePage
                   ? `
                   <details name="desktop-navbar-dropdown">
-                    <summary>Standings</summary>
+                    <summary class="text-white">Standings</summary>
                     <div class="absolute right-0 top-full mt-2 w-80 rounded-box bg-base-100 p-4 shadow z-[9999]">
                       <div id="standingsPreview" class="space-y-2 text-sm"></div>
                       <a href="standings.html" class="btn btn-primary btn-sm mt-4 w-full">Full Standings</a>
                     </div>
                   </details>`
-                  : `<a href="standings.html">Standings</a>`
+                  : `<a href="standings.html" class="text-white">Standings</a>`
               }
               </li>
 
               <li class="relative">
                 <details name="desktop-navbar-dropdown">
-                  <summary>Schedule</summary>
+                  <summary class="text-white">Schedule</summary>
                   <div class="absolute right-0 top-full mt-2 w-80 rounded-box bg-base-100 p-4 shadow z-[9999]">
                     <div id="schedulePreview" class="space-y-2 text-sm"></div>
                     <a href="schedule.html?view=full" class="btn btn-primary btn-sm mt-4 w-full">Full Fantasy Schedule</a>
@@ -133,7 +133,7 @@ export const renderNavbar = async () => {
 
               <li class="relative">
                 <details name="desktop-navbar-dropdown">
-                  <summary>Teams</summary>                   
+                  <summary class="text-white">Teams</summary>                   
                     <ul id="teamsDropdownDesktop"
                         class="absolute right-0 top-full mt-2 menu bg-base-100 rounded-box p-2 shadow z-[9999]"
                         style="width: max-content; min-width: 14rem;">
@@ -143,7 +143,7 @@ export const renderNavbar = async () => {
 
               <li class="relative">
                 <details name="desktop-navbar-dropdown">
-                  <summary>More</summary>
+                  <summary class="text-white">More</summary>
                   <ul class="absolute right-0 top-full mt-2 menu bg-base-100 rounded-box p-2 shadow z-[9999]"
                       style="width: max-content; min-width: 14rem;">
                       <li><a href="history.html">History</a></li>
