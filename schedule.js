@@ -15,8 +15,14 @@ const renderWeek = (weekNumber, matchups, teams, container) => {
     const weekMatchups = matchups.filter(m => m.week === weekNumber)
 
     const weekSection = document.createElement("div")
-    weekSection.className = "mb-6"
-    weekSection.innerHTML = `<h2 class="text-xl font-bold text-primary mb-3">Week${weekNumber}</h2>`
+    weekSection.innerHTML = `
+        <div class="bg-base-200 px-4 py-2 border-y border-base-300">
+            <h2 class="text-sm font-bold uppercase trcking-wide text-primary">Week ${weekNumber}</h2>
+        </div>
+    `
+
+    const rowsWrapper = document.createElement("div")
+    rowsWrapper.className = "divide-y divide-base-300"
 
     weekMatchups.forEach(matchup => {
         const team1 = teams.find(t => t.id === matchup.team_1_id)
@@ -25,17 +31,17 @@ const renderWeek = (weekNumber, matchups, teams, container) => {
         const hasScores = matchup.team_1_score !== null && matchup.team_2_score !== null
 
         const row = document.createElement("div")
-        row.className = "card bg-base-100 border border-base-300 shadow-sm mb-2 p-3"
+        row.className = "flex justify-between items-center px-4 py-3"
         row.innerHTML = `
-            <div class="flex justify-between items-center">
-                <span>${team1?.current_name || "TBD"}</span>
-                <span class="font-bold">${hasScores ? `${matchup.team_1_score} - ${matchup.team_2_score}` : "vs"}</span>
-                <span>${team2?.current_name || "TBD"}</span>
+            <span class="font-semibold flex-1">${team1?.current_name || "TBD"}</span>
+            <span class="font-bold text-primary px-4">${hasScores ? `${matchup.team_1_score} - ${matchup.team_2_score}` : "vs"}</span>
+            <span class="font-semibold flex-1 text-right">${team2?.current_name || "TBD"}</span>
             </div>
         `
-        weekSection.appendChild(row)
+        rowsWrapper.appendChild(row)
     })
 
+    weekSection.appendChild(rowsWrapper)
     container.appendChild(weekSection)
 }
 

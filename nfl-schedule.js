@@ -50,18 +50,18 @@ const loadNFLWeek = async (week) => {
         })
 
         const card = document.createElement("div")
-        card.className = "card bg-base-100 border border-base-300 shadow-sm mb-3 p-4"
+        card.className = "card bg-base-100 border border-base-300 shadow-sm mb-3 p-4 rounded-xl"
         card.innerHTML = `
             <div class="flex justify-between items-center">
                 <div class="flex flex-col gap-2">
                     <div class="flex items-center gap-2">
                         <img src="${away.team.logo}" style="width: 24px; height: 24px; object-fit: contain">
-                        <span class=:font-semibold">${away.team.displayName}</span>
+                        <span class="font-semibold">${away.team.displayName}</span>
                         ${isCompleted ? `<span class="font-bold ml-2">${away.score}</span>` : ""}
                     </div>
                     <div class="flex items-center gap-2">
                         <img src="${home.team.logo}" style="width: 24px; height: 24px; object-fit: contain">
-                        <span class=:font-semibold">${home.team.displayName}</span>
+                        <span class="font-semibold">${home.team.displayName}</span>
                         ${isCompleted ? `<span class="font-bold ml-2">${home.score}</span>` : ""}
                     </div>
                 </div>

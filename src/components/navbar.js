@@ -192,7 +192,6 @@ export const renderNavbar = async () => {
                       <li><a href="trophyCase.html">Trophy Case</a></li>
                       <li><a href="powerRankings.html">Power Rankings</a></li>
                       <li><a href="awards.html">Awards</a></li>
-                      <li><a href="nfl-schedule.html">NFL Schedule</a></li>
                     </ul>
                   </details>
                 </li>
