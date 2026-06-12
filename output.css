@@ -2057,9 +2057,6 @@
     border-bottom-style: var(--tw-border-style);
     border-bottom-width: 4px;
   }
-  .border-base-100 {
-    border-color: var(--color-base-100);
-  }
   .border-base-300 {
     border-color: var(--color-base-300);
   }
@@ -2095,9 +2092,6 @@
   }
   .p-2 {
     padding: calc(var(--spacing) * 2);
-  }
-  .p-3 {
-    padding: calc(var(--spacing) * 3);
   }
   .p-4 {
     padding: calc(var(--spacing) * 4);
@@ -2170,10 +2164,6 @@
     font-size: var(--text-sm);
     line-height: var(--tw-leading, var(--text-sm--line-height));
   }
-  .text-xl {
-    font-size: var(--text-xl);
-    line-height: var(--tw-leading, var(--text-xl--line-height));
-  }
   .text-xs {
     font-size: var(--text-xs);
     line-height: var(--tw-leading, var(--text-xs--line-height));
@@ -2203,33 +2193,6 @@
   }
   .whitespace-nowrap {
     white-space: nowrap;
-  }
-  .text-\[\#7B5E3B\] {
-    color: #7B5E3B;
-  }
-  .text-\[\#7B5E38\] {
-    color: #7B5E38;
-  }
-  .text-\[\#7B\] {
-    color: #7B;
-  }
-  .text-\[\#7\] {
-    color: #7;
-  }
-  .text-\[\#C0C0C0\] {
-    color: #C0C0C0;
-  }
-  .text-\[\#CD7F32\] {
-    color: #CD7F32;
-  }
-  .text-\[\#CD7F\] {
-    color: #CD7F;
-  }
-  .text-\[\#D4AF37\] {
-    color: #D4AF37;
-  }
-  .text-\[\#\] {
-    color: #;
   }
   .text-base-content {
     color: var(--color-base-content);
@@ -2367,6 +2330,11 @@
       line-height: var(--tw-leading, var(--text-4xl--line-height));
     }
   }
+  .md\:table-cell {
+    @media (width >= 48rem) {
+      display: table-cell;
+    }
+  }
   .md\:w-auto {
     @media (width >= 48rem) {
       width: auto;
@@ -2385,6 +2353,22 @@
   .md\:flex-row {
     @media (width >= 48rem) {
       flex-direction: row;
+    }
+  }
+  .md\:rounded {
+    @media (width >= 48rem) {
+      border-radius: 0.25rem;
+    }
+  }
+  .md\:rounded-none {
+    @media (width >= 48rem) {
+      border-radius: 0;
+    }
+  }
+  .md\:rounded-r-lg {
+    @media (width >= 48rem) {
+      border-top-right-radius: var(--radius-lg);
+      border-bottom-right-radius: var(--radius-lg);
     }
   }
   .md\:text-2xl {

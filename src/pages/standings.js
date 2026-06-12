@@ -94,10 +94,10 @@ export const renderStandings = async () => {
             <td class="${rankColor} rounded-l-lg">${index + 1}</td>
             <td class="${rankColor}">${team?.current_name || "Unknown Team"}</td>
             <td class="${rankColor}">${standing.win}</td>
-            <td class="${rankColor}">${standing.loss}</td>
-            <td class="${rankColor}">${standing.points_for}</td>
-            <td class="${rankColor}">${standing.points_against}</td>
-            <td class="${rankColor} rounded-r-lg">${standing.streak}</td>
+            <td class="${rankColor} rounded-r-lg md:rounded-none">${standing.loss}</td>
+            <td class="${rankColor} hidden md:table-cell">${standing.points_for}</td>
+            <td class="${rankColor} hidden md:table-cell">${standing.points_against}</td>
+            <td class="${rankColor} hidden md:table-cell md:rounded-r-lg">${standing.streak}</td>
         `
 
         standingsTableBody.appendChild(tr)
