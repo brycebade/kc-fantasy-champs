@@ -2,6 +2,12 @@ import { getStandings } from "../api/standingsApi.js"
 import { getTeams } from "../api/teamsApi.js"
 import { getMatchups } from "../api/matchupsApi.js"
 import { getHeadToHeadWinner } from "../utils/standingsUtils.js"
+import { renderNavbar } from "../components/navbar.js"
+
+const init = async () => {
+    await renderNavbar()
+    await renderStandings()
+}
 
 const season = 2025
 
@@ -74,16 +80,24 @@ export const renderStandings = async () => {
     standings.forEach((standing, index) => {
         const team = findTeam(teams, standing.team_id)
 
+        let rankColor = ""
+        if (seasonFinished) {
+            if (index === 0) rankColor = "bg-[#D4AF37] font-bold"
+            if (index === 1) rankColor = "bg-[#C0C0C0] font-bold"
+            if (index === 2) rankColor = "bg-[#CD7F32] font-bold"
+            if (index === standings.length -1) rankColor = "bg-[#7B5E3B] font-bold text-white"
+        }
+
         const tr = document.createElement("tr")
 
         tr.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${team?.current_name || "Unknown Team"}</td>
-            <td>${standing.win}</td>
-            <td>${standing.loss}</td>
-            <td>${standing.points_for}</td>
-            <td>${standing.points_against}</td>
-            <td>${standing.streak}</td>
+            <td class="${rankColor} rounded-l-lg">${index + 1}</td>
+            <td class="${rankColor}">${team?.current_name || "Unknown Team"}</td>
+            <td class="${rankColor}">${standing.win}</td>
+            <td class="${rankColor}">${standing.loss}</td>
+            <td class="${rankColor}">${standing.points_for}</td>
+            <td class="${rankColor}">${standing.points_against}</td>
+            <td class="${rankColor} rounded-r-lg">${standing.streak}</td>
         `
 
         standingsTableBody.appendChild(tr)
@@ -130,3 +144,5 @@ export const renderCompactStandings = async () => {
         standingsPreview.appendChild(row)
     })
 }
+
+init()
