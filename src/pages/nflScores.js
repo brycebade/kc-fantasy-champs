@@ -1,3 +1,14 @@
+const darkThemes = ["nightGame", "playoffs", "championship"]
+
+const isDarkTheme = () => {
+    const theme = document.documentElement.getAttribute("data-theme")
+    return darkThemes.includes(theme)
+}
+
+const themedLogo = (logoURL) => {
+    return isDarkTheme() ? logoURL.replace("/500/", "/500-dark/") : logoURL
+}
+
 export const renderNFLScores = async () => {
     const container = document.getElementById("nflScoreContainer")
     if(!container) return
@@ -41,14 +52,14 @@ export const renderNFLScores = async () => {
         card.innerHTML = `
             <div class="flex flex-col">
                 <div class="flex items-center gap-1">
-                    <img src="${away.team.logo}" style="width: 20px; height: 20px; object-fit: contain;">
-                    <span class="font-size: 0.75rem; font-weight: bold;">${away.team.abbreviation}</span>
-                    ${isCompleted ? `<span class="font-size: 0.75rem; font-weight: bold;">${away.score}</span>` : ""}
+                    <img src="${themedLogo(away.team.logo)}" style="width: 20px; height: 20px; object-fit: contain;">
+                    <span class="text-xs font-bold">${away.team.abbreviation}</span>
+                    ${isCompleted ? `<span class="text-xs font-bold">${away.score}</span>` : ""}
                 </div>
                 <div class="flex items-center gap-1">
-                    <img src="${home.team.logo}" style="width: 20px; height: 20px; object-fit: contain;">
-                    <span class="font-size: 0.75rem; font-weight: bold;">${home.team.abbreviation}</span>
-                    ${isCompleted ? `<span class="font-size: 0.75rem; font-weight: bold;">${home.score}</span>` : ""}
+                    <img src="${themedLogo(home.team.logo)}" style="width: 20px; height: 20px; object-fit: contain;">
+                    <span class="text-xs font-bold">${home.team.abbreviation}</span>
+                    ${isCompleted ? `<span class="text-xs font-bold">${home.score}</span>` : ""}
                 </div>
                 <span style="font-size: 0.65rem; opacity: 0.6; margin-top: 2px;">
                     ${isCompleted ? "FINAL"  : `${displayDate} ${displayTime}`}
