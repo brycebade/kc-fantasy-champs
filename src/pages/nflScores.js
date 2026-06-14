@@ -1,9 +1,4 @@
-const darkThemes = ["nightGame", "playoffs", "championship"]
-
-const isDarkTheme = () => {
-    const theme = document.documentElement.getAttribute("data-theme")
-    return darkThemes.includes(theme)
-}
+import { isDarkTheme } from "../utils/themeManager.js"
 
 const themedLogo = (logoURL) => {
     return isDarkTheme() ? logoURL.replace("/500/", "/500-dark/") : logoURL
