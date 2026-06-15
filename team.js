@@ -1,10 +1,11 @@
-import { renderNavbar } from "./src/components/navbar.js";
-import { getTeams } from "./src/api/teamsApi.js";
-import { getDraftSeasonsByTeam, getDraftResultsByTeamAndYear } from "./src/api/draftResultsApi.js";
-import { getOwnerById } from "./src/api/ownersApi.js";
-import { getRosterByTeam } from "./src/api/draftResultsApi.js";
-import { getFAPickupsByTeam } from "./src/api/faPickupsApi.js";
-import { getStandingsByTeam } from "./src/api/standingsApi.js";
+import { renderNavbar } from "./src/components/navbar.js"
+import { getTeams } from "./src/api/teamsApi.js"
+import { getDraftSeasonsByTeam, getDraftResultsByTeamAndYear } from "./src/api/draftResultsApi.js"
+import { getOwnerById } from "./src/api/ownersApi.js"
+import { getRosterByTeam } from "./src/api/draftResultsApi.js"
+import { getFAPickupsByTeam } from "./src/api/faPickupsApi.js"
+import { getStandingsByTeam } from "./src/api/standingsApi.js"
+import { renderHeadToHead } from "./src/components/headToHeadDisplay.js"
 
 const params = new URLSearchParams(window.location.search)
 const teamSlug = params.get("team")
@@ -53,6 +54,7 @@ const loadTeam = async () => {
     await loadDraftHistory(selectedTeam)
     await loadRoster(selectedTeam)
     await loadTeamHistory(selectedTeam)
+    await renderHeadToHead(selectedTeam.id)
 }
 
 const loadDraftHistory = async (selectedTeam) => {
