@@ -1,5 +1,7 @@
 import { getChiefsThemeFacts } from "../api/chiefsScheduleApi.js"
 
+const THEME_CACHE_KEY = "kc-last-theme"
+
 export const THEMES = {
     DEFAULT: "kcTheme",
     NIGHT: "nightGame",
@@ -38,4 +40,5 @@ export const detectTheme = async (referenceDate = new Date ()) => {
 export const initTheme = async () => {
     const theme = await detectTheme()
     applyTheme(theme)
+    localStorage.setItem(THEME_CACHE_KEY, theme)
 }
