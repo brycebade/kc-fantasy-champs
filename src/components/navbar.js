@@ -1,6 +1,7 @@
 import { getTeams } from "../api/teamsApi.js";
 import { getMatchups } from "../api/matchupsApi.js"
 import { getCurrentSeasonSettings } from "../api/seasonSettingsApi.js"
+import { initTheme } from "../utils/themeManager.js"
 
 export const renderTeamsDropdown = async () => {
   const desktopDropdown = document.getElementById("teamsDropdownDesktop")
@@ -84,6 +85,8 @@ export const renderSchedulePreview = async () =>  {
 }
 
 export const renderNavbar = async () => {
+  initTheme()
+  
   const isHomePage = window.location.pathname === '/' || window.location.pathname.includes('index.html')
 
   const navbarContainer = document.getElementById("navbar")
