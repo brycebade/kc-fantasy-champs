@@ -1,4 +1,4 @@
-const AWARDS_START_SEASON = 2025
+const AWARDS_START_SEASON = 2026
 
 const findHighest = (items, getValue) =>
     items.reduce((best, item) => (getValue(item) > getValue(best) ? item : best))
