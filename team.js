@@ -6,6 +6,7 @@ import { getRosterByTeam } from "./src/api/draftResultsApi.js"
 import { getFAPickupsByTeam } from "./src/api/faPickupsApi.js"
 import { getStandingsByTeam } from "./src/api/standingsApi.js"
 import { renderHeadToHead } from "./src/components/headToHeadDisplay.js"
+import { renderTeamAwards } from "./src/components/teamAwardsDisplay.js"
 
 const params = new URLSearchParams(window.location.search)
 const teamSlug = params.get("team")
@@ -55,6 +56,7 @@ const loadTeam = async () => {
     await loadRoster(selectedTeam)
     await loadTeamHistory(selectedTeam)
     await renderHeadToHead(selectedTeam.id)
+    await renderTeamAwards(selectedTeam.id)
 }
 
 const loadDraftHistory = async (selectedTeam) => {
