@@ -818,6 +818,37 @@ const computeRegularRankings = async (teams, season, week) => {
     return rankTeams(teamsWithPowerScores)
 }
 
+export const getPowerRankingsBlurbInput = async () => {
+    const seasonSettings = await getCurrentSeasonSettings()
+    const season = seasonSettings.season
+    const currentWeek = seasonSettings.current_week
+    const teams = await getTeams()
+
+    const rankedTeams = await computeRegularRankings(teams, season, currentWeek)
+
+    const previousRanks = {}
+    if (currentWeek > 1) {
+        const lastWeekRanks = await computeRegularRankings(teams, season, currentWeek -1)
+        lastWeekRanks.forEach((team) => {
+            previousRanks[team.teamid] = team.rank
+        })
+    }
+
+    const lines = rankedTeams.map((team) => {
+        const previousRank = previousRanks[team.teamId]
+        let movement = "new"
+        if (previousRank !== undefined) {
+            const change = previousRank - team.rank
+            if (change > 0) movement = `up ${change}`
+            else if (change < 0) movement = `down ${Math.abs(change)}`
+            else movement = "no change"
+        }
+        return `${team.rank}. ${team.teamName} (${team.wins}-${team.losses}) — ${movement} — avg ${team.averagePointsFor}, last 3 avg ${team.recentForm}`
+    })
+
+    return `Power rankings — Week ${currentWeek}\n\n${lines.join("\n")}`
+}
+
 export const renderPowerRankings = async () => {
     const container = document.getElementById("powerRankingsContainer")
 
