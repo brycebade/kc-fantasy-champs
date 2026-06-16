@@ -335,12 +335,18 @@ const renderRankingsList = (container, rankedTeams, subtitle) => {
 
         <div class="divide-y divide-base-300">
             ${rankedTeams.map((team) => {
-
                 let rankColor
                 if (team.rank === 1) {
                     rankColor = "text-secondary"
                 } else {
                     rankColor = "text-primary"
+                }
+
+                let movement = ""
+                if (team.change !== undefined && team.change !== null) {
+                    if (team.change > 0) movement = `<span class="text-success text-xs font-bold">▲${team.change}</span>`
+                    else if (team.change < 0) movement = `<span class="text-error text-xs font-bold">▼${Math.abs(team.change)}</span>`
+                    else movement = `<span class="opacity-40 text-xs">-</span>`
                 }
 
                 return `
@@ -349,17 +355,18 @@ const renderRankingsList = (container, rankedTeams, subtitle) => {
                             <span class="font-bold text-sm w-8 shrink-0 text-right ${rankColor}">
                                 #${team.rank}
                             </span>
-
                             <p class="text-sm font-semibold truncate">
                                 ${team.teamName}
                             </p>
                         </div>
-
-                        <span class="text-xs font-medium opacity-70 shrink-0">
-                            ${team.wins !== undefined && team.losses !== undefined
+                        <div class="flex items-center gap-2 shrink-0">
+                            ${movement}
+                            <span class="text-xs font-medium opacity-70">
+                                ${team.wins !== undefined && team.losses !== undefined
                                 ? `${team.wins}-${team.losses}`
                                 : ""}
-                        </span>
+                            </span>
+                        </div>
                     </div>
                 `
             }).join("")}
@@ -802,6 +809,15 @@ const buildPlayoffPlacementRankings = (teams, standings, playoffMatchups) => {
     return sortedRankings
 }
 
+const computeRegularRankings = async (teams, season, week) => {
+    const matchups = await getCompletedRegularSeasonMatchups(season, week)
+    const teamGameLogs = buildTeamLogs(teams, matchups)
+    const rawTeamStats = calculateRawTeamStats(teams, teamGameLogs)
+    const normalizedTeamStats = normalizeTeamStats(rawTeamStats)
+    const teamsWithPowerScores = calculatePowerScores(normalizedTeamStats, week)
+    return rankTeams(teamsWithPowerScores)
+}
+
 export const renderPowerRankings = async () => {
     const container = document.getElementById("powerRankingsContainer")
 
@@ -872,19 +888,31 @@ export const renderPowerRankings = async () => {
             return
         }
 
-        const matchups = await getCompletedRegularSeasonMatchups(season, currentWeek)
+       const rankedTeams = await computeRegularRankings(teams, season, currentWeek)
 
-        const teamGameLogs = buildTeamLogs(teams, matchups)
-        const rawTeamStats = calculateRawTeamStats(teams, teamGameLogs)
-        const normalizedTeamStats = normalizeTeamStats(rawTeamStats)
-        const teamsWithPowerScores = calculatePowerScores(normalizedTeamStats, currentWeek)
-        const rankedTeams = rankTeams(teamsWithPowerScores)
+       const previousRanks = {}
+       if (currentWeek > 1) {
+        const lastWeekRanks = await computeRegularRankings(teams, season, currentWeek - 1)
+        lastWeekRanks.forEach((team) => {
+            previousRanks[team.teamId] = team.rank
+        })
+       }
 
-        renderRankingsList(
-            container,
-            rankedTeams,
-            `Regular Season Rankings Through Week ${currentWeek}`
-        )   
+       const rankedWithMovement = rankedTeams.map((team) => {
+        const previousRank = previousRanks[team.teamId]
+        let change = null
+        if(previousRank !== undefined) {
+            change = previousRank - team.rank
+        }
+        return { ...team, change }
+       })
+
+       renderRankingsList(
+        container,
+        rankedWithMovement,
+        `Regular Season Rankings Through Week ${currentWeek}`
+       )
+        
     } catch (error) {
         console.error("Error rendering power rankings:", error)
 
