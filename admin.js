@@ -1,9 +1,26 @@
 import { supabase } from "./src/supabaseClient.js"
 import { getTeams } from "./src/api/teamsApi.js"
 import { getMatchups, getCurrentSeason } from "./src/api/matchupsApi.js"
+import { getPowerRankingsBlurbInput } from "./src/pages/powerRankings.js"
+import { savePowerRankingNote } from "./src/api/powerRankingsNotesApi.js"
+import { getCurrentSeasonSettings } from "./src/api/seasonSettingsApi.js"
 
 const passwordSubmit = document.getElementById("passwordSubmit")
 const adminDashboard = document.getElementById("adminDashboard")
+
+const generateBlurbInput = async () => {
+    const inputBox = document.getElementById("blurbInput")
+    inputBox.value = "Generating..."
+    inputBox.value = await getPowerRankingsBlurbInput()
+}
+
+const saveBlurb = async () => {
+    const settings = await getCurrentSeasonSettings()
+    const note = document.getElementById("blurbOuput").value
+
+    const result = await savePowerRankingNote(settings.season, settings.current_week, note)
+    alert(result ? "Blurb saved!" : "Error saving blurb")
+}
 
 const populateWeekDropdown = () => {
     const weekSelect = document.getElementById("weekSelect")
@@ -98,7 +115,7 @@ const recalculateStandings = async (season) => {
     const completedMatchups = allMatchups.filter(m => 
         m.matchup_type === "regular" &&
         m.team_1_score !== null &&
-        m.team_2_scroe !== null
+        m.team_2_score !== null
     )
 
     const teams = await getTeams()
@@ -153,6 +170,8 @@ passwordSubmit.addEventListener("click", () => {
         document.getElementById("weekSelect").addEventListener("change", loadMatchups)
         document.getElementById("seasonSelect").addEventListener("change", loadMatchups)
         document.getElementById("submitScores").addEventListener("click", submitScores)
+        document.getElementById("generateBlurbInput").addEventListener("click", generateBlurbInput)
+        document.getElementById("saveBlurb").addEventListener("click", saveBlurb)
     } else {
        document.getElementById('errorMessage').textContent = "Incorrect Password"
     }
