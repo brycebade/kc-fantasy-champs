@@ -46,18 +46,22 @@ const loadMatchups = async () => {
     const container = document.getElementById("matchupsContainer")
     container.innerHTML = ""
 
-    weekMatchups.forEach(matchup => {
+    weekMatchups.forEach((matchup, index) => {
         const team1 = teams.find(t => t.id === matchup.team_1_id)
         const team2 = teams.find(t => t.id === matchup.team_2_id)
 
         const row = document.createElement("div")
-        row.className = "flex items-center gap-4 mb-4"
+        row.className = "mb-5"
         row.innerHTML = `
-            <span class="font-semibold w-40 text-right">${team1?.current_name || "TBD"}</span>
-            <input type="number" id="score1_${matchup.id}" placeholder="0" class="input input-bordered w-20 text-center">
-            <span class="font-bold">vs</span>
-            <input type="number" id="score2_${matchup.id}" placeholder="0" class="input input-bordered w-20 text-center">
-            <span class="font-semibold w-40">${team2?.current_name || "TBD"}</span>
+            <h3 class="text-sm font-semibold text-primary mb-2">Game ${index + 1}</h3>
+            <div class="flex items-center justify-between gap-3 mb-2">
+                <span class="font-semibold flex-1">${team1?.current_name || "TBD"}</span>
+                <input type="number" id="score1_${matchup.id}" class="input w-24 text-center shrink-0 border border-base-300 bg-base-200 rounded-xl">
+            </div>
+            <div class="flex items-center justify-between gap-3">
+                <span class="font-semibold flex-1">${team2?.current_name || "TBD"}</span>
+                <input type="number" id="score2_${matchup.id}" class="input w-24 text-center shrink-0 border border-base-300 bg-base-200 rounded-xl">
+            </div>
         `
         container.appendChild(row)
     })
@@ -166,12 +170,15 @@ passwordSubmit.addEventListener("click", () => {
     if (inputValue === "champs") {
         document.getElementById("passwordScreen").style.display = "none"
         adminDashboard.style.display = "block"
+
         populateWeekDropdown()
+        loadMatchups()
+
         document.getElementById("weekSelect").addEventListener("change", loadMatchups)
         document.getElementById("seasonSelect").addEventListener("change", loadMatchups)
         document.getElementById("submitScores").addEventListener("click", submitScores)
         document.getElementById("generateBlurbInput").addEventListener("click", generateBlurbInput)
-        document.getElementById("saveBlurb").addEventListener("click", saveBlurb)
+        document.getElementById("saveBlurb").addEventListener("click", saveBlurb)      
     } else {
        document.getElementById('errorMessage').textContent = "Incorrect Password"
     }

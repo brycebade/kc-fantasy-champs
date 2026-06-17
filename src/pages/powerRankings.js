@@ -846,7 +846,9 @@ export const getPowerRankingsBlurbInput = async () => {
         return `${team.rank}. ${team.teamName} (${team.wins}-${team.losses}) — ${movement} — avg ${team.averagePointsFor}, last 3 avg ${team.recentForm}`
     })
 
-    return `Power rankings — Week ${currentWeek}\n\n${lines.join("\n")}`
+    const prompt = `Here are this week's fantasy football power rankings with movement and scoring. Write 3–4 sentence blurb for our league site about the biggest moves.`
+
+    return `${prompt}\n\nPower rankings — Week ${currentWeek}\n\n${lines.join("\n")}`
 }
 
 export const renderPowerRankings = async () => {

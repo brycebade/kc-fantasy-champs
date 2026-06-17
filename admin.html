@@ -46,22 +46,24 @@
                 <button id="submitScores" class="btn btn-primary w-full mt-4">Submit Scores</button>
             </div>
         </div>
-    </div>
 
-    <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl mb-6">
-        <div class="card-body p-4">
-            <h2 class="card-title text-primary mb-2">Power Rankings Blurb</h2>
+        <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl mb-6">
+            <div class="card-body p-4">
+                <h2 class="card-title text-primary mb-2">Power Rankings Blurb</h2>
 
-            <button id="generateBlurbInput" class="btn btn-primary btn-sm mb-2">Generate Input for AI</button>
-            <textarea id="blurbInput" readonly class="textarea textarea-bordered w-full h-40 mb-4"
-                placeholder="Click generate to build the text to paste into Claude/ChatGPT"></textarea>
+                <button id="generateBlurbInput" class="btn btn-primary btn-sm mb-2">Generate Input for AI</button>
+                <textarea id="blurbInput" readonly class="textarea textarea-bordered w-full h-40 mb-4"
+                    placeholder="Click generate to build the text to paste into Claude/ChatGPT"></textarea>
 
-            <label class="text-sm font-semibold mb-1">Paste the AI blurb here:</label>
-            <textarea id="blurbOutput" class="textarea textarea-bordered w-full h-28 mb-3"
-                placeholder="Paste the blurb you got back..."></textarea>
-            <button id="saveBlurb" class="btn btn-primary w-full">Save Blurb</button>
+                <label class="text-sm font-semibold mb-1">Paste the AI blurb here:</label>
+                <textarea id="blurbOutput" class="textarea textarea-bordered w-full h-28 mb-3"
+                    placeholder="Paste the blurb you got back..."></textarea>
+                <button id="saveBlurb" class="btn btn-primary w-full">Save Blurb</button>
+            </div>
         </div>
     </div>
+
+        
 
 
     <script type="module" src="./admin.js"></script>
