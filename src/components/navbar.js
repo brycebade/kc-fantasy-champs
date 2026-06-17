@@ -149,11 +149,9 @@ export const renderNavbar = async () => {
                   <summary class="text-white">More</summary>
                   <ul class="absolute right-0 top-full mt-2 menu bg-base-100 rounded-box p-2 shadow z-[9999]"
                       style="width: max-content; min-width: 14rem;">
-                      <li><a href="history.html">History</a></li>
-                      <li><a href="trophyCase.html">Trophy Case</a></li>
+                      <li><a href="history.html">League History</a></li>
                       <li><a href="powerRankings.html">Power Rankings</a></li>
                       <li><a href="awards.html">Awards</a></li>
-                      <li><a href="nfl-schedule.html">NFL Schedule</a></li>
                   </ul>
                 </details>
               </li>
@@ -192,7 +190,6 @@ export const renderNavbar = async () => {
                     <summary>More</summary>
                     <ul class="pl-4">
                       <li><a href="history.html">History</a></li>
-                      <li><a href="trophyCase.html">Trophy Case</a></li>
                       <li><a href="powerRankings.html">Power Rankings</a></li>
                       <li><a href="awards.html">Awards</a></li>
                     </ul>
