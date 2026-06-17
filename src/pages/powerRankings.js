@@ -7,6 +7,7 @@ import {
 import { getStandings } from "../api/standingsApi.js"
 import { getTeams } from "../api/teamsApi.js"
 import { getCurrentSeasonSettings } from "../api/seasonSettingsApi.js"
+import { getPowerRankingNote } from "../api/powerRankingsNotesApi.js"
 
 const roundToTwo = (number) => {
     return Math.round(number * 100) / 100
@@ -853,7 +854,6 @@ export const getPowerRankingsBlurbInput = async () => {
 
 export const renderPowerRankings = async () => {
     const container = document.getElementById("powerRankingsContainer")
-
     if (!container) return
 
     container.innerHTML = `<p class="text-base-content/70">Loading Power Rankings...</p>`
@@ -957,4 +957,104 @@ export const renderPowerRankings = async () => {
             </div>
         `
     }
+}
+
+const buildTeamStreaksAndPoints = (matchups) => {
+    const logs = {}
+
+    matchups.forEach((m) => {
+        if (!logs[m.team_1_id]) logs[m.team_1_id] = []
+        if (!logs[m.team_2_id]) logs[m.team_2_id] = []
+
+        logs[m.team_1_id].push({ score: Number(m.team_1_score), won: m.winner_team_id === m.team_1_id, tie: m.is_tie })
+        logs[m.team_2_id].push({ score: Number(m.team_2_score), won: m.winner_team_id === m.team_2_id, tie: m.is_tie })
+    })
+
+    const result = []
+    Object.keys(logs).forEach((teamId) => {
+        const games = logs[teamId]
+        const pointsFor = games.reduce((sum, g) => sum + g.score, 0)
+
+        let streak = ""
+        if (games.length) {
+            const last = games[games.length - 1]
+            if (last.tie) {
+                streak = "T1"
+            } else {
+                const type = last.won ? "W" : "L"
+                let count = 0
+                for (let i = games.length - 1; i >= 0; i--) {
+                    if (games[i].tie || (games[i].won ? "W" : "L") !== type) break
+                    count++
+                }
+                streak = `${type}${count}`
+            }
+        }
+
+        result[teamId] = { pointsFor: Math.round(pointsFor * 10) / 10, streak }
+    })
+
+    return results
+}
+
+export const renderPowerRankingsPage = async () => {
+    const container = document.getElementById("powerRankingsPageContainer")
+    if (!container) return
+    
+    const settings = await getCurrentSeasonSettings()
+    const season = settings.season
+    const currentWeek = settings.current_week
+
+    const teams = await getTeams()
+    const rankedTeams = await computeRegularRankings(teams, season, currentWeek)
+
+    const previousRanks = {}
+    if (currentWeek > 1) {
+        const lastWeekRanks = await computeRegularRankings(teams, season, currentWeek - 1)
+        lastWeekRanks.forEach((team) => {
+            previousRanks[team.teamId] = team.rank
+        })
+    }
+
+    const matchups = await getCompletedRegularSeasonMatchups(season, currentWeek)
+    const extras = buildTeamStreakAndPoints(matchups)
+
+    const note = await getPowerRankingNote(season, currentWeek)
+
+    const rows = rankedTeams.map((team) => {
+        const previousRank = previousRanks[team.teamId]
+        let movement = `<span class="opacity-40 text-xs">-</span>`
+        if (previousRank !== undefined) {
+            const change = previousRank - team.rank
+            if (change > 0) movement = `<span class="text-success text-xs font-bold">▲${change}</span>`
+            else if (change < 0) movement = `<span class="text-error text-xs font-bold">▼${Math.abs(change)}</span>` 
+        }
+
+        const extra = extras[team.teamId] || { pointsFor: 0, streak: "" }
+        const rankColor = team.rank === 1 ? "text-secondary" : "text-primary"
+        const streakPart = extra.streak ? ` • ${extra.streak}` : ""
+
+        return `
+            <div class="flex items-center justify-between gap-3 py-3 border-b border-base-300">
+                <div class="flex items-center gap-3 min-w-0">
+                    <span class="font-bold text-lg w-8 shrink-0 text-right ${rankColor}">${team.rank}</span>
+                    <div class="min-w-0">
+                        <p class="font-semibold truncate">${team.teamName}</p>
+                        <p class="text-xs opacity-70">${team.wins}-${team.losses}${streakPart} • ${extra.pointsFor} PF</p>
+                    </div>
+                </div>
+                <div class="shrink-0">${movement}</div>
+            </div>
+        `
+    }).join("")
+
+    const blurbHTML = note && note.note
+        ? `<div class="mb-6 p-4 bg-base-200 rounded-lg text-sm leading-relaxed whitespace-pre-line">${note.note}</div>`
+        : `<div class="mb-6 p-4 bg-base-200 rounded-lg text-sm opacity-60">This week's write-up coming soon.</div>`
+
+    container.innerHTML = `
+        <p class="text-xs uppercase tracking-wide opacity-60 mb-1">Through Week ${currentWeek}</p>
+        ${blurbHTML}
+        <div>${rows}</div> 
+    `
 }
