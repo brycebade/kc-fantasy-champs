@@ -831,7 +831,7 @@ export const getPowerRankingsBlurbInput = async () => {
     if (currentWeek > 1) {
         const lastWeekRanks = await computeRegularRankings(teams, season, currentWeek -1)
         lastWeekRanks.forEach((team) => {
-            previousRanks[team.teamid] = team.rank
+            previousRanks[team.teamId] = team.rank
         })
     }
 
@@ -970,7 +970,7 @@ const buildTeamStreaksAndPoints = (matchups) => {
         logs[m.team_2_id].push({ score: Number(m.team_2_score), won: m.winner_team_id === m.team_2_id, tie: m.is_tie })
     })
 
-    const result = []
+    const result = {}
     Object.keys(logs).forEach((teamId) => {
         const games = logs[teamId]
         const pointsFor = games.reduce((sum, g) => sum + g.score, 0)
@@ -994,7 +994,7 @@ const buildTeamStreaksAndPoints = (matchups) => {
         result[teamId] = { pointsFor: Math.round(pointsFor * 10) / 10, streak }
     })
 
-    return results
+    return result
 }
 
 export const renderPowerRankingsPage = async () => {
@@ -1017,7 +1017,7 @@ export const renderPowerRankingsPage = async () => {
     }
 
     const matchups = await getCompletedRegularSeasonMatchups(season, currentWeek)
-    const extras = buildTeamStreakAndPoints(matchups)
+    const extras = buildTeamStreaksAndPoints(matchups)
 
     const note = await getPowerRankingNote(season, currentWeek)
 
