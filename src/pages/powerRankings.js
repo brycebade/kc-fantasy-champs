@@ -1004,30 +1004,62 @@ export const renderPowerRankingsPage = async () => {
     const settings = await getCurrentSeasonSettings()
     const season = settings.season
     const currentWeek = settings.current_week
+    const phase = settings.phase
 
     const teams = await getTeams()
-    const rankedTeams = await computeRegularRankings(teams, season, currentWeek)
+    
+    let rankedTeams
+    let showMovement = false
+    let statsSeason = season
+    let subtitle
+
+    if (phase === "offseason") {
+        statsSeason = season -1
+        const standings = await getStandings(statsSeason)
+        rankedTeams = buildStandingsRankings(teams, standings)
+        subtitle = `${season} offseason - ${statsSeason} final standings`
+    } else if (phase === "final") {
+        const standigs = await getStandings(season)
+        rankedTeams = buildStandingsRankings(teams, standings)
+        subtitle = `${season} final standings`
+    } else if (phase === "playoffs") {
+        const matchups = await getCompletedMatchupsThroughWeek(season, currentWeek)
+        const teamGameLogs = buildTeamLogs(teams, matchups)
+        const rawTeamStats = calculateRawTeamStats(teams, teamGameLogs)
+        const normalizedTeamStats = normalizeTeamStats(rawTeamStats)
+        const teamsWithPowerScores = calculatePowerScores(normalizedTeamStats, currentWeek)
+        rankedTeams = rankTeams(teamsWithPowerScores)
+        subtitle = `Power Rankings through Week ${currentWeek}`
+    } else {
+        rankedTeams = await computeRegularRankings(teams, season, currentWeek)
+        showMovement = true
+        subtitle = `Through Week ${currentWeek}`
+    }
 
     const previousRanks = {}
-    if (currentWeek > 1) {
+    if (showMovement && currentWeek > 1) {
         const lastWeekRanks = await computeRegularRankings(teams, season, currentWeek - 1)
         lastWeekRanks.forEach((team) => {
             previousRanks[team.teamId] = team.rank
         })
     }
 
-    const matchups = await getCompletedRegularSeasonMatchups(season, currentWeek)
+    const matchups = await getCompletedRegularSeasonMatchups(statsSeason, 99)
     const extras = buildTeamStreaksAndPoints(matchups)
 
     const note = await getPowerRankingNote(season, currentWeek)
+    const inSeason = phase === "regular" || phase === "playoffs"
 
     const rows = rankedTeams.map((team) => {
-        const previousRank = previousRanks[team.teamId]
-        let movement = `<span class="opacity-40 text-xs">-</span>`
-        if (previousRank !== undefined) {
-            const change = previousRank - team.rank
-            if (change > 0) movement = `<span class="text-success text-xs font-bold">▲${change}</span>`
-            else if (change < 0) movement = `<span class="text-error text-xs font-bold">▼${Math.abs(change)}</span>` 
+        let movement = ""
+        if (showMovement) {
+            const previousRank = previousRanks[team.teamId]
+            movement = `<span class="opacity-40 text-xs">-</span>`
+            if (previousRank !== undefined) {
+                const change = previousRank - team.rank
+                if (change > 0) movement = `<span class="text-success text-xs font-bold">▲${change}</span>`
+                else if (change < 0) movement = `<span class="text-error text-xs font-bold">▼${Math.abs(change)}</span>`
+            }
         }
 
         const extra = extras[team.teamId] || { pointsFor: 0, streak: "" }
