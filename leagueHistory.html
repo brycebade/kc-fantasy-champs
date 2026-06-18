@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NFL Schedule | KC Fantasy Champs</title>
+    <title>League History | KC Fantasy Champs</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
@@ -18,16 +18,11 @@
 <body class="bg-base-200 text-base-content min-h-screen overflow-x-hidden">
     <div id="navbar"></div>
 
-    <main class="max-w-4xl mx-auto px-4 py-8">
-        <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl overflow-hidden">
-            <div class="bg-neutral text-white px-4 py-2 flex items-center justify-between">
-                <h1 class="font-bold uppercase tracking-wide text-sm">NFL Schedule</h1>
-                <select id="nflWeekSelect" class="select select-sm rounded-lg w-32" style="color: #1f2937; background-color: white;"></select>
-            </div>
-            <div id="nflScheduleContainer" class="p-4"></div>
-        </div>
-    </main>
+    <div class="max-w-2xl mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-primary mb-6">League History</h1>
+        <div id="leagueHistoryContainer"></div>
+    </div>
     
-    <script type="module" src="./nfl-schedule.js"></script>
+    <script type="module" src="leagueHistory.js"></script>
 </body>
 </html>
