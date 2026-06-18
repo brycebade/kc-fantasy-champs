@@ -129,7 +129,7 @@ export const renderNavbar = async () => {
                   <div class="absolute right-0 top-full mt-2 w-80 rounded-box bg-base-100 p-4 shadow z-[9999]">
                     <div id="schedulePreview" class="space-y-2 text-sm"></div>
                     <a href="schedule.html?view=full" class="btn btn-primary btn-sm mt-4 w-full">Full Fantasy Schedule</a>
-                    <a href="nfl-schedule.html" class="btn btn-primary btn-sm mt-2 w-full">Full NFL Schedule</a>
+                    <a href="nflSchedule.html" class="btn btn-primary btn-sm mt-2 w-full">Full NFL Schedule</a>
                   </div>
                 </details>
               </li>
@@ -149,7 +149,7 @@ export const renderNavbar = async () => {
                   <summary class="text-white">More</summary>
                   <ul class="absolute right-0 top-full mt-2 menu bg-base-100 rounded-box p-2 shadow z-[9999]"
                       style="width: max-content; min-width: 14rem;">
-                      <li><a href="history.html">League History</a></li>
+                      <li><a href="leagueHistory.html">League History</a></li>
                       <li><a href="powerRankings.html">Power Rankings</a></li>
                       <li><a href="awards.html">Awards</a></li>
                   </ul>
@@ -175,7 +175,7 @@ export const renderNavbar = async () => {
                   <ul class="pl-4">
                     <li><a href="schedule.html" id="currentWeekLinkMobile">Current Week</a></li>
                     <li><a href="schedule.html?view=full">Full Fantasy Schedule</a></li>
-                    <li><a href="nfl-schedule.html">Full NFL Schedule</a></li>
+                    <li><a href="nflSchedule.html">Full NFL Schedule</a></li>
                   </ul>
                 </details>
               </li>
@@ -189,7 +189,7 @@ export const renderNavbar = async () => {
                   <details>
                     <summary>More</summary>
                     <ul class="pl-4">
-                      <li><a href="history.html">History</a></li>
+                      <li><a href="leagueHistory.html">League History</a></li>
                       <li><a href="powerRankings.html">Power Rankings</a></li>
                       <li><a href="awards.html">Awards</a></li>
                     </ul>
