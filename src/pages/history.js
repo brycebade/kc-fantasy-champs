@@ -24,8 +24,11 @@ export const renderLeagueHistory = async () => {
     const championRows = seasons
         .map((season) => {
             const standings = standingsBySeason[season] || []
+            const ranked = standings.filter((s) => s.final_rank != null)
+            if (ranked.length === 0) return null
+            const lastRank = Math.max(...ranked.map((s) => s.final_rank))
             const champ = standings.find((s) => s.final_rank === 1)
-            const toilet = standings.find((s) => s.final_rank === 12)
+            const toilet = standings.find((s) => s.final_rank === lastRank)
             if (!champ && !toilet) return null
             return {
                 season,
@@ -47,9 +50,21 @@ export const renderLeagueHistory = async () => {
         })
     })
 
+    const isActive = (id) => {
+        const team = teams.find((t) => t.id === id)
+        return team ? team.active !== false : true
+    }
+
     const franchiseRows = Object.keys(franchise)
-        .map((teamId) => ({ teamId, ...franchise[teamId] }))
-        .sort((a, b) => b.titles - a.titles || b.wins - a.wins || b.pointsFor - a.pointsFor)
+        .map((teamId) => ({ 
+            teamId, 
+            active: isActive(teamId), 
+            ...franchise[teamId] 
+        }))
+        .sort((a, b) => {
+            if (a.active !== b.active) return a.active ? -1 : 1
+            return b.titles - a.titles || b.wins - a.wins || b.pointsFor - a.pointsFor
+        })
 
     let highest = null
     let lowest = null
@@ -92,14 +107,19 @@ export const renderLeagueHistory = async () => {
             </div>
         `).join("")
 
+    const hasFormer = franchiseRows.some((f) => !f.active)
     const franchiseBody = franchiseRows.length === 0
         ? `<p class="text-sm opacity-60">No Records Yet</p>`
-        : franchiseRows.map((f) => `
-            <div class="flex items-center justify-between gap-3 py-2 border-b border-base-300 last:border-0">
-                <span class="font-semibold truncate">${nameFor(f.teamId)}</span>
-                <span class="text-xs opacity-70 shrink-0">${f.titles} titles • ${f.wins}-${f.losses} • ${round1(f.pointsFor)} PF</span>
-            </div>
-        `).join("")
+        : franchiseRows.map((f) => {
+            const rowClass = f.active ? "" : "opacity-60 italic"
+            const mark = f.active ? "" : " *"
+            return `
+                <div class="flex items-center justify-between gap-3 py-2 border-b border-base-300 last:border-0">
+                    <span class="font-semibold truncate">${nameFor(f.teamId)}${mark}</span>
+                    <span class="text-xs opacity-70 shrink-0">${f.titles} titles • ${f.wins}-${f.losses} • ${round1(f.pointsFor)} PF</span>
+                </div>
+            `
+        }).join("") + (hasFormer ? `<p class="text-xs opacity-50 mt-3">* No longer in the league</p>` : "")
 
     const recordRow = (label, value) => `
         <div class="flex items-center justify-between gap-3 py-2 border-b border-base-300 last:border-0">

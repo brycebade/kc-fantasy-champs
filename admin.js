@@ -1,6 +1,6 @@
 import { supabase } from "./src/supabaseClient.js"
 import { getTeams } from "./src/api/teamsApi.js"
-import { getMatchups, getCurrentSeason } from "./src/api/matchupsApi.js"
+import { getMatchups, getCurrentSeason, getPlayoffMatchups } from "./src/api/matchupsApi.js"
 import { getPowerRankingsBlurbInput } from "./src/pages/powerRankings.js"
 import { savePowerRankingNote } from "./src/api/powerRankingsNotesApi.js"
 import { getCurrentSeasonSettings } from "./src/api/seasonSettingsApi.js"
@@ -20,6 +20,21 @@ const saveBlurb = async () => {
 
     const result = await savePowerRankingNote(settings.season, settings.current_week, note)
     alert(result ? "Blurb saved!" : "Error saving blurb")
+}
+
+const populateSeasonDropdown = () => {
+    const seasonSelect = document.getElementById("seasonSelect")
+    seasonSelect.innerHTML = ""
+
+    const FIRST_SEASON = 2013
+    const CURRENT_SEASON = 2026
+
+    for (let year = CURRENT_SEASON; year >= FIRST_SEASON; year--) {
+        const option = document.createElement("option")
+        option.value = year
+        option.textContent = year
+        seasonSelect.appendChild(option)
+    }
 }
 
 const populateWeekDropdown = () => {
@@ -164,6 +179,52 @@ const recalculateStandings = async (season) => {
     })
 }
 
+const computeFinalRankings = async = () => {
+    const season = Number(document.getElementById("seasonSelect").value)
+    const playoffMatchups = await getPlayoffMatchups(season)
+
+    const placementRankMap = {
+        championship_final: { winnerRank: 1, loserRank: 2 },
+        third_place: { winnerRank: 3, loserRank: 4 },
+        fifth_place: { winnerRank: 5, loserRank: 6 },
+        seventh_place: { winnerRank: 7, loserRank: 8 },
+        ninth_place: { winnerRank: 9, loserRank: 10 },
+        toilet_final: { winnerRank: 11, loserRank: 12 }
+    }
+
+    const placementGames = playoffMatchups.filter(
+        (m) => m.placement_type && m.winner_team_id && m.loser_team_id
+    )
+
+    if (placementGames.length === 0) {
+        alert(`No completed placement games for for ${season}`)
+        return
+    }
+
+    let update = 0
+    for (const game of placementGames) {
+        const ranks = placementRankMap[game.placement_type]
+        if(!ranks) continue
+
+        const results = [
+            { teamId: game.winner_team_id, rank: ranks.winnerRank },
+            { teamId: game.loser_team_id, rank: ranks.loserRank }
+        ]
+
+        for (const r of results) {
+            const { error } = await supabase
+                .from("standings")
+                .update({ final_rank: r.rank })
+                .eq("team_id", r.teamId)
+                .eq("season", season)
+            if (error) console.error("Error setting final_rank:", error)
+            else updated++
+        }
+    }
+
+    alert(`Final rankings set for ${updated} teams in ${season}`)
+}
+
 passwordSubmit.addEventListener("click", () => {
     const inputValue = document.getElementById("passwordInput").value
     
@@ -171,12 +232,14 @@ passwordSubmit.addEventListener("click", () => {
         document.getElementById("passwordScreen").style.display = "none"
         adminDashboard.style.display = "block"
 
+        populateSeasonDropdown()
         populateWeekDropdown()
         loadMatchups()
 
         document.getElementById("weekSelect").addEventListener("change", loadMatchups)
         document.getElementById("seasonSelect").addEventListener("change", loadMatchups)
         document.getElementById("submitScores").addEventListener("click", submitScores)
+        document.getElementById("computeFinalRankings").addEventListener("click", computeFinalRankings)
         document.getElementById("generateBlurbInput").addEventListener("click", generateBlurbInput)
         document.getElementById("saveBlurb").addEventListener("click", saveBlurb)      
     } else {

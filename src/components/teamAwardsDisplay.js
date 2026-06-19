@@ -1,5 +1,6 @@
 import { getAllCompletedMatchups } from "../api/matchupsApi.js"
 import { getTeams } from "../api/teamsApi.js"
+import { getStandings } from "../api/standingsApi.js"
 import { computeSeasonAwards } from "../utils/seasonAwards.js"
 
 export const renderTeamAwards = async (teamId) => {
@@ -13,7 +14,7 @@ export const renderTeamAwards = async (teamId) => {
 
     const nameFor = (id) => {
         const team = teams.find((t) => t.id === id)
-        return team?.current_name || id || ""
+        return team?.current_name || team?.team_name || team?.name || id || ""
     }
 
     const bySeason = {}
@@ -22,21 +23,50 @@ export const renderTeamAwards = async (teamId) => {
         bySeason[game.season].push(game)
     })
 
-    const teamsAwards = []
-    Object.keys(bySeason).forEach((season) => {
-        computeSeasonAwards(Number(season), bySeason[season])
+    const seasons = Object.keys(bySeason).map(Number)
+
+    const titleAwards = []
+    for (const season of seasons) {
+        const standings = await getStandings(season)
+        const ranked = standings.filter((s) => s.final_rank != null)
+        if (ranked.length === 0) continue
+        const lastRank = Math.max(...ranked.map((s) => s.final_rank))
+        const row = standings.find((s) => s.team_id === teamId)
+        if (!row || row.final_rank == null) continue
+        if (row.final_rank === 1) titleAwards.push({ title: "Champion". season })
+        else if (row.final_rank === lastRank) titleAwards.push({ title: "Toilet Champion", season}) 
+    }
+
+    const statAwards = []
+    seasons.forEach((season) => {
+        computeSeasonAwards(season, bySeason[season])
             .filter((award) => award.teamId === teamId)
-            .forEach((award) => teamsAwards.push({...award, season }))
+            .forEach((award) => statAwards.push({ ...award, season }))
     })
 
     container.innerHTML = ""
 
-    if (teamsAwards.length === 0) {
+    if (titleAwards.length === 0 && statAwards.length === 0) {
         container.innerHTML = `<p class="p-4 text-sm opacity-70">No Awards Yet</p>`
         return
     }
 
-    teamsAwards
+    titleAwards
+        .sort((a, b) => b.season - a.season)
+        .forEach((award) => {
+            const color = award.title === "Champion" ? "text-secondary" : "text-error"
+            const row = document.createElement("div")
+            row.className = "px-4 py-2"
+            row.innerHTML = `
+                <p class="text-xs uppercase tracking-wide text-primary font-bold">${award.season}</p>
+                <span class="font-bold ${color}">${award.title}</span>
+            `
+            container.appendChild(row)
+        })
+
+   
+
+    statAwards
         .sort((a, b) => b.season - a.season)
         .forEach((award) => {
             const detail = award.week

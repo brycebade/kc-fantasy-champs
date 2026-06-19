@@ -43,8 +43,11 @@ export const renderAwards = async () => {
     const titleRows = []
     for (const season of seasons) {
         const standings = await getStandings(season)
+        const ranked = standings.filter((s) => s.final_rank != null)
+        if (ranked.length === 0) continue
+        const lastRank = Math.max(...ranked.map((s) => s.final_rank))
         const champ = standings.find((s) => s.final_rank === 1)
-        const toilet = standings.find((s) => s.final_rank === 12)
+        const toilet = standings.find((s) => s.final_rank === lastRank)
         if (champ || toilet) {
             titleRows.push({
                 season,
