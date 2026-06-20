@@ -32,13 +32,36 @@
 
     <div id="adminDashboard" style="display: none;" class="max-w-3xl mx-auto px-4 py-8">
         <h1 class="text-3xl font-bold text-primary mb-6">Admin Dashboard</h1>
-
         <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl mb-6">
             <div class="card-body p-4">
-                <div class="flex gap-4 mb-4">
+                <div class="flex gap-4">
                     <select id="seasonSelect" class="select select-bordered"></select>
                     <select id="weekSelect" class="select select-bordered"></select>
                 </div>
+            </div>
+        </div>
+
+        <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl mb-6">
+            <div class="card-body p-4">
+                <h2 class="card-title text-primary mb-2">Add Game</h2>
+                <select id="addGameType" class="select select-border mb-3">
+                    <option value="regular">Regular</option>
+                    <option value="playoff">Playoff</option>
+                </select>
+                <div class="flex items-center justify-between gap-3 mb-2">
+                    <select id="addGameTeam1" class="select select-bordered flex-1"></select>
+                    <input id="addGameScore1" type="number" class="input w-20 text-center border border-base-300 bg-base-200">   
+                </div>
+                <div class="flex items-center justify-between gap-3 mb-2">
+                    <select id="addGameTeam2" class="select select-bordered flex-1"></select>
+                    <input id="addGameScore2" type="number" class="input w-20 text-center border border-base-300 bg-base-200">
+                </div>
+                <button id="addGame" class="btn btn-primary w-full">Add Game</button>
+            </div>
+        </div>
+
+        <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl mb-6">
+            <div class="card-body p-4">
                 <div id="matchupsContainer"></div>
                 <button id="submitScores" class="btn btn-primary w-full mt-4">Submit Scores</button>
                 <button id="computeFinalRankings" class="btn btn-secondary w-full mt-2">Compute Final Rankings</button>
@@ -57,6 +80,15 @@
                 <textarea id="blurbOutput" class="textarea textarea-bordered w-full h-28 mb-3"
                     placeholder="Paste the blurb you got back..."></textarea>
                 <button id="saveBlurb" class="btn btn-primary w-full">Save Blurb</button>
+            </div>
+        </div>
+
+        <div class="card bg-base-100 shadow-md border border-base-300 round-xl mb-6">
+            <div class="card-body p-4">
+                <h2 class="card-title text-primary mb-2">Final Rankings (Manual)</h2>
+                <button id="loadFinalRankings" class="btn btn-sm btn-primary mb-3">Load teams</button>
+                <div id="finalRankingsContainer"></div>
+                <button id="saveFinalRankings" class="btn btn-primary w-full mt-3" style="display:none">Save Final Rankings</button>
             </div>
         </div>
     </div>

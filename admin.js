@@ -4,6 +4,8 @@ import { getMatchups, getCurrentSeason, getPlayoffMatchups } from "./src/api/mat
 import { getPowerRankingsBlurbInput } from "./src/pages/powerRankings.js"
 import { savePowerRankingNote } from "./src/api/powerRankingsNotesApi.js"
 import { getCurrentSeasonSettings } from "./src/api/seasonSettingsApi.js"
+import { getStandings } from "./src/api/standingsApi.js"
+import { getAllTeamHistory } from "./src/api/teamsHistoryApi.js"
 
 const passwordSubmit = document.getElementById("passwordSubmit")
 const adminDashboard = document.getElementById("adminDashboard")
@@ -16,7 +18,7 @@ const generateBlurbInput = async () => {
 
 const saveBlurb = async () => {
     const settings = await getCurrentSeasonSettings()
-    const note = document.getElementById("blurbOuput").value
+    const note = document.getElementById("blurbOutput").value
 
     const result = await savePowerRankingNote(settings.season, settings.current_week, note)
     alert(result ? "Blurb saved!" : "Error saving blurb")
@@ -46,6 +48,68 @@ const populateWeekDropdown = () => {
         option.textContent = `Week ${i}`
         weekSelect.appendChild(option)
     }
+}
+
+const populateGameTeams = async () => {
+    const season = Number(document.getElementById("seasonSelect").value)
+    const teamHistory = await getAllTeamHistory()
+
+    const seasonTeams = teamHistory.filter((h) => 
+        season >= h.start_year && (h.end_year == null || season <= h.end_year)
+    )
+
+    const options = seasonTeams
+        .map((h) => `<option value="${h.team_id}">${h.name}</option>`)
+        .join("")
+
+    document.getElementById("addGameTeam1").innerHTML = options
+    document.getElementById("addGameTeam2").innerHTML = options
+}
+
+const addGame = async () => {
+    const season = Number(document.getElementById("seasonSelect").value)
+    const week = Number(document.getElementById("weekSelect").value)
+    const type = document.getElementByID("addGameType").value
+    const team1 = document.getElementById("addGameTeam1").value
+    const team2 = document.getElementById("addGameTeam2").value
+    const score1 = Number(document.getElementById("addGameScore1").value)
+    const score2 = Number(document.getElementById("addGameScore2").value)
+
+    if (team1 === team2) {
+        alert("Pick two different teams")
+        return
+    }
+
+    const isTie = score1 === score2
+    const winnerId = isTie ? null : (score1 > score2 ? team1 : team2)
+    const loserId = isTie ? null : (score1 > score2 ? team2 : team1)
+    const id = `${season}_week${week}_${team1}v${team2}`
+
+    const  { error } = await supabase
+        .from("matchups")
+        .insert({
+            id,
+            season,
+            week,
+            team_1_id: team1,
+            team_2_id: team2,
+            team_1_score: score1,
+            team_2_score: score2,
+            winner_team_id: winnerId,
+            loser_team_id: loserId,
+            is_tie: isTie,
+            matchup_type: type
+        })
+
+    if (error) {
+        console.error("Error adding game:", error)
+        alert("Error adding game(this matchup id may already exist")
+        return
+    }
+
+    await recalculateStandings(season)
+    alert(`Added ${season} Week ${week} game`)
+    loadMatchups()
 }
 
 const loadMatchups = async () => {
@@ -179,7 +243,7 @@ const recalculateStandings = async (season) => {
     })
 }
 
-const computeFinalRankings = async = () => {
+const computeFinalRankings = async () => {
     const season = Number(document.getElementById("seasonSelect").value)
     const playoffMatchups = await getPlayoffMatchups(season)
 
@@ -201,7 +265,7 @@ const computeFinalRankings = async = () => {
         return
     }
 
-    let update = 0
+    let updated = 0
     for (const game of placementGames) {
         const ranks = placementRankMap[game.placement_type]
         if(!ranks) continue
@@ -225,6 +289,58 @@ const computeFinalRankings = async = () => {
     alert(`Final rankings set for ${updated} teams in ${season}`)
 }
 
+const loadFinalRankings = async () => {
+    const season = Number(document.getElementById("seasonSelect").value)
+    const standings = await getStandings(season)
+    const teams = await getTeams()
+    const container = document.getElementById("finalRankingsContainer")
+    const saveButton = document.getElementById("saveFinalRankings")
+
+    if (standings.length === 0) {
+        container.innerHTML = `<p class="text-sm opacity-60">No Standings for ${season}. Sumbit scores first.</p>`
+        saveButton.style.display = "none"
+        return
+    }
+
+    const nameFor = (id) => {
+        const t = teams.find((t) => t.id === id)
+        return t?.current_name || t?.team_name || t?.name || id
+    }
+
+    container.innerHTML = standings
+        .sort((a, b) => (a.final_rank || 99) - (b.final_rank || 99))
+        .map((s) => `
+            <div class="flex items-center justify-between gap-3 mb-2">
+                <span class="font-semibold flex-1">${nameFor(s.team_id)}</span>
+                <input type="number" min="1" id="finalRank_${s.team_id}" value="${s.final_rank ?? ""}"
+                    class="input w-20 text-center border border-base-300 bg-base-200" data-team="${s.team_id}">
+            </div>
+        `).join("")
+
+    saveButton.style.display = "block"
+}
+
+const saveFinalRankings = async () => {
+    const season = Number(document.getElementById("seasonSelect").value)
+    const inputs = document.querySelectorAll("#finalRankingsContainer input[data-team]")
+
+    let saved = 0
+    for (const input of inputs) {
+        const teamId = input.getAttribute("data-team")
+        const rank = input.value === "" ? null : Number(input.value)
+
+        const { error } = await supabase
+            .from("standings")
+            .update({ final_rank: rank})
+            .eq("team_id", teamId)
+            .eq("season", season)
+        if (error) console.error("Error saving final_rank:", error)
+        else saved++
+    }
+
+    alert(`Saved final rankings for ${saved} teams in ${season}`)
+}
+
 passwordSubmit.addEventListener("click", () => {
     const inputValue = document.getElementById("passwordInput").value
     
@@ -234,13 +350,18 @@ passwordSubmit.addEventListener("click", () => {
 
         populateSeasonDropdown()
         populateWeekDropdown()
+        populateGameTeams()
         loadMatchups()
 
         document.getElementById("weekSelect").addEventListener("change", loadMatchups)
         document.getElementById("seasonSelect").addEventListener("change", loadMatchups)
+        document.getElementById("seasonSelect").addEventListener("change", populateGameTeams)
+        document.getElementById("addGame").addEventListener("click", addGame)
         document.getElementById("submitScores").addEventListener("click", submitScores)
         document.getElementById("computeFinalRankings").addEventListener("click", computeFinalRankings)
         document.getElementById("generateBlurbInput").addEventListener("click", generateBlurbInput)
+        document.getElementById("loadFinalRankings").addEventListener("click", loadFinalRankings)
+        document.getElementById("saveFinalRankings").addEventListener("click", saveFinalRankings)
         document.getElementById("saveBlurb").addEventListener("click", saveBlurb)      
     } else {
        document.getElementById('errorMessage').textContent = "Incorrect Password"
