@@ -122,6 +122,18 @@ const loadMatchups = async () => {
     const weekMatchups = allMatchups.filter(m => m.week === week)
 
     const teams = await getTeams()
+    const teamHistory = await getAllTeamHistory()
+
+    const nameFor = (teamId) => {
+        const h = teamHistory.find((h) => 
+            h.team_id === teamId &&
+            season >= h.start_year && (h.end_year == null || season <= h.end_year)
+        )
+        if (h) return h.name
+        const t = teams.find((t) => t.id === teamId)
+        return t?.current_name || "TBD"
+    }
+
     const container = document.getElementById("matchupsContainer")
     container.innerHTML = ""
 
@@ -134,11 +146,11 @@ const loadMatchups = async () => {
         row.innerHTML = `
             <h3 class="text-sm font-semibold text-primary mb-2">Game ${index + 1}</h3>
             <div class="flex items-center justify-between gap-3 mb-2">
-                <span class="font-semibold flex-1">${team1?.current_name || "TBD"}</span>
+                <span class="font-semibold flex-1">${nameFor(matchup.team_1_id)}</span>
                 <input type="number" id="score1_${matchup.id}" class="input w-24 text-center shrink-0 border border-base-300 bg-base-200 rounded-xl">
             </div>
             <div class="flex items-center justify-between gap-3">
-                <span class="font-semibold flex-1">${team2?.current_name || "TBD"}</span>
+                <span class="font-semibold flex-1">${nameFor(matchup.team_2_id)}</span>
                 <input type="number" id="score2_${matchup.id}" class="input w-24 text-center shrink-0 border border-base-300 bg-base-200 rounded-xl">
             </div>
         `
