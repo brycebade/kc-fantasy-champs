@@ -69,7 +69,7 @@ const populateGameTeams = async () => {
 const addGame = async () => {
     const season = Number(document.getElementById("seasonSelect").value)
     const week = Number(document.getElementById("weekSelect").value)
-    const type = document.getElementByID("addGameType").value
+    const type = document.getElementById("addGameType").value
     const team1 = document.getElementById("addGameTeam1").value
     const team2 = document.getElementById("addGameTeam2").value
     const score1 = Number(document.getElementById("addGameScore1").value)
