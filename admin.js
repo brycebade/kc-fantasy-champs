@@ -66,14 +66,25 @@ const populateGameTeams = async () => {
     document.getElementById("addGameTeam2").innerHTML = options
 }
 
+const togglePlayoffFields = () => {
+    const type = document.getElementById("addGameType").value
+    document.getElementById("playoffFields").style.display = type === "playoff" ? "block" : "none"
+}
+
 const addGame = async () => {
     const season = Number(document.getElementById("seasonSelect").value)
     const week = Number(document.getElementById("weekSelect").value)
     const type = document.getElementById("addGameType").value
+    const isPlayoff = type === "playoff"
+    const bracketType = isPlayoff ? document.getElementById("addGameBracket").value : null
+    const playoffRound = isPlayoff ? document.getElementById("addGameRound").value : null
+    const placementValue = isPlayoff ? document.getElementById("addGamePlacement").value : ""
+    const placementType = placementValue === "" ? null : placementValue
     const team1 = document.getElementById("addGameTeam1").value
     const team2 = document.getElementById("addGameTeam2").value
     const score1 = Number(document.getElementById("addGameScore1").value)
     const score2 = Number(document.getElementById("addGameScore2").value)
+
 
     if (team1 === team2) {
         alert("Pick two different teams")
@@ -98,12 +109,15 @@ const addGame = async () => {
             winner_team_id: winnerId,
             loser_team_id: loserId,
             is_tie: isTie,
-            matchup_type: type
+            matchup_type: type,
+            bracket_type: bracketType,
+            playoff_round: playoffRound,
+            placement_type: placementType
         })
 
     if (error) {
         console.error("Error adding game:", error)
-        alert("Error adding game(this matchup id may already exist")
+        alert("Error adding game(this matchup id may already exist)")
         return
     }
 
@@ -169,6 +183,34 @@ const loadMatchups = async () => {
     }   
 }
 
+const saveSingleGame = async (matchupId) => {
+    const season = Number(document.getElementById("seasonSelect").value)
+    const score1 = Number(document.getElementById(`score1_${matchupId}`).value)
+    const score2 = Number(document.getElementById(`score2_${matchupId}`).value)
+
+    const allMatchups = await getMatchups(season)
+    const matchup = allMatchups.find((m) => m.id === matchupId)
+    if (!matchup) return
+
+    const isTie = score1 === score2
+    const winnerId = isTie ? null : (score1 > score2 ? matchup.team_1_id : matchup.team_2_id)
+    const loserId = isTie ? null : (score1 > score2 ? matchup.team_2_id : matchup.team_1_id)
+
+    const { error } = await supabase
+        .from("matchups")
+        .update({ team_1_score: score1, team_2_score: score2, winner_team_id: winnerId, loser_team_id: loserId, is_tie: isTie })
+        .eq("id", matchupId)
+
+    if (error) {
+        console.error("Error saving game:", error)
+        alert("Error saving game")
+        return
+    }
+
+    await recalculateStandings(season)
+    alert("Game Saved")
+}
+
 const submitScores = async () => {
     const season = Number(document.getElementById("seasonSelect").value)
     const week = Number(document.getElementById("weekSelect").value)
@@ -225,6 +267,8 @@ const recalculateStandings = async (season) => {
             m.team_1_id === team.id || m.team_2_id === team.id  
         )
 
+        if (teamMatchups.length === 0) return
+
         let wins = 0
         let losses = 0
         let pointsFor = 0
@@ -241,6 +285,9 @@ const recalculateStandings = async (season) => {
             if (myScore > oppScore) wins++
             else if (myScore < oppScore) losses++
         })
+
+        pointsFor = Math.round(pointsFor * 100) / 100
+        pointsAgainst = Math.round(pointsAgainst * 100) / 100
 
         const { error } = await supabase
             .from("standings")
@@ -263,6 +310,8 @@ const recalculateStandings = async (season) => {
 const computeFinalRankings = async () => {
     const season = Number(document.getElementById("seasonSelect").value)
     const playoffMatchups = await getPlayoffMatchups(season)
+    const standings = await getStandings(season)
+    const teamCount = standings.length
 
     const placementRankMap = {
         championship_final: { winnerRank: 1, loserRank: 2 },
@@ -270,7 +319,7 @@ const computeFinalRankings = async () => {
         fifth_place: { winnerRank: 5, loserRank: 6 },
         seventh_place: { winnerRank: 7, loserRank: 8 },
         ninth_place: { winnerRank: 9, loserRank: 10 },
-        toilet_final: { winnerRank: 11, loserRank: 12 }
+        toilet_final: { winnerRank: teamCount - 1, loserRank: teamCount }
     }
 
     const placementGames = playoffMatchups.filter(
@@ -278,7 +327,7 @@ const computeFinalRankings = async () => {
     )
 
     if (placementGames.length === 0) {
-        alert(`No completed placement games for for ${season}`)
+        alert(`No completed placement games for ${season}`)
         return
     }
 
@@ -373,6 +422,7 @@ passwordSubmit.addEventListener("click", () => {
         document.getElementById("weekSelect").addEventListener("change", loadMatchups)
         document.getElementById("seasonSelect").addEventListener("change", loadMatchups)
         document.getElementById("seasonSelect").addEventListener("change", populateGameTeams)
+        document.getElementById("addGameType").addEventListener("change", togglePlayoffFields)
         document.getElementById("addGame").addEventListener("click", addGame)
         document.getElementById("submitScores").addEventListener("click", submitScores)
         document.getElementById("computeFinalRankings").addEventListener("click", computeFinalRankings)
