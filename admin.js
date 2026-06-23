@@ -147,21 +147,26 @@ const loadMatchups = async () => {
             <h3 class="text-sm font-semibold text-primary mb-2">Game ${index + 1}</h3>
             <div class="flex items-center justify-between gap-3 mb-2">
                 <span class="font-semibold flex-1">${nameFor(matchup.team_1_id)}</span>
-                <input type="number" id="score1_${matchup.id}" class="input w-24 text-center shrink-0 border border-base-300 bg-base-200 rounded-xl">
+                <input type="number" id="score1_${matchup.id}" value="${matchup.team_1_score ?? ""}" class="input w-24 text-center shrink-0 border border-base-300 bg-base-200 rounded-xl">
             </div>
             <div class="flex items-center justify-between gap-3">
                 <span class="font-semibold flex-1">${nameFor(matchup.team_2_id)}</span>
-                <input type="number" id="score2_${matchup.id}" class="input w-24 text-center shrink-0 border border-base-300 bg-base-200 rounded-xl">
+                <input type="number" id="score2_${matchup.id}" value="${matchup.team_2_score ?? ""}" class="input w-24 text-center shrink-0 border border-base-300 bg-base-200 rounded-xl">
             </div>
+            <button class="btn btn-xs btn-secondary mt-2" data-save="${matchup.id}">Save this game</button>
         `
         container.appendChild(row)
+    })
+
+    container.querySelectorAll("[data-save]").forEach((btn) => {
+        btn.addEventListener("click", () => saveSingleGame(btn.getAttribute("data-save")))
     })
 
     if (season < currentSeason) {
         submitButton.style.display = "none"
     } else {
         submitButton.style.display = "block"
-    }
+    }   
 }
 
 const submitScores = async () => {
