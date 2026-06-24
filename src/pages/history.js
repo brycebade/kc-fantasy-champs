@@ -23,6 +23,20 @@ export const renderLeagueHistory = async () => {
 
     const seasons = [...new Set(matchups.map((m) => m.season))].sort((a, b) => b -a)
 
+    const historyFor = (teamId, season) => 
+        teamHistory.find((h) =>
+            h.team_id === teamId &&
+            season >= h.start_year &&
+            (h.end_year == null || season <= h.end_year)
+        )
+
+    const seasonNameFor = (teamId, season) => {
+        const h = historyFor(teamId, season)
+        if (h) return h.name
+        const team = teams.find((t) => t.id === teamId)
+        return team?.current_name || team?.team_name || team?.name || teamId
+    }
+
     const standingsBySeason = {}
     for (const season of seasons) {
         standingsBySeason[season] = await getStandings(season)
@@ -72,21 +86,7 @@ export const renderLeagueHistory = async () => {
         if (!blowout || margin > blowout.margin) {
             blowout = { margin: round1(margin), winnerId: m.winner_team_id, loserId: m.loser_team_id, season: m.season, week: m.week}
         }
-    })
-    
-    const historyFor = (teamId, season) => 
-        teamHistory.find((h) =>
-            h.team_id === teamId &&
-            season >= h.start_year &&
-            (h.end_year == null || season <= h.end_year)
-        )
-
-    const seasonNameFor = (teamId, season) => {
-        const h = historyFor(teamId, season)
-        if (h) return h.name
-        const team = teams.find((t) => t.id === teamId)
-        return team?.current_name || team?.team_name || team?.name || teamId
-    }
+    })   
 
     const ownerNameFor = (ownerId) => {
         const owner = owners.find((o) => o.id === ownerId)
