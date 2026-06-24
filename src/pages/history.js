@@ -39,8 +39,8 @@ export const renderLeagueHistory = async () => {
             if (!champ && !toilet) return null
             return {
                 season,
-                champion: champ ? nameFor(champ.team_id) : "—",
-                toilet: toilet ? nameFor(toilet.team_id) : "—"
+                champion: champ ? seasonNameFor(champ.team_id, season) : "—",
+                toilet: toilet ? seasonNameFor(toilet.team_id, season) : "—"
             }
         })
         .filter(Boolean)
@@ -80,6 +80,13 @@ export const renderLeagueHistory = async () => {
             season >= h.start_year &&
             (h.end_year == null || season <= h.end_year)
         )
+
+    const seasonNameFor = (teamId, season) => {
+        const h = historyFor(teamId, season)
+        if (h) return h.name
+        const team = teams.find((t) => t.id === teamId)
+        return team?.current_name || team?.team_name || team?.name || teamId
+    }
 
     const ownerNameFor = (ownerId) => {
         const owner = owners.find((o) => o.id === ownerId)
