@@ -48,6 +48,7 @@ export const renderAwards = async () => {
     })
     const seasons = Object.keys(bySeason).map(Number).sort((a, b) => b - a)
 
+    /*
     const winnersByAward = {}
     seasons.forEach((season) => {
         computeSeasonAwards(season, bySeason[season]).forEach((award) => {
@@ -55,6 +56,7 @@ export const renderAwards = async () => {
             winnersByAward[award.title].push({ ...award, season })
         })
     })
+    */
 
     const titleRows = []
     for (const season of seasons) {
@@ -73,10 +75,12 @@ export const renderAwards = async () => {
         }
     }
 
+    /*
     const detailFor = (award) =>
         award.week
             ? `${award.value} pts • Wk ${award.week} vs ${nameFor(award.opponentId)}`
             : `${award.value} pts`
+    */
 
     const championsHtml = `
         <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl overflow-hidden mb-6">
@@ -111,6 +115,7 @@ export const renderAwards = async () => {
                         <div class="border-b border-base-300 last:border-0 pb-4 last:pb-0"
                             <h3 class="font-bold text-primary">${award.title}</h3>
                             <p class="text-xs opacity-70 mb-2">${award.description}</p>
+                            <p class="text-xs opacity-50">Coming 2027 Offseason</p>
                             ${winners.length === 0
                                 ? `<p class="text-xs opacity-50">Not Awarded Yet</p>`
                                 : winners.map((w) => `

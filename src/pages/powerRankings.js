@@ -1019,9 +1019,9 @@ export const renderPowerRankingsPage = async () => {
         rankedTeams = buildStandingsRankings(teams, standings)
         subtitle = `${season} offseason - ${statsSeason} final standings`
     } else if (phase === "final") {
-        const standigs = await getStandings(season)
+        const standings = await getStandings(season)
         rankedTeams = buildStandingsRankings(teams, standings)
-        subtitle = `${season} final standings`
+        subtitle = `${season} Final Power Rankings`
     } else if (phase === "playoffs") {
         const matchups = await getCompletedMatchupsThroughWeek(season, currentWeek)
         const teamGameLogs = buildTeamLogs(teams, matchups)
@@ -1082,10 +1082,10 @@ export const renderPowerRankingsPage = async () => {
 
     const blurbHTML = note && note.note
         ? `<div class="mb-6 p-4 bg-base-200 rounded-lg text-sm leading-relaxed whitespace-pre-line">${note.note}</div>`
-        : `<div class="mb-6 p-4 bg-base-200 rounded-lg text-sm opacity-60">This week's write-up coming soon.</div>`
+        : ""
 
     container.innerHTML = `
-        <p class="text-xs uppercase tracking-wide opacity-60 mb-1">Through Week ${currentWeek}</p>
+        <p class="text-xs uppercase tracking-wide opacity-60 mb-1">${subtitle}</p>
         ${blurbHTML}
         <div>${rows}</div> 
     `
