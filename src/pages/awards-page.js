@@ -2,6 +2,7 @@ import { getAllCompletedMatchups } from "../api/matchupsApi.js"
 import { getTeams } from "../api/teamsApi.js"
 import { getStandings } from "../api/standingsApi.js"
 import { computeSeasonAwards } from "../utils/seasonAwards.js"
+import { getAllTeamHistory } from "../api/teamsHistoryApi.js"
 
 const AWARD_DEFINITIONS = [
     { title: "Highest Score", description: "Most points scored in a single regular-season game." },
@@ -14,6 +15,12 @@ const AWARD_DEFINITIONS = [
     { title: "Unluckiest", description: "Most total points among teams that missed the playoffs. "}
 ]
 
+const [matchups, teams, teamHistory] = await Promise.all([
+    getAllCompletedMatchups(),
+    getTeams(),
+    getAllTeamHistory()
+])
+
 export const renderAwards = async () => {
     const container = document.getElementById("awardsHubContainer")
     if (!container) return
@@ -23,6 +30,15 @@ export const renderAwards = async () => {
     const nameFor = (id) => {
         const team = teams.find((t) => t.id === id)
         return team?.current_name || team?.team_name || team?.name || id
+    }
+
+    const seasonNameFor = (teamId, season) => {
+        const h = teamHistory.find((h) => 
+            h.team_id === teamId &&
+            season >= h.start_year && (h.end_year == null || season <= h.end_year)
+        )
+        if (h) return h.name
+        return nameFor(season)
     }
 
     const bySeason = {}
@@ -51,8 +67,8 @@ export const renderAwards = async () => {
         if (champ || toilet) {
             titleRows.push({
                 season,
-                champion: champ ? nameFor(champ.team_id) : "—",
-                toilet: toilet ? nameFor(toilet.team_id) : "—"
+                champion: champ ? seasonNameFor(champ.team_id, season) : "—",
+                toilet: toilet ? seasonNameFor(toilet.team_id, season) : "—"
             })
         }
     }

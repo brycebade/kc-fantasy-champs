@@ -68,26 +68,6 @@ export const renderLeagueHistory = async () => {
         </div>
     `
 
-    let highest = null
-    let lowest = null
-    let blowout = null
-
-    matchups.forEach((m) => {
-        const performances = [
-            { teamId: m.team_1_id, score: Number(m.team_1_score) },
-            { teamId: m.team_2_id, score: Number(m.team_2_score) } 
-        ]
-        performances.forEach((p) => {
-            if (!highest || p.score > highest.score) highest = { ...p, season: m.season, week: m.week}
-            if (!lowest || p.score < lowest.score) lowest = { ...p, season: m.season, week: m.week }
-        })
-
-        const margin = Math.abs(Number(m.team_1_score) - Number(m.team_2_score))
-        if (!blowout || margin > blowout.margin) {
-            blowout = { margin: round1(margin), winnerId: m.winner_team_id, loserId: m.loser_team_id, season: m.season, week: m.week}
-        }
-    })   
-
     const ownerNameFor = (ownerId) => {
         const owner = owners.find((o) => o.id === ownerId)
         return owner ? owner.name : "Unknown Owner"
@@ -154,21 +134,45 @@ export const renderLeagueHistory = async () => {
                 </div>
             </div>
         `).join("")
-
     
+    const allPerformances = []
+    const allBlowouts = []
 
-    const recordRow = (label, value) => `
-        <div class="flex items-center justify-between gap-3 py-2 border-b border-base-300 last:border-0">
-            <span class="font-semibold">${label}</span>
-            <span class="text-sm opacity-80 text-right">${value}</span>
-        </div>
-    `
+    matchups.forEach((m) => {
+        allPerformances.push({ teamId: m.team_1_id, score: Number(m.team_1_score), season: m.season, week: m.week })
+        allPerformances.push({ teamId: m.team_2_id, score: Number(m.team_2_score), season: m.season, week: m.week })
+
+        allBlowouts.push({
+            margin: round1(Math.abs(Number(m.team_1_score) - Number(m.team_2_score))),
+            winnerId: m.winner_team_id,
+            loserId: m.loser_team_id,
+            season: m.season,
+            week: m.week
+        })
+    })
+
+    const TOP_N = 10
+    const topHighest = [...allPerformances].sort((a,b) => b.score - a.score).slice(0, TOP_N)
+    const topLowest = [...allPerformances].sort((a, b) => a.score - b.score).slice(0, TOP_N)
+    const topBlowouts = [...allBlowouts].sort((a, b) => b.margin - a.margin).slice(0, TOP_N)
+
+    const rankedList = (items, renderItem) => 
+        items.map((item, i) => `
+            <div class="flex items-center justify-between gap-3 py-2 border-b border-base-300 last:border-0">
+                <span class="text-sm"><span class="font-bold text-primary mr-2">${i + 1}</span>${renderItem(item)}</span>
+            </div>
+        `).join("")
 
     const singleGameBody = matchups.length === 0
         ? `<p class="text-sm opacity-60">No Games Recorded Yet</p>`
-        : recordRow("Highest Score", highest ? `${round1(highest.score)} — ${nameFor(highest.teamId)} (${highest.season} Wk ${highest.week})` : "—")
-            + recordRow("Lowest Score", lowest ? `${round1(lowest.score)} — ${nameFor(lowest.teamId)} (${lowest.season} Wk ${lowest.week})` : "—")
-            + recordRow("Biggest Blowout", blowout ? `${blowout.margin} — ${nameFor(blowout.winnerId)} over ${nameFor(blowout.loserId)} (${blowout.season} Wk ${blowout.week})` : "—")
+        : `
+            <h3 class="font-bold text-sm mb-2">Highest Scores</h3>
+            ${rankedList(topHighest, (p) => `${round1(p.score)} — ${seasonNameFor(p.teamId, p.season)} (${p.season} Wk ${p.week})`)}
+            <h3 class="font-bold text-sm mb-2">Lowest Scores</h3>
+            ${rankedList(topLowest, (p) => `${round1(p.score)} — ${seasonNameFor(p.teamId, p.season)} (${p.season} Wk ${p.week})`)}
+            <h3 class="font-bold text-sm mt-4 mb-2">Biggest Blowouts</h3>
+            ${rankedList(topBlowouts, (b) => `${b.margin} — ${seasonNameFor(b.winnerId, b.season)} over ${seasonNameFor(b.loserId, b.season)} (${b.season} Wk ${b.week})`)}
+        `
 
     container.innerHTML =
         card("Champions", championsBody) + 

@@ -2,6 +2,7 @@ import { getAllCompletedMatchups } from "../api/matchupsApi.js"
 import { getTeams } from "../api/teamsApi.js"
 import { getStandings } from "../api/standingsApi.js"
 import { computeSeasonAwards } from "../utils/seasonAwards.js"
+import { getAllTeamHistory } from "../api/teamsHistoryApi.js"
 
 export const renderTeamAwards = async (teamId) => {
     const container = document.getElementById("awardsContainer")
@@ -9,12 +10,22 @@ export const renderTeamAwards = async (teamId) => {
     
     const [matchups, teams] = await Promise.all([
         getAllCompletedMatchups(),
-        getTeams()
+        getTeams(),
+        getAllTeamHistory()
     ])
 
     const nameFor = (id) => {
         const team = teams.find((t) => t.id === id)
         return team?.current_name || team?.team_name || team?.name || id || ""
+    }
+
+    const seasonNameFor = (id, season) => {
+        const h = getTeamHistory.find((h) => 
+            h.team_id === id &&
+            season >= h.start_year && (h.end_year == null || season <= h.end_year)
+        )
+        if (h) return h.name
+        return nameFor(id)
     }
 
     const bySeason = {}
@@ -33,8 +44,8 @@ export const renderTeamAwards = async (teamId) => {
         const lastRank = Math.max(...ranked.map((s) => s.final_rank))
         const row = standings.find((s) => s.team_id === teamId)
         if (!row || row.final_rank == null) continue
-        if (row.final_rank === 1) titleAwards.push({ title: "Champion". season })
-        else if (row.final_rank === lastRank) titleAwards.push({ title: "Toilet Champion", season}) 
+        if (row.final_rank === 1) titleAwards.push({ title: "Champion". season, seasonName: seasonNameFor(teamId, season) })
+        else if (row.final_rank === lastRank) titleAwards.push({ title: "Toilet Champion", season, seasonName: seasonNameFor(teamId, season) }) 
     }
 
     const statAwards = []
@@ -60,6 +71,7 @@ export const renderTeamAwards = async (teamId) => {
             row.innerHTML = `
                 <p class="text-xs uppercase tracking-wide text-primary font-bold">${award.season}</p>
                 <span class="font-bold ${color}">${award.title}</span>
+                <span class="text-xs opacity-60 ml-2">${award.seasonName}</span>
             `
             container.appendChild(row)
         })
