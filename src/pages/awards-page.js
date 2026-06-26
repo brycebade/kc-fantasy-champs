@@ -106,27 +106,25 @@ export const renderAwards = async () => {
     const awardsHtml = `
         <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl overflow-hidden">
             <div class="bg-neutral text-white px-4 py-2">
-                <h2 class="font-bold uppercase tracking-wide text-sm">Season Awards</h2>
+                <h2 class="font-bold uppercase tracking-wide text-sm">Season Awards - Coming Offseason 2027</h2>
             </div>
             <div class="card-body p-4 space-y-5">
-                ${AWARD_DEFINITIONS.map((award) => {
-                    const winners = winnersByAward[award.title] || []
-                    return `
-                        <div class="border-b border-base-300 last:border-0 pb-4 last:pb-0"
-                            <h3 class="font-bold text-primary">${award.title}</h3>
-                            <p class="text-xs opacity-70 mb-2">${award.description}</p>
-                            <p class="text-xs opacity-50">Coming 2027 Offseason</p>
-                            ${winners.length === 0
+                ${AWARD_DEFINITIONS.map((award) => `
+                    <div class="border-b border-base-300 last:border-0 pb-4 last:pb-0">
+                        <h3 class="font-bold text-primary">${award.title}</h3>
+                        <p class="text-xs opacity-70 mb-2">${award.description}</p>
+                            ${"" /* REACTIVATE 2027 
+                                winners.length === 0
                                 ? `<p class="text-xs opacity-50">Not Awarded Yet</p>`
                                 : winners.map((w) => `
-                                    <div class="flex items-center justify-between gap-3 text-sm py-1>
+                                    <div class="flex items-center justify-between gap-3 text-sm py-1">
                                         <span><span class="font-bold text-primary mr-2">${w.season}</span>${nameFor(w.teamId)}</span>
                                         <span class="opacity-70 text-xs shrink-0">${detailFor(w)}</span>
                                     </div>
-                                `).join("")}
-                        </div>
-                    `
-                }).join("")}
+                                `).join("")
+                            */}
+                    </div>
+                    `).join("")}
             </div>
         </div>
     `

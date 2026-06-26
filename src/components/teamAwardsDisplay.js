@@ -8,7 +8,7 @@ export const renderTeamAwards = async (teamId) => {
     const container = document.getElementById("awardsContainer")
     if (!container) return
     
-    const [matchups, teams] = await Promise.all([
+    const [matchups, teams, teamHistory] = await Promise.all([
         getAllCompletedMatchups(),
         getTeams(),
         getAllTeamHistory()
@@ -20,7 +20,7 @@ export const renderTeamAwards = async (teamId) => {
     }
 
     const seasonNameFor = (id, season) => {
-        const h = getTeamHistory.find((h) => 
+        const h = teamHistory.find((h) => 
             h.team_id === id &&
             season >= h.start_year && (h.end_year == null || season <= h.end_year)
         )
@@ -44,7 +44,7 @@ export const renderTeamAwards = async (teamId) => {
         const lastRank = Math.max(...ranked.map((s) => s.final_rank))
         const row = standings.find((s) => s.team_id === teamId)
         if (!row || row.final_rank == null) continue
-        if (row.final_rank === 1) titleAwards.push({ title: "Champion". season, seasonName: seasonNameFor(teamId, season) })
+        if (row.final_rank === 1) titleAwards.push({ title: "Champion", season, seasonName: seasonNameFor(teamId, season) })
         else if (row.final_rank === lastRank) titleAwards.push({ title: "Toilet Champion", season, seasonName: seasonNameFor(teamId, season) }) 
     }
 
