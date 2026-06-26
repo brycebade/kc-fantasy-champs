@@ -120,15 +120,16 @@ export const renderLeagueHistory = async () => {
 
             const teamLines = Object.values(o.teams)
                 .sort((a, b) => a.startYear - b.startYear)
-                .map((era) => {
+                .map((era, i, arr) => {
+                    const sep = i < arr.length - 1 ? " •" : ""
                     const teamRow = teams.find((t) => t.id === era.teamId)
                     const isCurrentName = 
                         teamRow &&
                         teamRow.current_owner_id === o.ownerId &&
                         teamRow.current_name === era.team_name
-                    return `<span class="whitespace-nowrap">${era.name} (${era.wins}-${era.losses})</span>`
+                    return `<span class="whitespace-nowrap">${era.name} (${era.wins}-${era.losses})${sep}</span>`
                 })
-                .join(" • ")
+                .join(" ")
 
             return {
                 ...o,
