@@ -68,60 +68,81 @@ export const renderLeagueHistory = async () => {
         </div>
     `
 
-    const ownerNameFor = (ownerId) => {
-        const owner = owners.find((o) => o.id === ownerId)
-        return owner ? owner.name : "Unknown Owner"
-    }
+    const LEAGUE_AVG = 0.5
+    const CONFIDENCE = 50
 
-    const teamFor = (id) => teams.find((tm) => tm.id === id)
+    const owners_agg = {}
 
-    const tenures = {}
     seasons.forEach((season) => {
-        (standingsBySeason[season] || []).forEach((s) => {
-            const h = historyFor(s.team_id,  season)
+        const seasonStandings = standingsBySeason[season] || []
+        seasonStandings.forEach((s) => {
+            const h = historyFor(s.team_id, season)
             const ownerId = h ? h.owner_id : null
-            const key = `${s.team_id}__${ownerId}`
+            if (ownerId == null) return
 
-            if (!tenures[key]) {
-                tenures[key] = { teamId: s.team_id, ownerId, titles: 0, wins: 0, losses: 0, pointsFor: 0, lastYear: -Infinity, lastName: null }  
+            if (!owners_agg[ownerId]) {
+                owners_agg[ownerId] = { ownerId, titles: 0, wins: 0, losses: 0, pointsFor: 0, teams: {} }
             }
-            const t = tenures[key]
-            t.wins += s.win || 0
-            t.losses += s.loss || 0
-            t.pointsFor += s.points_for || 0
-            if (s.final_rank === 1) t.titles += 1
-            if (h && season >= t.lastYear) {
-                t.lastYear = season
-                t.lastName = h.name
+            const o = owners_agg[ownerId]
+            o.wins += s.win || 0
+            o.losses += s.loss || 0
+            o.pointsFor += s.points_for || 0
+            if (s.final_rank === 1) o.titles += 1
+
+            if (h) {
+                if (!o.teams[h.id]) {
+                    o.teams[h.id] = {
+                        historyId: h.id,
+                        teamId: s.team_id,
+                        name: h.name,
+                        startYear: h.start_year,
+                        wins: 0,
+                        losses: 0
+                    }
+                }
+                const era = o.teams[h.id]
+                era.wins += s.win || 0
+                era.losses += s.loss || 0
             }
         })
     })
 
-    const tenureRows = Object.values(tenures)
-        .map((t) => {
-            const team = teamFor(t.teamId)
-            const active = team ? team.current_owner_id === t.ownerId : false
-            const teamName = active ? team.current_name : (t.lastName || team?.current_name || t.teamId)
-            return { ...t, active, label: `${ownerNameFor(t.ownerId)} - ${teamName}`}
+    const adjustedWinPct = (wins, losses) => {
+        const games = wins + losses
+        return (wins + CONFIDENCE * LEAGUE_AVG) / (games + CONFIDENCE)
+    }
+
+    const ownerRows = Object.values(owners_agg)
+        .map((o) => {
+            const owner = owners.find((ow) => ow.id === o.ownerId)
+            const ownerName = owner ? owner.name : "Unknown Owner"
+            const isActiveOwner = owner ? owner.current === true : false
+
+            const teamLines = Object.values(o.teams)
+                .sort((a, b) => a.startYear - b.startYear)
+                .map((era) => {
+                    const teamRow = teams.find((t) => t.id === era.teamId)
+                    const isCurrentName = 
+                        teamRow &&
+                        teamRow.current_owner_id === o.ownerId &&
+                        teamRow.current_name === era.team_name
+                    return `<span class="whitespace-nowrap">${era.name} (${era.wins}-${era.losses})</span>`
+                })
+                .join(" • ")
+
+            return {
+                ...o,
+                ownerName,
+                isActiveOwner,
+                teamLines,
+                adjPct: adjustedWinPct(o.wins, o.losses)
+            }
         })
         .sort((a, b) => {
-            if (a.active !== b.active) return a.active ? -1 : 1
-            return b.titles - a.titles || b.wins - a.wins || b.pointsFor - a.pointsFor
+            if (a.isActiveOwner !== b.isActiveOwner) return a.isActiveOwner ? -1 : 1
+            if (b.titles !== a.titles) return b.titles - a.titles
+            return b.adjPct - a.adjPct
         })
-
-    const hasFormer = tenureRows.some((t) => !t.active)
-    const franchiseBody = tenureRows.length === 0
-        ? `<p class="text-sm opacity-60">No Records Yet</p>`
-        : tenureRows.map((t) => {
-            const rowClass = t.active ? "" : "opacity-60 italic"
-            const mark = t.active ? "" : " *"
-            return `
-                <div class="flex items-center justify-between gap-3 py-2 border-b border-base-300 last:border-0 ${rowClass}">
-                    <span class="font-semibold truncate">${t.label}${mark}</span>
-                    <span class="text-xs opacity-70 shrink-0">${t.titles} titles • ${t.wins}-${t.losses} • ${round1(t.pointsFor)} PF</span>
-                </div>
-            `
-        }).join("") + (hasFormer ? `<p class="text-xs opacity-50 mt-3">* No longer the current owner</p>` : "")
 
     const championsBody = championRows.length === 0
         ? `<p class="text-sm opacity-60">No Champions Recorded Yet</p>`
@@ -134,6 +155,25 @@ export const renderLeagueHistory = async () => {
                 </div>
             </div>
         `).join("")
+
+    const renderOwnerRow = (o) => `
+        <div class="flex items-start justify-between gap-3 py-3 border-b border-base-300 last:border-0">
+            <div class="min-w-0">
+                <p class="font-semibold">${o.ownerName}</p>
+                <p class="text-xs opacity-70 mt-0.5">${o.teamLines}</p>
+            </div>
+            <span class="text-xs opacity-70 shrink-0 text-right">${o.titles} titles<br>${o.wins}-${o.losses}<br>${round1(o.pointsFor)} PF</span>
+        </div>
+    `
+
+    const currentOwners = ownerRows.filter((o) => o.isActiveOwner)
+    const formerOwners = ownerRows.filter((o) => !o.isActiveOwner)
+
+    const currentBody = currentOwners.length === 0
+        ? `<p class="text-sm opacity-60">No Records Yet</p>`
+        : currentOwners.map(renderOwnerRow).join("")
+
+    const formerBody = formerOwners.map(renderOwnerRow).join("")
     
     const allPerformances = []
     const allBlowouts = []
@@ -176,6 +216,7 @@ export const renderLeagueHistory = async () => {
 
     container.innerHTML =
         card("Champions", championsBody) + 
-        card("All-Time Franchise Records", franchiseBody) +
+        card("All-Time Franchise Records", currentBody) +
+        (formerOwners.length > 0 ? card("Former Owners", formerBody) : "") +
         card("All-Time Single-Game Records", singleGameBody)
 }
