@@ -91,19 +91,24 @@ export const renderHeadToHead = async (ownerId) => {
     )
 
     container.innerHTML = opponents.map((opp) => {
-        const eraLine = Object.values(opp.eras)
-            .sort((a, b) => b.lastSeason - a.lastSeason)
-            .map((era, i, arr) => {
-                const sep = i < arr.length - 1 ? " •" : ""
-                return `<span class="whitespace-nowrap">${era.name} (${fmtRecord(era.wins, era.losses, era.ties)})${sep}</span>`   
-            })
-            .join(" ")
+        const sortedEras = Object.values(opp.eras).sort((a, b) => b.lastSeason - a.lastSeason)
+        const headerName = sortedEras[0]?.name || ownerNameFor(opp.ownerId)
+
+        const eraLine = sortedEras.length <= 1
+            ? ""
+            : sortedEras
+                .map((era, i, arr) => {
+                    const sep = i < arr.length - 1 ? " •" : ""
+                    return `<span class="whitespace-nowrap">${era.name} (${fmtRecord(era.wins, era.losses, era.ties)})${sep}</span>`   
+                })
+                .join(" ")
 
         return `
             <div class="flex items-start justify-between gap-3 px-4 py-3 border-b border-base-300 last:border-0">
                 <div class="min-w-0">
-                    <p class="font-semibold">${ownerNameFor(opp.ownerId)}</p>
-                    <p class="text-xs opacity-70 mt-0.5">${eraLine}</p>
+                    <p class="font-semibold">${headerName}</p>
+                    <p class="text-xs opacity-60">${ownerNameFor(opp.ownerId)}</p>
+                    <p class="text-xs opacity-70 mt-1">${eraLine}</p>
                 </div>
                 <span class="text-sm font-medium opacity-80 shrink-0">${fmtRecord(opp.wins, opp.losses, opp.ties)}</span>
             </div>

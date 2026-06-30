@@ -106,18 +106,30 @@ export const getCompletedMatchupsThroughWeek = async (season, currentWeek) => {
 }
 
 export const getAllCompletedMatchups = async () => {
-    const { data, error } = await supabase
-        .from("matchups")
-        .select("*")
-        .not("team_1_score", "is", null)
-        .not("team_2_score", "is", null)
-        .order("season", { ascending: true })
-        .order("week", { ascending: true })
+    const pageSize = 1000
+    let from = 0
+    let all = []
 
-    if (error) {
-        console.error("Error fetching all completed matchups:", error)
-        return []
+    while (true) {
+        const { data, error } = await supabase
+            .from("matchups")
+            .select("*")
+            .not("team_1_score", "is", null)
+            .not("team_2_score", "is", null)
+            .order("season", { ascending: true })
+            .order("week", { ascending: true })
+            .range(from, from + pageSize - 1)
+
+        if (error) {
+            console.error("Error fetching all completed matchups:", error)
+            return all
+        }
+
+        all = all.concat(data)
+
+        if (data.length < pageSize) break
+        from += pageSize
     }
 
-    return data
+    return all
 }
