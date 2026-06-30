@@ -18,7 +18,11 @@ export const buildOwnerScope = async (ownerId) => {
     })
 
     const ownsTeamSeason = (teamId, season) =>
-        teamSeasons.some((ts) => ts.teamId === teamId && ts.season === season)
+        eras.some((h) => 
+            h.team_id === teamId &&
+            season >= h.start_year &&
+            (h.end_year == null || season <= h.end_year)    
+        )
 
     return { ownerId, teamSeasons, teamIds, ownsTeamSeason }
 }

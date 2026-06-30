@@ -4,7 +4,7 @@ import { getStandings } from "../api/standingsApi.js"
 import { computeSeasonAwards } from "../utils/seasonAwards.js"
 import { getAllTeamHistory } from "../api/teamsHistoryApi.js"
 
-export const renderTeamAwards = async (teamId) => {
+export const renderTeamAwards = async (ownerId) => {
     const container = document.getElementById("awardsContainer")
     if (!container) return
     
@@ -19,13 +19,20 @@ export const renderTeamAwards = async (teamId) => {
         return team?.current_name || team?.team_name || team?.name || id || ""
     }
 
-    const seasonNameFor = (id, season) => {
+    const eras = teamHistory.filter((h) => h.owner_id === ownerId)
+    const ownsTeamSeason = (teamId, season) => 
+        eras.some((h) => 
+            h.team_id === teamId &&
+            season >= h.start_year &&
+            (h.end_year == null || season <= h.end_year)
+        )
+
+    const seasonNameFor = (teamId, season) => {
         const h = teamHistory.find((h) => 
-            h.team_id === id &&
+            h.team_id === teamId &&
             season >= h.start_year && (h.end_year == null || season <= h.end_year)
         )
-        if (h) return h.name
-        return nameFor(id)
+        return h ? h.name : nameFor(teamId)
     }
 
     const bySeason = {}
@@ -42,16 +49,20 @@ export const renderTeamAwards = async (teamId) => {
         const ranked = standings.filter((s) => s.final_rank != null)
         if (ranked.length === 0) continue
         const lastRank = Math.max(...ranked.map((s) => s.final_rank))
-        const row = standings.find((s) => s.team_id === teamId)
-        if (!row || row.final_rank == null) continue
-        if (row.final_rank === 1) titleAwards.push({ title: "Champion", season, seasonName: seasonNameFor(teamId, season) })
-        else if (row.final_rank === lastRank) titleAwards.push({ title: "Toilet Champion", season, seasonName: seasonNameFor(teamId, season) }) 
+        const myRow = standings.find((s) => ownsTeamSeason(s.team_id, season))
+        if (!myRow || myRow.final_rank == null) continue
+        const rank = Number(myRow.final_rank)
+        if (rank === 1) {
+            titleAwards.push({ title: "Champion", season, seasonName: seasonNameFor(myRow.team_id, season) })
+        } else if (rank === lastRank) {
+            titleAwards.push({ title: "Toilet Champion", season, seasonName: seasonNameFor(myRow.team_id, season) }) 
+        }
     }
 
     const statAwards = []
     seasons.forEach((season) => {
         computeSeasonAwards(season, bySeason[season])
-            .filter((award) => award.teamId === teamId)
+            .filter((award) => ownsTeamSeason(award.teamId, season))
             .forEach((award) => statAwards.push({ ...award, season }))
     })
 
@@ -75,8 +86,6 @@ export const renderTeamAwards = async (teamId) => {
             `
             container.appendChild(row)
         })
-
-   
 
     statAwards
         .sort((a, b) => b.season - a.season)

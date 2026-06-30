@@ -56,7 +56,7 @@ const loadTeam = async () => {
     await loadRoster(selectedTeam)
     await loadTeamHistory(selectedTeam)
     await renderHeadToHead(selectedTeam.current_owner_id)
-    await renderTeamAwards(selectedTeam.id)
+    await renderTeamAwards(selectedTeam.current_owner_id)
 }
 
 const loadDraftHistory = async (selectedTeam) => {
