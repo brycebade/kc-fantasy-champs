@@ -7,6 +7,7 @@ import { getFAPickupsByTeam } from "./src/api/faPickupsApi.js"
 import { getStandingsByTeam } from "./src/api/standingsApi.js"
 import { renderHeadToHead } from "./src/components/headToHeadDisplay.js"
 import { renderTeamAwards } from "./src/components/teamAwardsDisplay.js"
+import { getAllTeamHistory } from "./src/api/teamsHistoryApi.js"
 
 const params = new URLSearchParams(window.location.search)
 const teamSlug = params.get("team")
@@ -133,27 +134,46 @@ const loadRoster = async (selectedTeam) => {
 
 const loadTeamHistory = async (team) => {
     const standings = await getStandingsByTeam(team.id)
+    const teamHistory = await getAllTeamHistory()
+
+    const ownerId = team.current_owner_id
+    const ownsSeason = (season) => 
+        teamHistory.some((h) => 
+            h.team_id === team.id &&
+            h.owner_id === ownerId &&
+            season >= h.start_year &&
+            (h.end_year == null || season <= h.end_year)
+        )
+    
+    const ownerStandings = standings.filter((s) => ownsSeason(s.season))
 
     const container = document.getElementById("teamHistoryContainer")
     container.innerHTML = ""
 
-    standings.forEach((standing)  => {
-        const row = document.createElement("div")
-        row.innerHTML = `
-            <div class="px-4 py-3 ${getFinishColor(standing.final_rank)}">
-                <p class="text-xs uppercase tracking-wide text-primary font-bold">
-                    Season ${standing.season} • Wins ${standing.win} • Losses ${standing.loss}
-                </p>
-                <h2 class="text-lg font-bold text-base-content leading-tight">
-                    Final Place: ${getFinishLabel(standing.final_rank)}
-                </h2>
-                <p class="text-sm opacity-80">
-                    Points For: ${standing.points_for} • Points Against: ${standing.points_against}
-                </p>
-            </div>
-        `
-        container.appendChild(row)
-    })
+    if (ownerStandings.length === 0) {
+        container.innerHTML = `<p class="px-4 py-3 text-sm opacity-70">No History Yet</p>`
+        return
+    }
+
+    ownerStandings
+        .sort((a, b) => b.season - a.season)
+        .forEach((standing)  => {
+            const row = document.createElement("div")
+            row.innerHTML = `
+                <div class="px-4 py-3 ${getFinishColor(standing.final_rank)}">
+                    <p class="text-xs uppercase tracking-wide text-primary font-bold">
+                        Season ${standing.season} • Wins ${standing.win} • Losses ${standing.loss}
+                    </p>
+                    <h2 class="text-lg font-bold text-base-content leading-tight">
+                        Final Place: ${getFinishLabel(standing.final_rank)}
+                    </h2>
+                    <p class="text-sm opacity-80">
+                        Points For: ${standing.points_for} • Points Against: ${standing.points_against}
+                    </p>
+                </div>
+            `
+            container.appendChild(row)
+        })
 }
 
 init()
