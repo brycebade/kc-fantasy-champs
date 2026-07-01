@@ -97,6 +97,8 @@ export const renderHeadToHead = async (ownerId) => {
         const eraLine = sortedEras.length <= 1
             ? ""
             : sortedEras
+                .slice()
+                .sort((a, b) => a.lastSeason - b.lastSeason)
                 .map((era, i, arr) => {
                     const sep = i < arr.length - 1 ? " •" : ""
                     return `<span class="whitespace-nowrap">${era.name} (${fmtRecord(era.wins, era.losses, era.ties)})${sep}</span>`   

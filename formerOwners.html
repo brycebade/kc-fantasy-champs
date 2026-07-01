@@ -25,24 +25,29 @@
         <div id="formerOwnersList"></div>
 
         <div id="formerOwnerDetail" style="display:none">
-            <button id="backToList" class="btn btn-sm btn-ghost mb-4">All Former Owners</button>
+            <button id="backToList" class="btn btn-sm btn-outline btn-primary mb-4 gap-1">
+                <span class="text-base leading-none">←</span>All Former Owners
+            </button>
             <div id="ownerHeader" class="mb-6"></div>
-            <div id="ownerSeasons" class="card bg-base-100 shadow-md border border-base-300 rounded-xl overflow-hidden mb-6">
+
+            <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl overflow-hidden mb-6">
                 <div class="bg-neutral text-white px-4 py-2">
                     <h2 class="font-bold uppercase tracking-wide text-sm">Season History</h2>
-                    <div id="teamHistoryContainer" class="card-body p-0"></div>
                 </div>
+                <div id="teamHistoryContainer" class="p-0"></div>
+                
                 <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl overflow-hidden mb-6">
                     <div class="bg-neutral text-white px-4 py-2">
                         <h2 class="font-bold uppercase tracking-wide text-sm">Awards</h2>
-                        <div id="awardsContainer" class="card-body p-0"></div>
                     </div>
+                    <div id="awardsContainer" class="p-0"></div>
                 </div>
-                <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl overflow-hidden mb-6">
+                <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl overflow-hidden">
                     <div class="bg-neutral text-white px-4 py-2">
                         <h2 class="font-bold uppercase tracking-wide text-sm">Head to Head</h2>
-                        <div id="headToHeadContainer" class="card-body p-0"></div>
                     </div>
+                    <div id="headToHeadContainer" class="p-0"></div>
+                </div>
                 </div>
             </div>
         </div>

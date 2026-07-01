@@ -152,6 +152,7 @@ export const renderNavbar = async () => {
                       <li><a href="leagueHistory.html">League History</a></li>
                       <li><a href="powerRankings.html">Power Rankings</a></li>
                       <li><a href="awards.html">Awards</a></li>
+                      <li><a href="formerOwners.html">Former Owners</a></li>
                   </ul>
                 </details>
               </li>
@@ -192,6 +193,7 @@ export const renderNavbar = async () => {
                       <li><a href="leagueHistory.html">League History</a></li>
                       <li><a href="powerRankings.html">Power Rankings</a></li>
                       <li><a href="awards.html">Awards</a></li>
+                      <li><a href="formerOwners.html>Former Owners</a></li>
                     </ul>
                   </details>
                 </li>
