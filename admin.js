@@ -247,7 +247,7 @@ const submitScores = async () => {
             }
     }
 
-    recalculateStandings(season)
+    await recalculateStandings(season)
     alert("Scores submitted successfully!")
 }
 
@@ -262,12 +262,12 @@ const recalculateStandings = async (season) => {
 
     const teams = await getTeams()
 
-    teams.forEach(async (team) => {
+    for (const teams of teams) {
         const teamMatchups = completedMatchups.filter(m => 
             m.team_1_id === team.id || m.team_2_id === team.id  
         )
 
-        if (teamMatchups.length === 0) return
+        if (teamMatchups.length === 0) continue
 
         let wins = 0
         let losses = 0
@@ -304,7 +304,7 @@ const recalculateStandings = async (season) => {
         if (error) {
             console.error("Error updating standings for", team.id, error)
         }
-    })
+    }
 }
 
 const computeFinalRankings = async () => {
