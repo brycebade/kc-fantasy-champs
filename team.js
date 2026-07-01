@@ -52,6 +52,13 @@ const loadTeam = async () => {
     document.title = `${selectedTeam.current_name} | KC Fantasy Champs`
     document.getElementById("team-name").textContent = selectedTeam.current_name
     document.getElementById("owner-name").textContent = owner.name
+    
+    const logo = document.getElementById("team-logo")
+    if (logo) {
+        logo.src = `./assets/logos/${selectedTeam.id}.png`
+        logo.alt = `${selectedTeam.current_name} logo`
+        logo.onerror = () => { logo.style.display = "none" }
+    }
 
     await loadDraftHistory(selectedTeam)
     await loadRoster(selectedTeam)
