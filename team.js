@@ -4,7 +4,7 @@ import { getDraftSeasonsByTeam, getDraftResultsByTeamAndYear } from "./src/api/d
 import { getOwnerById } from "./src/api/ownersApi.js"
 import { getRosterByTeam } from "./src/api/draftResultsApi.js"
 import { getFAPickupsByTeam } from "./src/api/faPickupsApi.js"
-import { getStandingsByTeam } from "./src/api/standingsApi.js"
+import { getStandingsByTeam, getStandings } from "./src/api/standingsApi.js"
 import { renderHeadToHead } from "./src/components/headToHeadDisplay.js"
 import { renderTeamAwards } from "./src/components/teamAwardsDisplay.js"
 import { getAllTeamHistory } from "./src/api/teamsHistoryApi.js"
@@ -25,17 +25,17 @@ const getKeeperCost = (player) => {
     return `Round ${player.round -1}`
 }
 
-const getFinishLabel = (rank) => {
+const getFinishLabel = (rank, lastRank) => {
     if (rank === 1) return `Champion`
-    if (rank === 12) return `Toilet Bowl Champion`
+    if (rank === lastRank) return `Toilet Bowl Champion`
     return `${rank}`
 }
 
-const getFinishColor = (rank) => {
+const getFinishColor = (rank, lastRank) => {
     if (rank === 1) return "bg-[#D4AF37]"
     if (rank === 2) return "bg-[#C0C0C0]"
     if (rank === 3) return "bg-[#CD7F32] medal-text"
-    if (rank === 12) return "bg-[#7B5E3B] medal-text"
+    if (rank === lastRank) return "bg-[#7B5E3B] medal-text"
     return ""
 }
 
@@ -155,17 +155,21 @@ const loadTeamHistory = async (team) => {
         return
     }
 
-    ownerStandings
-        .sort((a, b) => b.season - a.season)
-        .forEach((standing)  => {
+    const sorted = ownerStandings.sort((a, b) => b.season - a.season)
+
+        for (const standing of sorted) {
+            const seasonStandings = await getStandings(standing.season)
+            const ranked = seasonStandings.filter((s) => s.final_rank != null)
+            const lastRank = ranked.length ? Math.max(...ranked.map((s) => Number(s.final_rank))) : null
+
             const row = document.createElement("div")
             row.innerHTML = `
-                <div class="px-4 py-3 ${getFinishColor(standing.final_rank)}">
+                <div class="px-4 py-3 ${getFinishColor(standing.final_rank, lastRank)}">
                     <p class="text-xs uppercase tracking-wide text-primary font-bold">
                         Season ${standing.season} • Wins ${standing.win} • Losses ${standing.loss}
                     </p>
                     <h2 class="text-lg font-bold text-base-content leading-tight">
-                        Final Place: ${getFinishLabel(standing.final_rank)}
+                        Final Place: ${getFinishLabel(standing.final_rank, lastRank)}
                     </h2>
                     <p class="text-sm opacity-80">
                         Points For: ${standing.points_for} • Points Against: ${standing.points_against}
@@ -173,7 +177,7 @@ const loadTeamHistory = async (team) => {
                 </div>
             `
             container.appendChild(row)
-        })
+        }
 }
 
 init()
