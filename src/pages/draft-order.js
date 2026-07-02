@@ -34,8 +34,8 @@ export const renderDraftOrder = async () => {
             "flex items-center gap-3 rounded-md px-2 py-1 text-sm"
 
         listItem.innerHTML = `
-            <span class="font-bold w-8 ${draftColor}">#${entry.pick}</span>
-            <span class="font-semibold text-right">${team ? team.current_name : "Unknown Team"}</span>   
+            <span class="font-bold w-8 shrink-0 ${draftColor}">#${entry.pick}</span>
+            <span class="font-semibold flex-1 text-left">${team ? team.current_name : "Unknown Team"}</span>   
         `
 
         draftOrderList.appendChild(listItem)     
