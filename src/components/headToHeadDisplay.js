@@ -54,7 +54,12 @@ export const renderHeadToHead = async (ownerId) => {
         const isTie = m.is_tie === true
 
         if (!vsOwner[oppOwnerId]) {
-            vsOwner[oppOwnerId] = { ownerId: oppOwnerId, wins: 0, losses: 0, ties: 0, eras: {} }   
+            vsOwner[oppOwnerId] = { 
+                ownerId: oppOwnerId, 
+                wins: 0, losses: 0, ties: 0, 
+                regWins: 0, regLosses: 0, regTies: 0,
+                poWins: 0, poLosses: 0, poTies: 0,
+                eras: {} }   
         }
         const rec = vsOwner[oppOwnerId]
 
@@ -65,15 +70,23 @@ export const renderHeadToHead = async (ownerId) => {
         const era = rec.eras[oppName]
         if (season > era.lastSeason) era.lastSeason = season
 
+        const isPlayoff = m.matchup_type === "playoff"
+
         if (isTie) {
             rec.ties++
             era.ties++
+            if (isPlayoff) rec.poTies++
+            else rec.regTies++
         } else if (usWon) {
-            rec.wins++ 
+            rec.wins++
             era.wins++
+            if (isPlayoff) rec.poWins++
+            else rec.regWins++
         } else {
             rec.losses++
             era.losses++
+            if (isPlayoff) rec.poLosses++
+            else rec.regLosses++
         }
     })
 
@@ -105,6 +118,10 @@ export const renderHeadToHead = async (ownerId) => {
                 })
                 .join(" ")
 
+        const regRecord = fmtRecord(opp.regWins, opp.regLosses, opp.regTies)
+        const hasPlayoffs = (opp.poWins + opp.poLosses + opp.poTies) > 0
+        const poRecord = hasPlayoffs ? fmtRecord(opp.poWins, opp.poLosses, opp.poTies) : null
+
         return `
             <div class="flex items-start justify-between gap-3 px-4 py-3 border-b border-base-300 last:border-0">
                 <div class="min-w-0">
@@ -112,7 +129,12 @@ export const renderHeadToHead = async (ownerId) => {
                     <p class="text-xs opacity-60">${ownerNameFor(opp.ownerId)}</p>
                     <p class="text-xs opacity-70 mt-1">${eraLine}</p>
                 </div>
-                <span class="text-sm font-medium opacity-80 shrink-0">${fmtRecord(opp.wins, opp.losses, opp.ties)}</span>
+                <div class="shrink-0 text-right">
+                    <span class="text-sm font-medium opacity-80">${fmtRecord(opp.wins, opp.losses, opp.ties)}</span>
+                    <p class="text-xs opacity-50 mt-0.5">
+                        ${regRecord} reg${poRecord ? ` • ${poRecord} playoff` : ""}
+                    </p>
+                </div>
             </div>
         `
     }).join("")
