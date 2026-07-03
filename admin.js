@@ -10,6 +10,24 @@ import { getAllTeamHistory } from "./src/api/teamsHistoryApi.js"
 const passwordSubmit = document.getElementById("passwordSubmit")
 const adminDashboard = document.getElementById("adminDashboard")
 
+const setupTabs = () => {
+    const tabs = document.querySelectorAll("[data-tab]")
+    const panels = document.querySelectorAll("[data-panel]")
+
+    tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+            const target = tab.getAttribute("data-tab")
+
+            tabs.forEach((t) => t.classList.remove("table-active"))
+            tab.classList.add("tab-active")
+
+            panels.forEach((p) => {
+                p.style.display = p.getAttribute("data-panel") === target ? "block" : "none"
+            })
+        })
+    })
+}
+
 const generateBlurbInput = async () => {
     const inputBox = document.getElementById("blurbInput")
     inputBox.value = "Generating..."
@@ -413,6 +431,8 @@ passwordSubmit.addEventListener("click", () => {
     if (inputValue === "champs") {
         document.getElementById("passwordScreen").style.display = "none"
         adminDashboard.style.display = "block"
+
+        setupTabs()
 
         populateSeasonDropdown()
         populateWeekDropdown()
