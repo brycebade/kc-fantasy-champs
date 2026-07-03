@@ -47,6 +47,8 @@
             <a role="tab" class="tab" data-tab="addGame">Add Game</a>
             <a role="tab" class="tab" data-tab="finalRankings">Final Rankings</a>
             <a role="tab" class="tab" data-tab="blurb">Blurb</a>
+            <a role="tab" class="tab" data-tab="draft">Draft Results</a>
+            <a role="tab" class="tab" data-tab="roster">End-of-Year Roster</a>
         </div>
 
         <div data-panel="scores">
@@ -126,6 +128,24 @@
                     <textarea id="blurbOutput" class="textarea textarea-bordered w-full h-28 mb-3"
                         placeholder="Paste the blurb you got back..."></textarea>
                     <button id="saveBlurb" class="btn btn-primary w-full">Save Blurb</button>
+                </div>
+            </div>
+        </div>
+
+        <div data-panel="draft" style="display: none">
+            <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl mb-6">
+                <div class="card-body p-4">
+                    <h2 class="card-title text-primary mb-2">Draft Results</h2>
+                    <p class="text-sm opacity-60">Coming soon - enter draft picks by team for the selected season.</p>
+                </div>
+            </div>
+        </div>
+
+        <div data-panel="roster" style="display: none">
+            <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl mb-6">
+                <div class="card-body p-4">
+                    <h2 class="card-title text-primary mb-2">End-of-Year Roster</h2>
+                    <p class="text-sm opacity-60">Coming soon - record each team's final roster for keeper tracking</p>
                 </div>
             </div>
         </div>
