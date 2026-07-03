@@ -175,49 +175,8 @@ export const renderLeagueHistory = async () => {
         : currentOwners.map(renderOwnerRow).join("")
 
     const formerBody = formerOwners.map(renderOwnerRow).join("")
-    
-    const allPerformances = []
-    const allBlowouts = []
-
-    matchups.forEach((m) => {
-        allPerformances.push({ teamId: m.team_1_id, score: Number(m.team_1_score), season: m.season, week: m.week })
-        allPerformances.push({ teamId: m.team_2_id, score: Number(m.team_2_score), season: m.season, week: m.week })
-
-        allBlowouts.push({
-            margin: round1(Math.abs(Number(m.team_1_score) - Number(m.team_2_score))),
-            winnerId: m.winner_team_id,
-            loserId: m.loser_team_id,
-            season: m.season,
-            week: m.week
-        })
-    })
-
-    const TOP_N = 10
-    const topHighest = [...allPerformances].sort((a,b) => b.score - a.score).slice(0, TOP_N)
-    const topLowest = [...allPerformances].sort((a, b) => a.score - b.score).slice(0, TOP_N)
-    const topBlowouts = [...allBlowouts].sort((a, b) => b.margin - a.margin).slice(0, TOP_N)
-
-    const rankedList = (items, renderItem) => 
-        items.map((item, i) => `
-            <div class="flex items-center justify-between gap-3 py-2 border-b border-base-300 last:border-0">
-                <span class="text-sm"><span class="font-bold text-primary mr-2">${i + 1}</span>${renderItem(item)}</span>
-            </div>
-        `).join("")
-
-    const singleGameBody = matchups.length === 0
-        ? `<p class="text-sm opacity-60">No Games Recorded Yet</p>`
-        : `
-            <h3 class="font-bold text-sm mb-2">Highest Scores</h3>
-            ${rankedList(topHighest, (p) => `${round1(p.score)} — ${seasonNameFor(p.teamId, p.season)} (${p.season} Wk ${p.week})`)}
-            <h3 class="font-bold text-sm mb-2">Lowest Scores</h3>
-            ${rankedList(topLowest, (p) => `${round1(p.score)} — ${seasonNameFor(p.teamId, p.season)} (${p.season} Wk ${p.week})`)}
-            <h3 class="font-bold text-sm mt-4 mb-2">Biggest Blowouts</h3>
-            ${rankedList(topBlowouts, (b) => `${b.margin} — ${seasonNameFor(b.winnerId, b.season)} over ${seasonNameFor(b.loserId, b.season)} (${b.season} Wk ${b.week})`)}
-        `
 
     container.innerHTML =
         card("Champions", championsBody) + 
         card("All-Time Franchise Records", currentBody) +
-        (formerOwners.length > 0 ? card("Former Owners", formerBody) : "") +
-        card("All-Time Single-Game Records", singleGameBody)
-}
+        (formerOwners.length > 0 ? card("Former Owners", formerBody) : "")}

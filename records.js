@@ -8,8 +8,16 @@ const round1 = (n) => Math.round(n * 10) / 10
 
 const init = async () => {
     await renderNavbar()
-    await renderSingleSeasonRecords()
+    await renderView("single-game")
 
+    document.getElementById("recordsView").addEventListener("change", (e) => {
+        renderView(e.target.value)
+    })
+}
+
+const renderView = async (view) => {
+    if (view === "single-game") await renderSingleGameRecords()
+        else if (view === "single-season") await renderSingleSeasonRecords()
 }
 
 const renderSingleGameRecords = async () => {
