@@ -6,6 +6,8 @@ import { savePowerRankingNote } from "./src/api/powerRankingsNotesApi.js"
 import { getCurrentSeasonSettings } from "./src/api/seasonSettingsApi.js"
 import { getStandings } from "./src/api/standingsApi.js"
 import { getAllTeamHistory } from "./src/api/teamsHistoryApi.js"
+import { getDraftResultsByTeamAndYear } from "./src/api/draftResultsApi.js"
+import { getAllFAPickupsByTeam } from "./src/api/faPickupsApi.js"
 
 const passwordSubmit = document.getElementById("passwordSubmit")
 const adminDashboard = document.getElementById("adminDashboard")
@@ -425,6 +427,122 @@ const saveFinalRankings = async () => {
     alert(`Saved final rankings for ${saved} teams in ${season}`)
 }
 
+const FA_KEEPER_ROUND = 10
+
+const faKeeperRound = (faPlayer, draftRows) => {
+    const drafted = draftRows.find((d) => d.player === faPlayer.player)
+    return drafted ? drafted.round : FA_KEEPER_ROUND
+}
+
+const populateRosterTeams = async () => {
+    const teams = await getTeams()
+    const select = document.getElementById("rosterTeamSelect")
+    teams.forEach((t) => {
+        const opt = document.createElement("option")
+        opt.value = t.id
+        opt.textContent = t.current_name
+        select.appendChild(opt)
+    })
+}
+
+const loadRosterEditor = async () => {
+    const teamId = document.getElementById("rosterTeamSelect").value
+    const container = document.getElementById("rosterEditorContainer")
+    const addSection = document.getElementById("addFASection")
+
+    if (!teamId) {
+        container.innerHTML = ""
+        addSection.style.display = "none"
+        return
+    }
+
+    const settings = await getCurrentSeasonSettings()
+    const season = settings.season
+
+    const [draft, pickups] = await Promise.all([
+        getDraftResultsByTeamAndYear(teamId, season),
+        getAllFAPickupsByTeam(teamId, season)
+    ])
+
+    const players = [
+        ...draft.map((p) => ({ ...p, source: "draft_results_by_year", keeprRound: p.round })),
+        ...pickups.map((p) => ({ ...p, source: "fa_pickups", KeeperRound: faKeeperRound(p, draft) }))
+    ]
+
+    players.sort((a, b) => (b.is_on_roster === true) - (a.is_on_roster === true))
+
+    addSection.style.display = "block"
+    container.innerHTML = players.map((p) => `
+        <div class="flex items-center justify-between gap-3 py-2 border-b border-base-300 ${p.is_on_roster ? "" : "opacity-50"}">
+            <span class="text-sm">
+                <span class="font-semibold">${p.player}</span>
+                <span class="opacity-60">• ${p.position} • ${p.nfl_team} • Rd ${p.keeperRound}</span>
+            </span>
+            <input type="checkbox" class="toggle toggle-sm toggle-primary" ${p.is_on_roster ? "checked" : ""}
+                data-source="${p.source}" data-id="${p.id}">
+        </div>
+    `).join("")
+
+    container.querySelectorAll("input[type=checkbox]").forEach((box) => {
+        box.addEventListener("change", () => toggleOnRoster(box))
+    })
+}
+
+const toggleOnRoster = async (box) => {
+    const source = box.getAttribute("data-source")
+    const id = box.getAttribute("data-id")
+    const isOn = box.checked
+
+    const { error } = await supabase
+        .from(source)
+        .update({ is_on_roster: isOn })
+        .eq("id", id)
+
+    if (error) {
+        console.error("Error updating roster:", error)
+        box.checked = !isOn
+        return
+    }
+
+    loadRosterEditor()
+}
+
+const addFAPickup = async () => {
+    const teamId = document.getElementById("rosterTeamSelect").value
+    if (!teamId) return
+
+    const settings = await getCurrentSeasonSettings()
+    const season = settings.season
+
+    const player = document.getElementById("faPlayer").value.trim()
+    const position = document.getElementById("faPosition").value.trim()
+    const nflTeam = document.getElementById("faNFLTeam").value.trim()
+    if (!player) return
+
+    const { error } = await supabase
+        .from("fa_pickups")
+        .insert({
+            id: `${season}_${teamId}_${player.replace(/\s+/g, "_")}`,
+            team_id: teamId,
+            season,
+            player,
+            position,
+            nfl_team: nflTeam,
+            is_on_roster: true
+        })
+
+    if (error) {
+        console.error("Error adding FA pickup:", error)
+        alert("Error adding pickup (may already exist)")
+        return
+    }
+
+    document.getElementById("faPlayer").value = ""
+    document.getElementById("faPosition").value = ""
+    document.getElementById("faNFLTeam").value = ""
+    loadRosterEditor()
+}
+
 passwordSubmit.addEventListener("click", () => {
     const inputValue = document.getElementById("passwordInput").value
     
@@ -438,6 +556,7 @@ passwordSubmit.addEventListener("click", () => {
         populateWeekDropdown()
         populateGameTeams()
         loadMatchups()
+        populateRosterTeams()
 
         document.getElementById("weekSelect").addEventListener("change", loadMatchups)
         document.getElementById("seasonSelect").addEventListener("change", loadMatchups)
@@ -449,9 +568,10 @@ passwordSubmit.addEventListener("click", () => {
         document.getElementById("generateBlurbInput").addEventListener("click", generateBlurbInput)
         document.getElementById("loadFinalRankings").addEventListener("click", loadFinalRankings)
         document.getElementById("saveFinalRankings").addEventListener("click", saveFinalRankings)
-        document.getElementById("saveBlurb").addEventListener("click", saveBlurb)      
+        document.getElementById("saveBlurb").addEventListener("click", saveBlurb)
+        document.getElementById("rosterTeamSelect").addEventListener("change", loadRosterEditor)
+        document.getElementById("addFAPickup").addEventListener("click", addFAPickup)   
     } else {
        document.getElementById('errorMessage').textContent = "Incorrect Password"
     }
 })
-
