@@ -458,7 +458,7 @@ const loadRosterEditor = async () => {
     }
 
     const settings = await getCurrentSeasonSettings()
-    const season = 2025
+    const season = settings.season
 
     const [draft, pickups] = await Promise.all([
         getDraftResultsByTeamAndYear(teamId, season),
