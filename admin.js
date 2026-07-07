@@ -8,6 +8,7 @@ import { getStandings } from "./src/api/standingsApi.js"
 import { getAllTeamHistory } from "./src/api/teamsHistoryApi.js"
 import { getDraftResultsByTeamAndYear } from "./src/api/draftResultsApi.js"
 import { getAllFAPickupsByTeam } from "./src/api/faPickupsApi.js"
+import { getKeeperCost } from "./src/utils/keeperCost.js"
 
 const passwordSubmit = document.getElementById("passwordSubmit")
 const adminDashboard = document.getElementById("adminDashboard")
@@ -457,7 +458,7 @@ const loadRosterEditor = async () => {
     }
 
     const settings = await getCurrentSeasonSettings()
-    const season = settings.season
+    const season = 2025
 
     const [draft, pickups] = await Promise.all([
         getDraftResultsByTeamAndYear(teamId, season),
@@ -465,8 +466,12 @@ const loadRosterEditor = async () => {
     ])
 
     const players = [
-        ...draft.map((p) => ({ ...p, source: "draft_results_by_year", keeprRound: p.round })),
-        ...pickups.map((p) => ({ ...p, source: "fa_pickups", KeeperRound: faKeeperRound(p, draft) }))
+        ...draft.map((p) => ({ ...p, source: "draft_results_by_year", keeperCost: getKeeperCost(p.round) })),
+        ...pickups.map((p) => {
+            const drafted = draft.find((d) => d.player === p.player)
+            const keeperCost = drafted ? getKeeperCost(drafted.round) : "Round 10"
+            return { ...p, source: "fa_pickups", keeperCost}
+        })
     ]
 
     players.sort((a, b) => (b.is_on_roster === true) - (a.is_on_roster === true))
@@ -476,7 +481,7 @@ const loadRosterEditor = async () => {
         <div class="flex items-center justify-between gap-3 py-2 border-b border-base-300 ${p.is_on_roster ? "" : "opacity-50"}">
             <span class="text-sm">
                 <span class="font-semibold">${p.player}</span>
-                <span class="opacity-60">• ${p.position} • ${p.nfl_team} • Rd ${p.keeperRound}</span>
+                <span class="opacity-60">• ${p.position} • ${p.nfl_team} • Rd ${p.keeperCost}</span>
             </span>
             <input type="checkbox" class="toggle toggle-sm toggle-primary" ${p.is_on_roster ? "checked" : ""}
                 data-source="${p.source}" data-id="${p.id}">

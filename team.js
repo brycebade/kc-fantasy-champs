@@ -8,6 +8,7 @@ import { getStandingsByTeam, getStandings } from "./src/api/standingsApi.js"
 import { renderHeadToHead } from "./src/components/headToHeadDisplay.js"
 import { renderTeamAwards } from "./src/components/teamAwardsDisplay.js"
 import { getAllTeamHistory } from "./src/api/teamsHistoryApi.js"
+import { getKeeperCost } from "./src/utils/keeperCost.js"
 
 const params = new URLSearchParams(window.location.search)
 const teamSlug = params.get("team")
@@ -17,12 +18,6 @@ if (!teamSlug) window.location.href = "index.html"
 const init = async () => {
     await renderNavbar()
     await loadTeam()
-}
-
-const getKeeperCost = (player) => {
-    if (!player.round) return `Round 10`
-    if (player.round === 1) return `Not Keepable`
-    return `Round ${player.round -1}`
 }
 
 const getFinishLabel = (rank, lastRank) => {
@@ -132,7 +127,7 @@ const loadRoster = async (selectedTeam) => {
                     <span class="text-xs font-bold text-primary whitespace-nowrap">${roster.position} ${roster.nfl_team ? "• " + roster.nfl_team : ""}</span>
                     <span class="font-semibold">${roster.player}</span>
                 </div>
-                    <span class="text-sm opacity-70">Keeper Cost: ${getKeeperCost(roster)}</span>
+                    <span class="text-sm opacity-70">Keeper Cost: ${getKeeperCost(roster.round)}</span>
             </div>
         `
         container.appendChild(row)
