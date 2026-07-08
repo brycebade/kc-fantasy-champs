@@ -68,24 +68,16 @@ const loadDraftHistory = async (selectedTeam) => {
 
     const select = document.getElementById("draftSeasonSelect")
 
-    seasons.forEach(s => {
-        const option = document.createElement("option")
-        option.value = s.season
-        option.textContent = s.season
-        select.appendChild(option)
-    })
-
     if (seasons.length > 0) {
         await loadDraftPicks(selectedTeam.id, seasons[0].season)
     }
-
-    select.addEventListener("change", async () => {
-        await loadDraftPicks(selectedTeam.id, select.value)
-    })
 }
 
 const loadDraftPicks = async (teamId, season) => {
     const picks = await getDraftResultsByTeamAndYear(teamId, season)
+
+    const header = document.getElementById("draftHistoryHeader")
+    if (header) header.textContent = `${season} Draft`
 
     const container = document.getElementById("draftHistoryContainer")
     container.innerHTML = ""
