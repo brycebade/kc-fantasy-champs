@@ -2502,10 +2502,6 @@
     border-style: var(--tw-border-style);
     border-width: 1px;
   }
-  .border-2 {
-    border-style: var(--tw-border-style);
-    border-width: 2px;
-  }
   .border-y {
     border-block-style: var(--tw-border-style);
     border-block-width: 1px;
@@ -2522,33 +2518,9 @@
     border-bottom-style: var(--tw-border-style);
     border-bottom-width: 4px;
   }
-  .border-l {
+  .border-l-\[20px\] {
     border-left-style: var(--tw-border-style);
-    border-left-width: 1px;
-  }
-  .border-l-8 {
-    border-left-style: var(--tw-border-style);
-    border-left-width: 8px;
-  }
-  .border-l-\[12px\] {
-    border-left-style: var(--tw-border-style);
-    border-left-width: 12px;
-  }
-  .border-l-\[16px\] {
-    border-left-style: var(--tw-border-style);
-    border-left-width: 16px;
-  }
-  .border-\[\#7B5E3B\] {
-    border-color: #7B5E3B;
-  }
-  .border-\[\#C0C0C0\] {
-    border-color: #C0C0C0;
-  }
-  .border-\[\#CD7F32\] {
-    border-color: #CD7F32;
-  }
-  .border-\[\#D4AF37\] {
-    border-color: #D4AF37;
+    border-left-width: 20px;
   }
   .border-base-300 {
     border-color: var(--color-base-300);
@@ -2556,20 +2528,20 @@
   .border-primary {
     border-color: var(--color-primary);
   }
+  .border-l-\[\#5A5F63\] {
+    border-left-color: #5A5F63;
+  }
   .border-l-\[\#7B5E3B\] {
     border-left-color: #7B5E3B;
   }
-  .border-l-\[\#C0C0C0\] {
-    border-left-color: #C0C0C0;
+  .border-l-\[\#71797E\] {
+    border-left-color: #71797E;
   }
   .border-l-\[\#CD7F32\] {
     border-left-color: #CD7F32;
   }
   .border-l-\[\#D4AF37\] {
     border-left-color: #D4AF37;
-  }
-  .border-l-base-300 {
-    border-left-color: var(--color-base-300);
   }
   .bg-\[\#7B5E3B\] {
     background-color: #7B5E3B;
@@ -2650,6 +2622,9 @@
   .pt-4 {
     padding-top: calc(var(--spacing) * 4);
   }
+  .pr-4 {
+    padding-right: calc(var(--spacing) * 4);
+  }
   .pb-3 {
     padding-bottom: calc(var(--spacing) * 3);
   }
@@ -2658,6 +2633,9 @@
   }
   .pl-4 {
     padding-left: calc(var(--spacing) * 4);
+  }
+  .pl-\[36px\] {
+    padding-left: 36px;
   }
   .text-center {
     text-align: center;
@@ -2826,10 +2804,6 @@
     transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events;
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
     transition-duration: var(--tw-duration, var(--default-transition-duration));
-  }
-  .ease-in-out {
-    --tw-ease: var(--ease-in-out);
-    transition-timing-function: var(--ease-in-out);
   }
   .btn-outline {
     @layer daisyui.l1 {
@@ -3094,15 +3068,6 @@ details summary::after {
   }
 }
 @layer base {
-  :root, [data-theme] {
-    background: var(--page-scroll-bg, var(--root-bg));
-    color: var(--color-base-content);
-  }
-  :where(:root, [data-theme]) {
-    --root-bg: var(--color-base-100);
-  }
-}
-@layer base {
   :root {
     background: var(--page-scroll-bg, var(--root-bg));
     --page-scroll-bg-on: linear-gradient(var(--root-bg, #0000), var(--root-bg, #0000))
@@ -3128,6 +3093,15 @@ details summary::after {
   }
 }
 @layer base {
+  :root, [data-theme] {
+    background: var(--page-scroll-bg, var(--root-bg));
+    color: var(--color-base-content);
+  }
+  :where(:root, [data-theme]) {
+    --root-bg: var(--color-base-100);
+  }
+}
+@layer base {
   :root {
     scrollbar-color: currentColor #0000;
     @supports (color: color-mix(in lab, red, red)) {
@@ -3142,43 +3116,15 @@ details summary::after {
     initial-value: 0%;
   }
 }
-@keyframes menu {
-  0% {
-    opacity: 0;
-  }
-}
-@keyframes dropdown {
-  0% {
-    opacity: 0;
-  }
-}
-@keyframes skeleton {
-  0% {
-    background-position: 150%;
-  }
-  100% {
-    background-position: -50%;
-  }
-}
 @keyframes rating {
   0%, 40% {
     scale: 1.1;
     filter: brightness(1.05) contrast(1.05);
   }
 }
-@keyframes progress {
-  50% {
-    background-position-x: -115%;
-  }
-}
-@keyframes toast {
+@keyframes menu {
   0% {
-    scale: 0.9;
     opacity: 0;
-  }
-  100% {
-    scale: 1;
-    opacity: 1;
   }
 }
 @keyframes rotator {
@@ -3192,12 +3138,40 @@ details summary::after {
     translate: 0 -100%;
   }
 }
+@keyframes progress {
+  50% {
+    background-position-x: -115%;
+  }
+}
 @keyframes radio {
   0% {
     padding: 5px;
   }
   50% {
     padding: 3px;
+  }
+}
+@keyframes dropdown {
+  0% {
+    opacity: 0;
+  }
+}
+@keyframes toast {
+  0% {
+    scale: 0.9;
+    opacity: 0;
+  }
+  100% {
+    scale: 1;
+    opacity: 1;
+  }
+}
+@keyframes skeleton {
+  0% {
+    background-position: 150%;
+  }
+  100% {
+    background-position: -50%;
   }
 }
 @layer base {
@@ -3448,10 +3422,6 @@ details summary::after {
   syntax: "*";
   inherits: false;
 }
-@property --tw-ease {
-  syntax: "*";
-  inherits: false;
-}
 @layer properties {
   @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
     *, ::before, ::after, ::backdrop {
@@ -3496,7 +3466,6 @@ details summary::after {
       --tw-drop-shadow-color: initial;
       --tw-drop-shadow-alpha: 100%;
       --tw-drop-shadow-size: initial;
-      --tw-ease: initial;
     }
   }
 }
