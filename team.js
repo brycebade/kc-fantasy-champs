@@ -27,11 +27,12 @@ const getFinishLabel = (rank, lastRank) => {
 }
 
 const getFinishColor = (rank, lastRank) => {
-    if (rank === 1) return "bg-[#D4AF37]"
-    if (rank === 2) return "bg-[#C0C0C0]"
-    if (rank === 3) return "bg-[#CD7F32] medal-text"
-    if (rank === lastRank) return "bg-[#7B5E3B] medal-text"
-    return ""
+    const base = "border border-base-300 border-l-[16px]"
+    if (rank === 1) return `${base} border-l-[#D4AF37]`
+    if (rank === 2) return `${base} border-l-[#C0C0C0]`
+    if (rank === 3) return `${base} border-l-[#CD7F32]`
+    if (rank === lastRank) return `${base} border-l-[#7B5E3B]`
+    return `${base} border-l-base-300`
 }
 
 const loadTeam = async () => {
@@ -166,7 +167,7 @@ const loadTeamHistory = async (team) => {
 
             const row = document.createElement("div")
             row.innerHTML = `
-                <div class="px-4 py-3 ${getFinishColor(standing.final_rank, lastRank)}">
+                <div class="px-4 py-3 mb-2 rounded-lg bg-base-100 ${getFinishColor(standing.final_rank, lastRank)}">
                     <p class="text-xs uppercase tracking-wide text-primary font-bold">
                         Season ${standing.season} • Wins ${standing.win} • Losses ${standing.loss}
                     </p>

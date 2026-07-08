@@ -2475,9 +2475,6 @@
   .overflow-x-hidden {
     overflow-x: hidden;
   }
-  .rounded {
-    border-radius: 0.25rem;
-  }
   .rounded-box {
     border-radius: var(--radius-box);
   }
@@ -2505,6 +2502,10 @@
     border-style: var(--tw-border-style);
     border-width: 1px;
   }
+  .border-2 {
+    border-style: var(--tw-border-style);
+    border-width: 2px;
+  }
   .border-y {
     border-block-style: var(--tw-border-style);
     border-block-width: 1px;
@@ -2521,11 +2522,54 @@
     border-bottom-style: var(--tw-border-style);
     border-bottom-width: 4px;
   }
+  .border-l {
+    border-left-style: var(--tw-border-style);
+    border-left-width: 1px;
+  }
+  .border-l-8 {
+    border-left-style: var(--tw-border-style);
+    border-left-width: 8px;
+  }
+  .border-l-\[12px\] {
+    border-left-style: var(--tw-border-style);
+    border-left-width: 12px;
+  }
+  .border-l-\[16px\] {
+    border-left-style: var(--tw-border-style);
+    border-left-width: 16px;
+  }
+  .border-\[\#7B5E3B\] {
+    border-color: #7B5E3B;
+  }
+  .border-\[\#C0C0C0\] {
+    border-color: #C0C0C0;
+  }
+  .border-\[\#CD7F32\] {
+    border-color: #CD7F32;
+  }
+  .border-\[\#D4AF37\] {
+    border-color: #D4AF37;
+  }
   .border-base-300 {
     border-color: var(--color-base-300);
   }
   .border-primary {
     border-color: var(--color-primary);
+  }
+  .border-l-\[\#7B5E3B\] {
+    border-left-color: #7B5E3B;
+  }
+  .border-l-\[\#C0C0C0\] {
+    border-left-color: #C0C0C0;
+  }
+  .border-l-\[\#CD7F32\] {
+    border-left-color: #CD7F32;
+  }
+  .border-l-\[\#D4AF37\] {
+    border-left-color: #D4AF37;
+  }
+  .border-l-base-300 {
+    border-left-color: var(--color-base-300);
   }
   .bg-\[\#7B5E3B\] {
     background-color: #7B5E3B;
@@ -2602,6 +2646,9 @@
   }
   .py-8 {
     padding-block: calc(var(--spacing) * 8);
+  }
+  .pt-4 {
+    padding-top: calc(var(--spacing) * 4);
   }
   .pb-3 {
     padding-bottom: calc(var(--spacing) * 3);
@@ -2828,6 +2875,20 @@
     @layer daisyui.l1.l2.l3 {
       --btn-color: var(--color-secondary);
       --btn-fg: var(--color-secondary-content);
+    }
+  }
+  .toggle-primary {
+    @layer daisyui.l1.l2 {
+      &:checked, &[aria-checked="true"] {
+        --input-color: var(--color-primary);
+      }
+    }
+  }
+  .toggle-sm {
+    @layer daisyui.l1.l2 {
+      &:is([type="checkbox"]), &:has([type="checkbox"]) {
+        --size: calc(var(--size-selector, 0.25rem) * 5);
+      }
     }
   }
   .last\:border-0 {
