@@ -218,7 +218,6 @@ const renderCareerRecords = async () => {
         const eraNames = Object.values(c.eras)
             .sort((a, b) => b.lastYear - a.lastYear)
             .map((e) => e.name)
-            console.log(ownerNameFor(c.ownerId), "eras:", Object.values(c.eras).map(e => e.name))
         return { ...c, winPct: games > 0 ? c.wins / games : 0, games, eraNames }
     })
 
@@ -229,13 +228,18 @@ const renderCareerRecords = async () => {
     let expandCounter = 0
     const teamList = (eraNames) => {
         if (eraNames.length === 0) return ""
+
+        const wrapNames = (names) =>
+            names.map((n) => `<span class="whitespace-nowrap">${n}</span>`).join(", ")
+
+        const escapeAttr = (str) => str.replace(/'/g, "&#39;").replace(/"/g, "&quot;")
+
         if (eraNames.length <= 2) {
-            return `<span class="opacity-60">(${eraNames.join(", ")})</span>`
+            return `<span class="opacity-60">(${wrapNames(eraNames)})</span>`
         }
-        const id = `eras-${expandCounter++}`
-        const firstTwo = eraNames.slice(0, 2).join(", ")
-        const all = eraNames.join(", ")
-        return `<span class="opacity-60">(<span data-full="${all}" data-short="${firstTwo}" class="era-toggle cursor-pointer" data-id="${id}">${firstTwo}, <span class="text-primary font-bold">…</span></span>)</span>`
+        const firstTwo = wrapNames(eraNames.slice(0, 2))
+        const all = wrapNames(eraNames)
+        return `<span class="opacity-60">(<span class="era-toggle cursor-pointer" data-full='${escapeAttr(all)}' data-short='${escapeAttr(firstTwo)}'>${firstTwo}, <span class="text-primary font-bold">…</span></span>)</span>`
     }
 
     const mostWins = [...owners_list].sort((a, b) => b.wins - a.wins).slice(0, TOP_N)
@@ -272,14 +276,15 @@ const renderCareerRecords = async () => {
         card("Most Points For", rankedList(mostPoints, (o) => `${round1(o.pointsFor)} — ${ownerNameFor(o.ownerId)} ${teamList(o.eraNames)}`))
 
     container.querySelectorAll(".era-toggle").forEach((el) => {
-        el.addEventListener("click", () => {
-            const showingFull = el.dataset.showing === "true"
-            if (showingFull) {
-                el.innerHTML = `${el.dataset.short}, <span class="text-primary font-bold">...</span>`
-                el.dataset.showing = "false"
+        el.addEventListener("click", (e) => {
+            e.stopPropagation()
+            const showing = el.getAttribute("data-showing") === "true"
+            if (showing) {
+                el.innerHTML = `${el.getAttribute("data-short")}, <span class="text-primary font-bold">...</span>`
+                el.setAttribute("data-showing", "false")
             } else {
-                el.textContent = el.dataset.showingFull
-                el.dataset.showing = "true"
+                el.innerHTML = el.getAttribute("data-full")
+                el.setAttribute("data-showing", "true")
             }
         })
     })
