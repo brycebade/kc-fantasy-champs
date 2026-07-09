@@ -4,11 +4,13 @@ import { getTeams } from "./src/api/teamsApi.js"
 import { getAllTeamHistory } from "./src/api/teamsHistoryApi.js"
 import { getStandings } from "./src/api/standingsApi.js"
 import { getOwners } from "./src/api/ownersApi.js"
+import { renderArchiveNav } from "./src/components/archiveNav.js"
 
 const round1 = (n) => Math.round(n * 10) / 10
 
 const init = async () => {
     await renderNavbar()
+    await renderArchiveNav("records")
     await renderView("single-game")
 
     document.getElementById("recordsView").addEventListener("change", (e) => {

@@ -5,11 +5,13 @@ import { getAllTeamHistory } from "./src/api/teamsHistoryApi.js"
 import { getStandings } from "./src/api/standingsApi.js"
 import { renderTeamAwards } from "./src/components/teamAwardsDisplay.js"
 import { renderHeadToHead } from "./src/components/headToHeadDisplay.js"
+import { renderArchiveNav } from "./src/components/archiveNav.js"
 
 const round1 = (n) => Math.round(n * 10) / 10
 
 const init = async () => {
     await renderNavbar()
+    await renderArchiveNav("former")
     await loadFormerOwners()
 }
 

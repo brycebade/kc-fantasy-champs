@@ -149,11 +149,9 @@ export const renderNavbar = async () => {
                   <summary class="text-white">More</summary>
                   <ul class="absolute right-0 top-full mt-2 menu bg-base-100 rounded-box p-2 shadow z-[9999]"
                       style="width: max-content; min-width: 14rem;">
-                      <li><a href="leagueHistory.html">League History</a></li>
                       <li><a href="powerRankings.html">Power Rankings</a></li>
                       <li><a href="awards.html">Awards</a></li>
-                      <li><a href="records.html">League Records</a></li>
-                      <li><a href="formerOwners.html">Former Owners</a></li>
+                      <li><a href="leagueHistory.html">League Archive</a></li>
                   </ul>
                 </details>
               </li>
@@ -191,11 +189,9 @@ export const renderNavbar = async () => {
                   <details>
                     <summary>More</summary>
                     <ul class="pl-4">
-                      <li><a href="leagueHistory.html">League History</a></li>
                       <li><a href="powerRankings.html">Power Rankings</a></li>
                       <li><a href="awards.html">Awards</a></li>
-                      <li><a href="records.html">League Records</a><li>
-                      <li><a href="formerOwners.html>Former Owners</a></li>
+                      <li><a href="leagueHistory.html">League Archive</a></li>
                     </ul>
                   </details>
                 </li>
