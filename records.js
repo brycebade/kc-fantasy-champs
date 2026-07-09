@@ -194,7 +194,7 @@ const renderCareerRecords = async () => {
             if (ownerId == null) return
 
             if (!career[ownerId]) {
-                career[ownerId] = { ownerId, wins: 0, losses: 0, pointsFor: 0, titles: 0, toilets: 0 }
+                career[ownerId] = { ownerId, wins: 0, losses: 0, pointsFor: 0, titles: 0, toilets: 0, eras: {} }
             }
             const c = career[ownerId]
             const ranked = standings.filter((x) => x.final_rank != null)
@@ -205,17 +205,38 @@ const renderCareerRecords = async () => {
             c.pointsFor += s.points_for || 0
             if (Number(s.final_rank) === 1) c.titles += 1
             if (lastRank != null && Number(s.final_rank) === lastRank) c.toilets += 1
+
+            if (h) {
+                if (!c.eras[h.id]) c.eras[h.id] = { name: h.name, lastYear: season }
+                else if (season > c.eras[h.id].lastYear) c.eras[h.id].lastYear = season
+            }
         })
     }
 
     const owners_list = Object.values(career).map((c) => {
         const games = c.wins + c.losses
-        return { ...c, winPct: games > 0 ? c.wins / games : 0, games }
+        const eraNames = Object.values(c.eras)
+            .sort((a, b) => b.lastYear - a.lastYear)
+            .map((e) => e.name)
+            console.log(ownerNameFor(c.ownerId), "eras:", Object.values(c.eras).map(e => e.name))
+        return { ...c, winPct: games > 0 ? c.wins / games : 0, games, eraNames }
     })
 
     const TOP_N = 5
     const round1 = (n) => Math.round(n * 10) / 10
     const pct = (n) => (n * 100).toFixed(1) + "%"
+
+    let expandCounter = 0
+    const teamList = (eraNames) => {
+        if (eraNames.length === 0) return ""
+        if (eraNames.length <= 2) {
+            return `<span class="opacity-60">(${eraNames.join(", ")})</span>`
+        }
+        const id = `eras-${expandCounter++}`
+        const firstTwo = eraNames.slice(0, 2).join(", ")
+        const all = eraNames.join(", ")
+        return `<span class="opacity-60">(<span data-full="${all}" data-short="${firstTwo}" class="era-toggle cursor-pointer" data-id="${id}">${firstTwo}, <span class="text-primary font-bold">…</span></span>)</span>`
+    }
 
     const mostWins = [...owners_list].sort((a, b) => b.wins - a.wins).slice(0, TOP_N)
     const mostLosses = [...owners_list].sort((a, b) => b.losses - a.losses).slice(0, TOP_N)
@@ -243,12 +264,25 @@ const renderCareerRecords = async () => {
     `
 
     container.innerHTML = 
-        card("Most Wins", rankedList(mostWins, (o) => `${o.wins} — ${ownerNameFor(o.ownerId)}`)) +
-        card("Most Losses", rankedList(mostLosses, (o) => `${o.losses} — ${ownerNameFor(o.ownerId)}`)) +
-        card("Most Championships", rankedList(mostTitles, (o) => `${o.titles} — ${ownerNameFor(o.ownerId)}`)) +
-        card("Most Toilet Bowls", rankedList(mostToilets, (o) => `${o.toilets} — ${ownerNameFor(o.ownerId)}`)) +
-        card("Best All-Time Win %", rankedList(bestWinPct, (o) => `${pct(o.winPct)} (${o.wins}-${o.losses}) — ${ownerNameFor(o.ownerId)}`)) +
-        card("Most Points For", rankedList(mostPoints, (o) => `${round1(o.pointsFor)} — ${ownerNameFor(o.ownerId)}`))
+        card("Most Wins", rankedList(mostWins, (o) => `${o.wins} — ${ownerNameFor(o.ownerId)} ${teamList(o.eraNames)}`)) +
+        card("Most Losses", rankedList(mostLosses, (o) => `${o.losses} — ${ownerNameFor(o.ownerId)} ${teamList(o.eraNames)}`)) +
+        card("Most Championships", rankedList(mostTitles, (o) => `${o.titles} — ${ownerNameFor(o.ownerId)} ${teamList(o.eraNames)}`)) +
+        card("Most Toilet Bowls", rankedList(mostToilets, (o) => `${o.toilets} — ${ownerNameFor(o.ownerId)} ${teamList(o.eraNames)}`)) +
+        card("Best All-Time Win %", rankedList(bestWinPct, (o) => `${pct(o.winPct)} (${o.wins}-${o.losses}) — ${ownerNameFor(o.ownerId)} ${teamList(o.eraNames)}`)) +
+        card("Most Points For", rankedList(mostPoints, (o) => `${round1(o.pointsFor)} — ${ownerNameFor(o.ownerId)} ${teamList(o.eraNames)}`))
+
+    container.querySelectorAll(".era-toggle").forEach((el) => {
+        el.addEventListener("click", () => {
+            const showingFull = el.dataset.showing === "true"
+            if (showingFull) {
+                el.innerHTML = `${el.dataset.short}, <span class="text-primary font-bold">...</span>`
+                el.dataset.showing = "false"
+            } else {
+                el.textContent = el.dataset.showingFull
+                el.dataset.showing = "true"
+            }
+        })
+    })
 }
 
 init()
