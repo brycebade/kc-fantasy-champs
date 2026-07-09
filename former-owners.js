@@ -15,6 +15,15 @@ const init = async () => {
     await loadFormerOwners()
 }
 
+const getFinishColor = (rank, lastRank) => {
+    const base = "border border-base-300 rounded-lg bg-base-100"
+    if (rank === 1) return `${base} border-l-[20px] border-l-[#D4AF37] pl-4`
+    if (rank === 2) return `${base} border-l-[20px] border-l-[#5A5F63] pl-4`
+    if (rank === 3) return `${base} border-l-[20px] border-l-[#CD7F32] pl-4`
+    if (rank === lastRank) return `${base} border-l-[20px] border-l-[#7B5E3B] pl-4`
+    return `${base} pl-[36px]`
+}
+
 const loadFormerOwners = async () => {
     const owners = await getOwners()
     const former = owners.filter((o) => o.current === false)
@@ -162,7 +171,7 @@ const renderOwnerSeasons = async (ownerId) => {
 
         const div = document.createElement("div")
         div.innerHTML = `
-            <div class="px-4 py-3 border-b border-base-300 last:border-0">
+            <div class="py-3 pr-4 mb-2 ${getFinishColor(rank, lastRank)}">
                 <p class="text-xs uppercase tracking-wide text-primary font-bold">
                     Season ${year} • ${seasonNameFor(row.team_id, year)} • ${row.win}-${row.loss}
                 </p>
