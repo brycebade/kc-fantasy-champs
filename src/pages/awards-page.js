@@ -8,7 +8,7 @@ const AWARD_DEFINITIONS = [
     { title: "Highest Score", description: "Most points scored in a single regular-season game." },
     { title: "Stinker of the Year", description: "Fewest points scored in a single regular-season game." },
     { title: "Offensive Juggernaut", description: "Most total points scored across the regular season." },
-    { title: "Biggest Blowout", description: "Largest margin of victory in a single." },
+    { title: "Biggest Blowout", description: "Largest margin of victory in a single game." },
     { title: "Backed In", description: "Lowest-scoring win of the season." },
     { title: "Hard-Luck", description: "Highest-scoring loss of the season." },
     { title: "Nail-Biter", description: "Closest final margin in a decided game." },
