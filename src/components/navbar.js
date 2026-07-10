@@ -128,8 +128,8 @@ export const renderNavbar = async () => {
                   <summary class="text-white">Schedule</summary>
                   <div class="absolute right-0 top-full mt-2 w-80 rounded-box bg-base-100 p-4 shadow z-[9999]">
                     <div id="schedulePreview" class="space-y-2 text-sm"></div>
-                    <a href="schedule.html?view=full" class="btn btn-primary btn-sm mt-4 w-full">Full Fantasy Schedule</a>
-                    <a href="nflSchedule.html" class="btn btn-primary btn-sm mt-2 w-full">Full NFL Schedule</a>
+                    <a href="schedule.html" class="btn btn-primary btn-sm mt-4 w-full">Full Fantasy Schedule</a>
+                    <a href="nflSchedule.html" class="btn btn-primary btn-sm mt-2 w-full">NFL Schedule</a>
                   </div>
                 </details>
               </li>
@@ -173,9 +173,8 @@ export const renderNavbar = async () => {
                 <details>
                   <summary>Schedule</summary>
                   <ul class="pl-4">
-                    <li><a href="schedule.html" id="currentWeekLinkMobile">Current Week</a></li>
-                    <li><a href="schedule.html?view=full">Full Fantasy Schedule</a></li>
-                    <li><a href="nflSchedule.html">Full NFL Schedule</a></li>
+                    <li><a href="schedule.html">Fantasy Schedule</a></li>
+                    <li><a href="nflSchedule.html">NFL Schedule</a></li>
                   </ul>
                 </details>
               </li>

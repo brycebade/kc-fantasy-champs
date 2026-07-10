@@ -1067,7 +1067,7 @@ export const renderPowerRankingsPage = async () => {
         const streakPart = extra.streak ? ` • ${extra.streak}` : ""
 
         return `
-            <div class="flex items-center justify-between gap-3 py-3 border-b border-base-300">
+            <div class="flex items-center justify-between gap-3 py-3">
                 <div class="flex items-center gap-3 min-w-0">
                     <span class="font-bold text-lg w-8 shrink-0 text-right ${rankColor}">${team.rank}</span>
                     <div class="min-w-0">
@@ -1087,6 +1087,6 @@ export const renderPowerRankingsPage = async () => {
     container.innerHTML = `
         <p class="text-xs uppercase tracking-wide opacity-60 mb-1">${subtitle}</p>
         ${blurbHTML}
-        <div>${rows}</div> 
+        <div class="divide-y divide-base-300">${rows}</div> 
     `
 }
