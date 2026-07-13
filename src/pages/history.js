@@ -140,7 +140,6 @@ export const renderLeagueHistory = async () => {
             }
         })
         .sort((a, b) => {
-            if (a.isActiveOwner !== b.isActiveOwner) return a.isActiveOwner ? -1 : 1
             if (b.titles !== a.titles) return b.titles - a.titles
             return b.adjPct - a.adjPct
         })
@@ -160,23 +159,18 @@ export const renderLeagueHistory = async () => {
     const renderOwnerRow = (o) => `
         <div class="flex items-start justify-between gap-3 py-3 border-b border-base-300 last:border-0">
             <div class="min-w-0">
-                <p class="font-semibold">${o.ownerName}</p>
+                <p class="font-semibold">${o.ownerName}${!o.isActiveOwner ? ` <span class="text-xs font-normal opacity-50">(former)</span>` : ""}</p>
                 <p class="text-xs opacity-70 mt-0.5">${o.teamLines}</p>
             </div>
             <span class="text-xs opacity-70 shrink-0 text-right">${o.titles} titles<br>${o.wins}-${o.losses}<br>${round1(o.pointsFor)} PF</span>
         </div>
     `
 
-    const currentOwners = ownerRows.filter((o) => o.isActiveOwner)
-    const formerOwners = ownerRows.filter((o) => !o.isActiveOwner)
-
-    const currentBody = currentOwners.length === 0
+    const allOwnersBody = ownerRows.length === 0
         ? `<p class="text-sm opacity-60">No Records Yet</p>`
-        : currentOwners.map(renderOwnerRow).join("")
-
-    const formerBody = formerOwners.map(renderOwnerRow).join("")
-
-    container.innerHTML =
-        card("Champions", championsBody) + 
-        card("All-Time Franchise Records", currentBody) +
-        (formerOwners.length > 0 ? card("Former Owners", formerBody) : "")}
+        : ownerRows.map(renderOwnerRow).join("")
+    
+    container.innerHTML = 
+        card("Champions", championsBody) +
+        card("All-Time Franchise Records", allOwnersBody)
+}
