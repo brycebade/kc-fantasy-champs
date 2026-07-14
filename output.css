@@ -2282,6 +2282,9 @@
   .h-16 {
     height: calc(var(--spacing) * 16);
   }
+  .h-24 {
+    height: calc(var(--spacing) * 24);
+  }
   .h-28 {
     height: calc(var(--spacing) * 28);
   }
@@ -2540,6 +2543,9 @@
     border-left-style: var(--tw-border-style);
     border-left-width: 20px;
   }
+  .border-base-100 {
+    border-color: var(--color-base-100);
+  }
   .border-base-300 {
     border-color: var(--color-base-300);
   }
@@ -2756,6 +2762,9 @@
   .uppercase {
     text-transform: uppercase;
   }
+  .line-through {
+    text-decoration-line: line-through;
+  }
   .prose {
     & :where(a.btn:not(.btn-link)):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
       text-decoration-line: none;
@@ -2865,6 +2874,12 @@
       --size: calc(var(--size-field, 0.25rem) * 6);
     }
   }
+  .btn-error {
+    @layer daisyui.l1.l2.l3 {
+      --btn-color: var(--color-error);
+      --btn-fg: var(--color-error-content);
+    }
+  }
   .btn-primary {
     @layer daisyui.l1.l2.l3 {
       --btn-color: var(--color-primary);
@@ -2875,6 +2890,12 @@
     @layer daisyui.l1.l2.l3 {
       --btn-color: var(--color-secondary);
       --btn-fg: var(--color-secondary-content);
+    }
+  }
+  .btn-success {
+    @layer daisyui.l1.l2.l3 {
+      --btn-color: var(--color-success);
+      --btn-fg: var(--color-success-content);
     }
   }
   .toggle-primary {

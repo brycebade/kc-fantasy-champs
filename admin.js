@@ -9,6 +9,7 @@ import { getAllTeamHistory } from "./src/api/teamsHistoryApi.js"
 import { getDraftResultsByTeamAndYear } from "./src/api/draftResultsApi.js"
 import { getAllFAPickupsByTeam } from "./src/api/faPickupsApi.js"
 import { getKeeperCost } from "./src/utils/keeperCost.js"
+import { getAllStorylines, addStoryline, getActiveStorylines, updateStorylineActive } from "./src/api/storylinesApi.js"
 
 const passwordSubmit = document.getElementById("passwordSubmit")
 const adminDashboard = document.getElementById("adminDashboard")
@@ -547,6 +548,54 @@ const addFAPickup = async () => {
     document.getElementById("faNFLTeam").value = ""
     loadRosterEditor()
 }
+
+const renderStorylinesList = async () => {
+    const storylines = await getAllStorylines()
+    const container = document.getElementById("storylinesListContainer")
+
+    container.innerHTML = storylines.map((s) => `
+        <div class="flex items-center justify-between gap-3 py-2 border-b border-base-300 last:border-0">
+            <div class="min-w-0">
+                <p class="font-semibold text-sm ${!s.is_active ? "opacity-40 line-through" : ""}">${s.headline}</p>
+                <p class="text-xs opacity-60">${s.blurb}</p>
+            </div>
+            <button class="btn btn-xs ${s.is_active ? "btn-error" : "btn-success"}" data-toggle-id="${s.id}" data-current-active="${s.is_active}">
+                ${s.is_active ? "Deactivate" : "Activate"}
+            </button>
+        </div>
+    `).join("")
+
+    container.querySelectorAll("[data-toggle-id]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+            const id = btn.dataset.toggleId
+            const currentActive = btn.dataset.currentActive === "true"
+            await updateStorylineActive(id, !currentActive)
+            await renderStorylinesList()
+        })
+    })
+}
+
+document.getElementById("addStoryline").addEventListener("click", async () => {
+    const headline = document.getElementById("storylineHeadline").value.trim()
+    const blurb = document.getElementById("storylineBlurb").value.trim()
+    const sortOrder = Number(document.getElementById("storylineSortOrder").value) || 0
+
+
+    if (!headline || !blurb) {
+        alert("Headline and blurb are required")
+        return
+    }
+
+    await addStoryline({ headline, blurb, sort_order: sortOrder })
+
+    document.getElementById("storylineHeadline").value = ""
+    document.getElementById("storylineBlurb").value = ""
+    document.getElementById("storylineSortOrder").value = ""
+
+    await renderStorylinesList()
+})
+
+renderStorylinesList()
 
 passwordSubmit.addEventListener("click", () => {
     const inputValue = document.getElementById("passwordInput").value
