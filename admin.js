@@ -10,6 +10,7 @@ import { getDraftResultsByTeamAndYear } from "./src/api/draftResultsApi.js"
 import { getAllFAPickupsByTeam } from "./src/api/faPickupsApi.js"
 import { getKeeperCost } from "./src/utils/keeperCost.js"
 import { getAllStorylines, addStoryline, getActiveStorylines, updateStorylineActive } from "./src/api/storylinesApi.js"
+import { getStorylineFacts, buildStoryLinesPrompt } from "./src/utils/storylineFacts.js"
 
 const passwordSubmit = document.getElementById("passwordSubmit")
 const adminDashboard = document.getElementById("adminDashboard")
@@ -596,6 +597,13 @@ document.getElementById("addStoryline").addEventListener("click", async () => {
 })
 
 renderStorylinesList()
+
+document.getElementById("generateStorylinesInput").addEventListener("click", async () => {
+    const facts = await getStorylineFacts()
+    const notes = document.getElementById("storylineAdminNotes").value.trim()
+    const prompt = buildStoryLinesPrompt(facts, notes)
+    document.getElementById("storylinesPromptOutput").value = prompt
+})
 
 passwordSubmit.addEventListener("click", () => {
     const inputValue = document.getElementById("passwordInput").value

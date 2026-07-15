@@ -163,6 +163,10 @@
                 <div class="card-body p-4">
                     <h2 class="card-title text-primary mb-2">Storylines</h2>
                     
+                    <textarea id="storylineAdminNotes" placeholder="Add any extra context or things you've notice(optional)" class="textarea textarea-bordered w-full h-20 mb-2"></textarea>
+                    <button id="generateStorylinesInput" class="btn btn-primary btn-sm mb-2">Generate Input for AI</button>
+                    <textarea id="storylinesPromptOutput" readonly class="textarea textarea-bordered w-full h-40 mb-4" placeholder="Click generate to build the text to paste into Claude/ChatGPT"></textarea>
+
                     <input id="storylineHeadline" type="text" placeholder="Headline" class="input input-bordered w-full mb-2">
                     <textarea id="storylineBlurb" placeholder="Blurb (1-2 sentences)" class="textarea textarea-bordered w-full h-24 mb-2"></textarea>
                     <input id="storylineSortOrder" type="number" placeholder="Sort Order" class="input input-bordered w-full mb-3">
