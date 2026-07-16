@@ -3,74 +3,20 @@ import { getAllTeamHistory } from "../api/teamsHistoryApi.js"
 import { getOwners } from "../api/ownersApi.js"
 import { getAllCompletedMatchups } from "../api/matchupsApi.js"
 
-const allMatchups = await getAllCompletedMatchups()
-const allSeasons = [...new Set(allMatchups.map((m) => m.season))].filter((s) => s < season).sort((a, b) => b - a)
-
-const priorStandingsBySeason = {}
-for (const s of allSeasons) {
-    priorStandingsBySeason[s] = await getStandings(s)
-}
-
-const toiletRepeatCount = (ownerId) => {
-    let count = 0
-    allSeasons.forEach((s) => {
-        const st = priorStandingsBySeason[s]
-        const ranked = st.filter((r) => r.final_rank != null)
-        const last = ranked.length ? Math.max(...ranked.map((r) => r.final_rank)) : null
-        const finisher = st.find((r) => r.final_rank === last)
-        if (finisher) {
-            const h = teamHistory.find((th) => 
-                th.team_id === finisher.team_id &&
-                s >= th.start_year && (th.end_year == null || s <= th.end_year)
-            )
-            if (h && h.owner_id === ownerId) count++
-        }
-    })
-    return count
-}
-
-const previousSeason = season - 1
-const previousChampStanding = priorStandingsBySeason[previousSeason]?.find((s) => s.final_rank === 1)
-let defendingChampFellOff = null
-if (previousChampStanding) {
-    const prevH = teamHistory.find((th) => 
-        th.team_id === previousChampStanding.team_id &&
-        previousSeason >= th.start_year && (th.end_year == null || previousSeason <= th.end_year)
-    )
-    if (prevH) {
-        const thisSeasonStanding = standings.find((s) => {
-            const h = historyFor(s.team_id)
-            return h && h.owner_id === prevH.owner_id
-        })
-
-        if (thisSeasonStanding && thisSeasonStanding.final_rank > 6) {
-            defendingChampFellOff = { owner: ownerNameById(prevH.owner_id), rank: thisSeasonStanding.final_rank }
-        }
-    }
-}
-
 export const getSeasonStoryFacts = async (season) => {
-    const [standings, teamHistory, owners] = await Promise.all([
+    const [standings, teamHistory, owners, allMatchups] = await Promise.all([
         getStandings(season),
         getAllTeamHistory(),
-        getOwners()
+        getOwners(),
+        getAllCompletedMatchups()
     ])
 
-    const rebrandsThisSeason = teamHistory.filter((h) => {
-        if (h.end_year !== season) return false
-        const nextEra = teamHistory.find((next) => 
-            next.team_id === h.team_id && next.start_year === season + 1
-        )
-        return nextEra && nextEra.owner_id === h.owner_id
-    })
+    const allSeasons = [...new Set(allMatchups.map((m) => m.season))].filter((s) => s < season).sort((a, b) => b - a)
 
-    const trueDeparturesEnteringThisSeason = teamHistory.filter((h) => {
-        if (h.end_year !== season - 1) return false
-        const nextEra = teamHistory.find((next) => 
-            next.team_id === h.team_id && next.start_year === season
-        )
-        return !nextEra || nextEra.owner_id !== h.owner_id
-    })
+    const priorStandingsBySeason = {}
+    for (const s of allSeasons) {
+        priorStandingsBySeason[s] = await getStandings(s)
+    }
 
     const historyFor = (teamId) =>
         teamHistory.find((h) => 
@@ -96,6 +42,52 @@ export const getSeasonStoryFacts = async (season) => {
         return h ? h.name : "Unknown Team"
     }
 
+    const ownerRankBySeason = {}
+    allSeasons.forEach((s) => {
+        const st = priorStandingsBySeason[s]
+        st.forEach((standing) => {
+            if (standing.final_rank == null) return
+            const h = teamHistory.find((th) =>
+                th.team_id === standing.team_id &&
+                s >= th.start_year && (th.end_year == null || s <= th.end_year)
+            )
+            if (!h) return
+            if (!ownerRankBySeason[h.owner_id]) ownerRankBySeason[h.owner_id] = {}
+            ownerRankBySeason[h.owner_id][s] = standing.final_rank
+        })
+    })
+
+    const toiletRepeatCount = (ownerId) => {
+        const ranks = ownerRankBySeason[ownerId] || {}
+        return Object.entries(ranks).filter(([s, rank]) => {
+            const st = priorStandingsBySeason[Number(s)]
+            const ranked = st.filter((r) => r.final_rank != null)
+            const lastRank = ranked.length ? Math.max(...ranked.map((r) => r.final_rank)) : null
+            return rank === lastRank
+        }).length
+    }
+
+    const champRepeatCount = (ownerId) => {
+        const ranks = ownerRankBySeason[ownerId] || {}
+        return Object.values(ranks).filter((rank) => rank === 1).length
+    }
+
+    const rebrandsThisSeason = teamHistory.filter((h) => {
+        if (h.end_year !== season) return false
+        const nextEra = teamHistory.find((next) => 
+            next.team_id === h.team_id && next.start_year === season + 1
+        )
+        return nextEra && nextEra.owner_id === h.owner_id
+    })
+
+    const trueDeparturesEnteringThisSeason = teamHistory.filter((h) => {
+        if (h.end_year !== season - 1) return false
+        const nextEra = teamHistory.find((next) => 
+            next.team_id === h.team_id && next.start_year === season
+        )
+        return !nextEra || nextEra.owner_id !== h.owner_id
+    })    
+
     const rebrandsIntoThisSeason = teamHistory.filter((h) => {
         if (h.start_year !== season) return false
         const prevEra = teamHistory.find((prev) =>
@@ -109,12 +101,6 @@ export const getSeasonStoryFacts = async (season) => {
         return { owner: ownerNameFor(h.team_id), oldName: prevEra.name, newName: h.name }
     })
 
-    const ranked = standings.filter((s) => s.final_rank != null)
-    const lastRank = ranked.length ? Math.max(...ranked.map((s) => s.final_rank)) : null
-
-    const champStanding = standings.find((s) => s.final_rank === 1)
-    const toiletStanding = standings.find((s) => s.final_rank === lastRank)
-
     const newOwnersThisSeason = teamHistory.filter((h) => {
         if (h.start_year !== season) return false
         const prevEra = teamHistory.find((prev) => 
@@ -123,6 +109,39 @@ export const getSeasonStoryFacts = async (season) => {
         const isRebranded = prevEra && prevEra.owner_id === h.owner_id
         return !isRebranded
     })
+
+    const ranked = standings.filter((s) => s.final_rank != null)
+    const lastRank = ranked.length ? Math.max(...ranked.map((s) => s.final_rank)) : null
+
+    const champStanding = standings.find((s) => s.final_rank === 1)
+    const toiletStanding = standings.find((s) => s.final_rank === lastRank)
+
+    const previousSeason = season - 1
+    const previousChampStanding = priorStandingsBySeason[previousSeason]?.find((s) => s.final_rank === 1)
+    let defendingChampFellOff = null
+    if (previousChampStanding) {
+        const prevH = teamHistory.find((th) => 
+            th.team_id === previousChampStanding.team_id &&
+            previousSeason >= th.start_year && (th.end_year == null || previousSeason <= th.end_year)
+        )
+        if (prevH) {
+            const thisSeasonRank = ownerRankBySeason[prevH.owner_id]?.[season]
+            if (thisSeasonRank && thisSeasonRank > 6) {
+                defendingChampFellOff = { owner: ownerNameById(prevH.owner_id), rank: thisSeasonRank }
+            }
+        }
+    }
+
+    const biggestClimb = ranked
+        .map((standing) => {
+            const h = historyFor(standing.team_id)
+            if (!h) return null
+            const prevRank = ownerRankBySeason[h.owner_id]?.[previousSeason]
+            if (!prevRank) return null
+            return { owner: ownerNameById(h.owner_id), from: prevRank, to: standing.final_rank, jump: prevRank - standing.final_rank }
+        })
+        .filter(Boolean)
+        .sort((a, b) => b.jump - a.jump)[0]
 
     const standingsSummary = ranked
         .sort((a, b) => a.final_rank - b.final_rank)
@@ -134,8 +153,19 @@ export const getSeasonStoryFacts = async (season) => {
         toilet: toiletStanding ? { team: teamNameFor(toiletStanding.team_id), owner: ownerNameFor(toiletStanding.team_id), record: `${toiletStanding.win}-${toiletStanding.loss}` } : null,
         newOwners: newOwnersThisSeason.map((h) => ownerNameFor(h.team_id)),
         rebrands: rebrandsThisSeason.map((h) => ({ owner: ownerNameFor(h.team_id), oldName: h.name, newName: teamHistory.find((next) => next.team_id === h.team_id && next.start_year === season + 1)?.name })),
+        toiletRepeats: ranked.filter((s) => {
+            const h = historyFor(s.team_id)
+            return h && toiletRepeatCount(h.owner_id) >= 2 && s.final_rank === lastRank
+        }).map((s) => ({ owner: ownerNameById(historyFor(s.team_id).owner_id), count: toiletRepeatCount(historyFor(s.team_id).owner_id) })),
+        champRepeats: champStanding ? (() => {
+            const h = historyFor(champStanding.team_id)
+            const count = h ? champRepeatCount(h.owner_id) : 0
+            return count >= 2 ? { owner: ownerNameById(h.owner_id), count } : null
+        })() : null,
+        defendingChampFellOff,
         trueDepartures: trueDeparturesEnteringThisSeason.map((h) => ownerNameById(h.owner_id)),
         rebrandsIntoThisSeason,
+        biggestClimb: biggestClimb && biggestClimb.jump >= 3 ? biggestClimb : null,
         standingsSummary
     }
 }
@@ -162,6 +192,22 @@ export const buildSeasonStoryPrompt = (facts, adminNotes) => {
     facts.rebrandsIntoThisSeason.forEach((r) => {
         lines.push(`${r.owner} rebranded their team from "${r.oldName}" to "${r.newName}" this season`)
     })
+
+    facts.toiletRepeats.forEach((t) => {
+        lines.push(`${t.owner} has now finished last (Toilet Bowl) ${t.count} times`)
+    })
+
+    if (facts.champRepeats) {
+        lines.push(`${facts.champRepeats.owner} has now won the championship ${facts.champRepeats.count} times`)
+    }
+    
+    if (facts.defendingChampFellOff) {
+        lines.push(`The defending champion, ${facts.defendingChampFellOff.owner}, failed to make playoffs this season, finishing ${facts.defendingChampFellOff.rank}th (top 6 make playoffs)`)
+    }
+
+    if (facts.biggestClimb) {
+        lines.push(`Biggest turnaround: ${facts.biggestClimb.owner} jumped from ${facts.biggestClimb.from}th place last season to ${facts.biggestClimb.to}th this season`)
+    }
 
     lines.push(`Full final standings:\n${facts.standingsSummary.join("\n")}`)
 
