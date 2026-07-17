@@ -12,7 +12,7 @@ import { getKeeperCost } from "./src/utils/keeperCost.js"
 import { getAllStorylines, addStoryline, getActiveStorylines, updateStorylineActive } from "./src/api/storylinesApi.js"
 import { getStorylineFacts, buildStoryLinesPrompt } from "./src/utils/storylineFacts.js"
 import { getSeasonStoryFacts, buildSeasonStoryPrompt } from "./src/utils/leagueStoryFacts.js"
-import { getLeagueStory, addLeagueStoryChapter } from "./src/api/leagueStoryApi.js"
+import { getLeagueStory, addLeagueStoryChapter, updateLeagueStoryChapter } from "./src/api/leagueStoryApi.js"
 
 const passwordSubmit = document.getElementById("passwordSubmit")
 const adminDashboard = document.getElementById("adminDashboard")
@@ -636,23 +636,40 @@ const renderStoryChaptersList = async () => {
     const container = document.getElementById("storyChaptersListContainer")
 
     container.innerHTML = chapters.map((c) => `
-        <div class="py-2 border-b border-base-300 last:border-0">
+        <div class="flex items-center justify-between gap-3 py-2 border-b border-base-300 last:border-0">
             <p class="font-semibold text-sm">${c.season} — ${c.title}</p>
+            <button class="btn btn-xs" data-edit-id="${c.id}" data-season="${c.season}" data-title="${c.title}">Edit</button>
         </div>
     `).join("")
+
+    container.querySelectorAll("[data-edit-id").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            const chapter = chapters.find((c) => c.id === Number(btn.dataset.editId))
+            document.getElementById("storySeasonSelect").value = chapter.season
+            document.getElementById("storyChapterTitle").value - chapter.title
+            document.getElementById("storyChapterBody").value = chapter.body
+            document.getElementById("saveStoryChapter").dataset.editingId = chapter.id
+        })
+    })
 }
 
 document.getElementsById("saveStoryChapter").addEventListener("click", async () => {
     const season = Number(document.getElementById("storySeasonSelect").value)
     const title = document.getElementById("storyChapterTitle").value.trim()
     const body = document.getElementById("storyChapterBody").value.trim()
+    const editingId = document.getElementById("saveStoryChapter").dataset.editingId
 
     if (!title || !body) {
         alert("Title and chapter body are required")
         return
     }
 
-    await addLeagueStoryChapter({ season, title, body })
+    if (editingId) {
+        await updateLeagueStoryChapter(Number(editingId), title, body)
+        delete document.getElementById("saveStoryChapter").dataset.editingId
+    } else {
+        await addLeagueStoryChapter({ season, title, body })
+    }
 
     document.getElementById("storyChapterTitle").value = ""
     document.getElementById("storyChapterBody").value = ""

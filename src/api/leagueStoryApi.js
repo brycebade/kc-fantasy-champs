@@ -27,3 +27,17 @@ export const addLeagueStoryChapter = async (chapter) => {
 
     return data
 }
+
+export const updateLeagueStoryChapter = async (id, title, body) => {
+    const { error } await supabase
+        .from("league_story")
+        .update({ title, body })
+        .eq("id", id)
+
+    if (error) {
+        console.error("Error updating league story chapter:", error)
+        return false
+    }
+
+    return true
+}
