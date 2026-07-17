@@ -712,11 +712,3 @@ passwordSubmit.addEventListener("click", () => {
        document.getElementById('errorMessage').textContent = "Incorrect Password"
     }
 })
-
-import { getSeasonStoryFacts, buildSeasonStoryPrompt } from "./src/utils/leagueStoryFacts.js"
-
-window.testStory = async (season) => {
-    const facts = await getSeasonStoryFacts(season)
-    const prompt = buildSeasonStoryPrompt(facts, "")
-    console.log(prompt)
-}
