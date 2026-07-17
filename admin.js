@@ -11,6 +11,8 @@ import { getAllFAPickupsByTeam } from "./src/api/faPickupsApi.js"
 import { getKeeperCost } from "./src/utils/keeperCost.js"
 import { getAllStorylines, addStoryline, getActiveStorylines, updateStorylineActive } from "./src/api/storylinesApi.js"
 import { getStorylineFacts, buildStoryLinesPrompt } from "./src/utils/storylineFacts.js"
+import { getSeasonStoryFacts, buildSeasonStoryPrompt } from "./src/utils/leagueStoryFacts.js"
+import { getLeagueStory, addLeagueStoryChapter } from "./src/api/leagueStoryApi.js"
 
 const passwordSubmit = document.getElementById("passwordSubmit")
 const adminDashboard = document.getElementById("adminDashboard")
@@ -604,6 +606,62 @@ document.getElementById("generateStorylinesInput").addEventListener("click", asy
     const prompt = buildStoryLinesPrompt(facts, notes)
     document.getElementById("storylinesPromptOutput").value = prompt
 })
+
+const populateStorySeasonSelect = async () => {
+    const select = document.getElementById("storySeasonSelect")
+    const settings = await getCurrentSeasonSettings()
+    const startSeason = 2013
+    const endSeason = settings.season
+
+    select.innerHTML = ""
+    for (let s = startSeason; s <= endSeason; s++) {
+        const option = document.createElement("option")
+        option.value = s
+        option.textContent = s
+        select.appendChild(option)
+    }
+}
+
+document.getElementById("generateStoryInput").addEventListener("click", async () => {
+    const season = Number(document.getElementById("storySeasonSelect").value)
+    const notes = document.getElementById("storyAdminNotes").value.trim()
+
+    const facts = await getSeasonStoryFacts(season)
+    const prompt = buildSeasonStoryPrompt(facts, notes)
+    document.getElementById("storyPromptOutput").value = prompt
+})
+
+const renderStoryChaptersList = async () => {
+    const chapters = await getLeagueStory()
+    const container = document.getElementById("storyChaptersListContainer")
+
+    container.innerHTML = chapters.map((c) => `
+        <div class="py-2 border-b border-base-300 last:border-0">
+            <p class="font-semibold text-sm">${c.season} — ${c.title}</p>
+        </div>
+    `).join("")
+}
+
+document.getElementsById("saveStoryChapter").addEventListener("click", async () => {
+    const season = Number(document.getElementById("storySeasonSelect").value)
+    const title = document.getElementById("storyChapterTitle").value.trim()
+    const body = document.getElementById("storyChapterBody").value.trim()
+
+    if (!title || !body) {
+        alert("Title and chapter body are required")
+        return
+    }
+
+    await addLeagueStoryChapter({ season, title, body })
+
+    document.getElementById("storyChapterTitle").value = ""
+    document.getElementById("storyChapterBody").value = ""
+
+    await renderStoryChaptersList()
+})
+
+populateStorySeasonSelect()
+renderStoryChaptersList()
 
 passwordSubmit.addEventListener("click", () => {
     const inputValue = document.getElementById("passwordInput").value

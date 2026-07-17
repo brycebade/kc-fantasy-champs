@@ -51,6 +51,7 @@
                     <a role="tab" class="tab" data-tab="blurb">Blurb</a>
                     <a role="tab" class="tab" data-tab="roster">Roster</a>
                     <a role="tab" class="tab" data-tab="storylines">Storylines</a>
+                    <a role="tab" class="tab" data-tab="leagueStory">League Story</a>
                 </div>
             </div>
         </div>
@@ -175,6 +176,28 @@
 
                     <div class="divider text-xs opacity-60">Existing Storylines</div>
                     <div id="storylinesListContainer"></div>
+                </div>
+            </div>
+        </div>
+
+        <div data-panel="leagueStory" style="display: none">
+            <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl mb-6">
+                <div class="card-body p-4">
+                    <h2 class="card-title text-primary mb-2">League Story</h2>
+
+                    <select id="storySeasonSelect" class="select select-bordered w-full mb-3"></select>
+
+                    <textarea id="storyAdminNotes" placeholder="Any extra context or moments to include (optional)" class="textarea textarea-bordered w-full h-20 mb-2"></textarea>
+                    <button id="generateStoryInput" class="btn btn-primary btn-sm mb-2">Generate Input for AI</button>
+                    <textarea id="storyPromptOutput" readonly class="textarea textarea=bordered w-full h-48 mb-4" placeholder="Click generate to build the text to paste into Claude/ChatGPT"></textarea>
+
+                    <input id="storyChapterTitle" type="text" placeholder="Chapter Title" class="input input-bordered w-full mb-2">
+                    <textarea id="storyChapterBody" placeholder="Past the AI-wirtten chapter here" class="textarea textarea-bordered w-full h-40 mb-3"></textarea>
+
+                    <button id="saveStoryChapter" class="btn btn-primary w-full mb-6">Save Chapter</button>
+
+                    <div class="divider text-xs opacity-60">Existing Chapters</div>
+                    <div id="storyChaptersListContainer"></div>
                 </div>
             </div>
         </div>
