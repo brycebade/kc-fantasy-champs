@@ -682,6 +682,13 @@ document.getElementById("saveStoryChapter").addEventListener("click", async () =
 populateStorySeasonSelect()
 renderStoryChaptersList()
 
+document.getElementById("storySeasonSelect").addEventListener("change", () => {
+    document.getElementById("storyAdminNotes").value = ""
+    document.getElementById("storyPromptOutput").value = ""
+    document.getElementById("storyChapterTitle").value = ""
+    document.getElementById("storyChapterBody").value = ""
+})
+
 passwordSubmit.addEventListener("click", () => {
     const inputValue = document.getElementById("passwordInput").value
     
