@@ -25,7 +25,7 @@ const setupTabs = () => {
         tab.addEventListener("click", () => {
             const target = tab.getAttribute("data-tab")
 
-            tabs.forEach((t) => t.classList.remove("table-active"))
+            tabs.forEach((t) => t.classList.remove("tab-active"))
             tab.classList.add("tab-active")
 
             panels.forEach((p) => {
@@ -287,7 +287,7 @@ const recalculateStandings = async (season) => {
 
     const teams = await getTeams()
 
-    for (const teams of teams) {
+    for (const team of teams) {
         const teamMatchups = completedMatchups.filter(m => 
             m.team_1_id === team.id || m.team_2_id === team.id  
         )
@@ -642,18 +642,18 @@ const renderStoryChaptersList = async () => {
         </div>
     `).join("")
 
-    container.querySelectorAll("[data-edit-id").forEach((btn) => {
+    container.querySelectorAll("[data-edit-id]").forEach((btn) => {
         btn.addEventListener("click", () => {
             const chapter = chapters.find((c) => c.id === Number(btn.dataset.editId))
             document.getElementById("storySeasonSelect").value = chapter.season
-            document.getElementById("storyChapterTitle").value - chapter.title
+            document.getElementById("storyChapterTitle").value = chapter.title
             document.getElementById("storyChapterBody").value = chapter.body
             document.getElementById("saveStoryChapter").dataset.editingId = chapter.id
         })
     })
 }
 
-document.getElementsById("saveStoryChapter").addEventListener("click", async () => {
+document.getElementById("saveStoryChapter").addEventListener("click", async () => {
     const season = Number(document.getElementById("storySeasonSelect").value)
     const title = document.getElementById("storyChapterTitle").value.trim()
     const body = document.getElementById("storyChapterBody").value.trim()

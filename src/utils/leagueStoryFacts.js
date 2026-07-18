@@ -68,7 +68,8 @@ export const getSeasonStoryFacts = async (season) => {
     const toiletRepeatCount = (ownerId) => {
         const ranks = ownerRankBySeason[ownerId] || {}
         return Object.entries(ranks).filter(([s, rank]) => {
-            const st = Number(s) === season ? standings : priorStandingsBySeason[Number(s)]
+            if (Number(s) >= season) return false
+            const st = priorStandingsBySeason[Number(s)]
             const ranked = st.filter((r) => r.final_rank != null)
             const lastRank = ranked.length ? Math.max(...ranked.map((r) => r.final_rank)) : null
             return rank === lastRank
@@ -77,7 +78,7 @@ export const getSeasonStoryFacts = async (season) => {
 
     const champRepeatCount = (ownerId) => {
         const ranks = ownerRankBySeason[ownerId] || {}
-        return Object.values(ranks).filter((rank) => rank === 1).length
+        return Object.entries(ranks).filter(([s, rank]) => Number(s) < season && rank === 1).length
     }
 
     const rebrandsThisSeason = teamHistory.filter((h) => {
@@ -148,6 +149,8 @@ export const getSeasonStoryFacts = async (season) => {
         let checkSeason = season
         while (true) {
             const rank = ownerRankBySeason[ownerId]?.[checkSeason]
+            if (rank === undefined) break
+
             const st = checkSeason === season ? standings : priorStandingsBySeason[checkSeason]
             const rankedThatSeason = st.filter((r) => r.final_rank != null)
             const lastRankThatSeason = rankedThatSeason.length ? Math.max(...rankedThatSeason.map((r) => r.final_rank)) : null

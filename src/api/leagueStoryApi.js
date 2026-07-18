@@ -29,7 +29,7 @@ export const addLeagueStoryChapter = async (chapter) => {
 }
 
 export const updateLeagueStoryChapter = async (id, title, body) => {
-    const { error } await supabase
+    const { error } = await supabase
         .from("league_story")
         .update({ title, body })
         .eq("id", id)

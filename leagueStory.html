@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="kcTheme">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>League Story | KC Fantasy Champs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./output.css">
+    <script>
+        try {
+            const cached = localStorage.getItem("kc-last-theme")
+            if (cached) document.documentElement.setAttribute("data-theme", cached)
+        } catch (e) {}
+    </script>
+</head>
+<body class="bg-base-200 text-base-content min-h-screen overflow-x-hidden">
+    <div id="navbar"></div>
+    <div id="archiveNav"></div>
+
+    <div class="max-w-2xl mx-auto px-4 py-8">
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-3xl font-bold text-primary mb-6">League Story</h1>
+            <select id="seasonJumpSelect" class="select select-bordered select-sm w-32"></select>
+        </div>
+        <div id="leagueStoryContainer"></div>
+    </div>
+    
+    <script type="module" src="./leagueStory.js"></script>
+</body>
+</html>
