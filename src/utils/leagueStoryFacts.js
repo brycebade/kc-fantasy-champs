@@ -1,14 +1,15 @@
 import { getStandings } from "../api/standingsApi.js"
 import { getAllTeamHistory } from "../api/teamsHistoryApi.js"
 import { getOwners } from "../api/ownersApi.js"
-import { getAllCompletedMatchups } from "../api/matchupsApi.js"
+import { getAllCompletedMatchups, getMatchups } from "../api/matchupsApi.js"
 
 export const getSeasonStoryFacts = async (season) => {
-    const [standings, teamHistory, owners, allMatchups] = await Promise.all([
+    const [standings, teamHistory, owners, allMatchups, seasonMatchups] = await Promise.all([
         getStandings(season),
         getAllTeamHistory(),
         getOwners(),
-        getAllCompletedMatchups()
+        getAllCompletedMatchups(),
+        getMatchups(season)
     ])
 
     const allSeasons = [...new Set(allMatchups.map((m) => m.season))].filter((s) => s < season).sort((a, b) => b - a)
@@ -119,6 +120,18 @@ export const getSeasonStoryFacts = async (season) => {
         return !isRebranded
     })
 
+    const seasonMatchupLines = seasonMatchups
+        .filter((m) => m.team_1_score !== null && m.team_2_score !== null)
+        .map((m) => {
+            const team1 = ownerNameFor(m.team_1_id)
+            const team2 = ownerNameFor(m.team_2_id)
+            const score1 = Number(m.team_1_score)
+            const score2 = Number(m.team_2_score)
+            const margin = Math.abs(score1 - score2)
+            const label = m.matchup_type === "playoff" ? "Playoffs" : "Regular Season"
+            return `[${label}] Week ${m.week}: ${team1} ${score1} - ${score2} ${team2} (margin: ${margin.toFixed(1)})`
+        })
+
     const ranked = standings.filter((s) => s.final_rank != null)
     const lastRank = ranked.length ? Math.max(...ranked.map((s) => s.final_rank)) : null
 
@@ -220,6 +233,7 @@ export const getSeasonStoryFacts = async (season) => {
 
     return {
         season,
+        seasonMatchupLines,
         champion: champStanding ? { team: teamNameFor(champStanding.team_id), owner: ownerNameFor(champStanding.team_id), record: `${champStanding.win}-${champStanding.loss}` } : null,
         toilet: toiletStanding ? { team: teamNameFor(toiletStanding.team_id), owner: ownerNameFor(toiletStanding.team_id), record: `${toiletStanding.win}-${toiletStanding.loss}` } : null,
         newOwners: newOwnersThisSeason.map((h) => ownerNameFor(h.team_id)),
@@ -279,6 +293,8 @@ export const buildSeasonStoryPrompt = (facts, adminNotes) => {
     if (facts.biggestClimb) {
         lines.push(`Biggest turnaround: ${facts.biggestClimb.owner} jumped from ${facts.biggestClimb.from}th place last season to ${facts.biggestClimb.to}th this season`)
     }
+
+    lines.push(`\nWeek-by-week matchup log (look for anything narratively interesting here - a blowout, a win/loss streak, a nail-biter - but don't force it if nothing stands out):\n${facts.seasonMatchupLines.join("\n")}`)
 
     lines.push(`Full final standings:\n${facts.standingsSummary.join("\n")}`)
 
