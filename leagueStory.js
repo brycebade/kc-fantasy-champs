@@ -29,6 +29,7 @@ const renderChapters = async () => {
     jumpSelect.addEventListener("change", (e) => {
         if (!e.target.value) return
         document.getElementById(`season-${e.target.value}`)?.scrollIntoView({ behavior: "smooth" })
+        jumpSelect.value = ""
     })
 }
 
