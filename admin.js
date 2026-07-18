@@ -673,6 +673,8 @@ document.getElementById("saveStoryChapter").addEventListener("click", async () =
 
     document.getElementById("storyChapterTitle").value = ""
     document.getElementById("storyChapterBody").value = ""
+    document.getElementById("storyAdminNotes").value = ""
+    document.getElementById("storyPromptOutput").value = ""
 
     await renderStoryChaptersList()
 })
