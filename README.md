@@ -4,6 +4,16 @@ The official website for the KC Fantasy Champs fantasy football league — runni
 
 🔗 **[kcfantasychamps.com](https://kcfantasychamps.com)**
 
+## Screenshots
+
+| Home | League Story |
+|---|---|
+| ![Home page](./assets/readme/home-desktop.png) | ![League Story](./assets/readme/league-story.png) |
+
+| Power Rankings | Home (Mobile) |
+|---|---|
+| ![Power Rankings](./assets/readme/power-rankings.png) | ![Home page mobile](./assets/readme/home-mobile.png) |
+
 ## Features
 
 - **Home dashboard** — draft order, upcoming events, live power rankings, storylines, fantasy news, and NFL scores at a glance
