@@ -9,6 +9,7 @@ import { renderHeadToHead } from "./src/components/headToHeadDisplay.js"
 import { renderTeamAwards } from "./src/components/teamAwardsDisplay.js"
 import { getAllTeamHistory } from "./src/api/teamsHistoryApi.js"
 import { getKeeperCost } from "./src/utils/keeperCost.js"
+import { getCurrentSeasonSettings } from "./src/api/seasonSettingsApi.js"
 
 const params = new URLSearchParams(window.location.search)
 const teamSlug = params.get("team")
@@ -100,13 +101,16 @@ const loadDraftPicks = async (teamId, season) => {
 }
 
 const loadRoster = async (selectedTeam) => {
-    const draftPlayers = await getRosterByTeam(selectedTeam.id, 2025)
-    const faPickups = await getFAPickupsByTeam(selectedTeam.id, 2025)
+    const settings = await getCurrentSeasonSettings()
+    const season = settings.season
+
+    const draftPlayers = await getRosterByTeam(selectedTeam.id, season)
+    const faPickups = await getFAPickupsByTeam(selectedTeam.id, season)
     const fullRoster = [...draftPlayers, ...faPickups]
-    const positionOrder = ["QB", "RB", "WR", "TE", "DEF", "K"]
+    const positionOrder = ["QB", "RB", "WR", "TE", "DEF", "K", "PK"]
 
     fullRoster.sort((a, b) => {
-        return positionOrder.indexOf(a.position) - positionOrder.indexOf(b.position)
+        return positionOrder.indexOf(a.position.toUpperCase()) - positionOrder.indexOf(b.position.toUpperCase())
     })
 
     const container = document.getElementById("rosterContainer")
