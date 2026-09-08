@@ -3,13 +3,15 @@ import { getTeams } from "../api/teamsApi.js"
 import { getMatchups } from "../api/matchupsApi.js"
 import { getHeadToHeadWinner } from "../utils/standingsUtils.js"
 import { renderNavbar } from "../components/navbar.js"
+import { getCurrentSeasonSettings } from "../api/seasonSettingsApi.js"
 
 const init = async () => {
     await renderNavbar()
     await renderStandings()
 }
 
-const season = 2025
+const settings = await getCurrentSeasonSettings()
+const season = settings.season
 
 const isSeasonFinished = (matchups) => {
     const week17Matchups = matchups.filter((matchup) => {
@@ -132,12 +134,15 @@ export const renderCompactStandings = async () => {
         row.className = "flex items-center justify-between gap-3"
 
         row.innerHTML = `
-            <span class="truncate">
+            <span class="truncate flex-1">
                 ${index + 1}. ${team?.current_name || "Unknown"}
             </span>
 
             <span class="font-semibold whitespace-nowrap">
                 (${standing.win}-${standing.loss})
+            </span>
+            <span class="text-xs opacity-70 whitespace-nowrap w-12 text-right">
+                ${(standing.win / (standing.win + standing.loss) || 0).toFixed(3).replace(/^0\./, ".")}
             </span>
         `
 
