@@ -10,9 +10,6 @@ const init = async () => {
     await renderStandings()
 }
 
-const settings = await getCurrentSeasonSettings()
-const season = settings.season
-
 const isSeasonFinished = (matchups) => {
     const week17Matchups = matchups.filter((matchup) => {
         return Number(matchup.week) === 17
@@ -60,7 +57,20 @@ const sortByFinalRank = (standings) => {
     })
 }
 
+const sortAlphabetically = (standings, teams) => {
+    standings.sort((a, b) => {
+        const teamA = findTeam(teams, a.team_id)
+        const teamB = findTeam(teams, b.team_id)
+        const nameA = teamA?.current_name || ""
+        const nameB = teamB?.current_name || ""
+        return nameA.localeCompare(nameB)
+    })
+}
+
 export const renderStandings = async () => {
+    const settings = await getCurrentSeasonSettings()
+    const season = settings.season
+
     const standingsTableBody = document.getElementById("standingsTableBody")
 
     if (!standingsTableBody) return
@@ -70,9 +80,12 @@ export const renderStandings = async () => {
     const matchups = await getMatchups(season)
 
     const seasonFinished = isSeasonFinished(matchups)
+    const noGamesPlayed = standings.every((s) => s.wins === 0 && s.loss === 0)
 
     if (seasonFinished) {
         sortByFinalRank(standings)
+    } else if (noGamesPlayed) {
+        sortAlphabetically(standings, teams)
     } else {
         sortStandings(standings, matchups)
     }
@@ -107,7 +120,10 @@ export const renderStandings = async () => {
 }
 
 export const renderCompactStandings = async () => {
-    const standingsPreview = document.getElementById("standingsPreview")
+    const settings = await getCurrentSeasonSettings()
+    const season = settings.season
+
+    const standingsPreview = document.getElementById("homeStandingsPreview")
 
     if (!standingsPreview) return
 
