@@ -52,6 +52,7 @@
                     <a role="tab" class="tab" data-tab="roster">Roster</a>
                     <a role="tab" class="tab" data-tab="storylines">Storylines</a>
                     <a role="tab" class="tab" data-tab="leagueStory">League Story</a>
+                    <a role="tab" class="tab" dta-tab="draftGrades">Draft Grades</a>
                 </div>
             </div>
         </div>
@@ -198,6 +199,25 @@
 
                     <div class="divider text-xs opacity-60">Existing Chapters</div>
                     <div id="storyChaptersListContainer"></div>
+                </div>
+            </div>
+        </div>
+
+        <div data-panel="draftGrades" style="display: none">
+            <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl mb-6">
+                <div class="card-body p-4">
+                    <h2 class="card-title text-primary mb-2">Draft Grades</h2>
+
+                    <select id="draftGradesSeasonSelect" class="select select-bordered w-full mb-3"></select>
+
+                    <textarea id="draftGradesAdminNotes" placeholder="Any extra context (optional)" class="textarea textarea-bordered w-full h-20 mb-2"></textarea>
+                    <button id="generateDraftGrafesInput" class="btn btn-primary btn-sm mb-2">Generate Input for AI</button>
+                    <textarea id="draftGradesPromptOutput" readonly class="textarea textarea-boredered w-full h-48 mb-4" placeholder="Click generate to build the text to paste into Claude/ChatGPT"></textarea>
+
+                    <input id="draftGradesHeadline" type="text" placeholder="Headline" class="input input-bordered w-full mb-2">
+                    <textarea id="draftGradesBody" placeholder="Paste the AI-written article here" class="textarea textarea-bordered w-full h-40 mb-3"></textarea>
+
+                    <button id="saveDraftGrades" class="btn btn-primary w-full">Save Draft Grades</button>
                 </div>
             </div>
         </div>
