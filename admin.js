@@ -13,6 +13,8 @@ import { getAllStorylines, addStoryline, getActiveStorylines, updateStorylineAct
 import { getStorylineFacts, buildStoryLinesPrompt } from "./src/utils/storylineFacts.js"
 import { getSeasonStoryFacts, buildSeasonStoryPrompt } from "./src/utils/leagueStoryFacts.js"
 import { getLeagueStory, addLeagueStoryChapter, updateLeagueStoryChapter } from "./src/api/leagueStoryApi.js"
+import { getDraftGradeFacts, buildDraftGradesPrompt } from "./src/utils/draftGradesFacts.js"
+import { getDraftGrades, addDraftGrades, updateDraftGrades } from "./src/api/draftGradesApi.js"
 
 const passwordSubmit = document.getElementById("passwordSubmit")
 const adminDashboard = document.getElementById("adminDashboard")
@@ -578,6 +580,21 @@ const renderStorylinesList = async () => {
     })
 }
 
+const populateDraftGradesSeasonSelect = async () => {
+    const select = document.getElementById("draftGradesSeasonSelect")
+    const settings = await getCurrentSeasonSettings()
+    const startSeason = 2013
+    const endSeason = settings.season
+
+    select.innerHTML = ""
+    for (let s = endSeason; s >= startSeason; s--) {
+        const option = document.createElement("option")
+        option.value = s
+        option.textContent = s
+        select.appendChild(option)
+    }
+}
+
 document.getElementById("addStoryline").addEventListener("click", async () => {
     const headline = document.getElementById("storylineHeadline").value.trim()
     const blurb = document.getElementById("storylineBlurb").value.trim()
@@ -688,6 +705,43 @@ document.getElementById("storySeasonSelect").addEventListener("change", () => {
     document.getElementById("storyChapterTitle").value = ""
     document.getElementById("storyChapterBody").value = ""
 })
+
+document.getElementById("generateDraftGradesInput").addEventListener("click", async () => {
+    const season = Number(document.getElementById("draftGrafesSeasonSelect").value)
+    const notes = document.getElementById("draftGradesAdminNotes").value.trim()
+
+    const draftLines = await getDraftGradesFacts(season)
+    const prompt = buildDraftGradesPrompt(season, draftLines, notes)
+    document.getElementById("draftGradesPromptOutput").value = prompt
+})
+
+document.getElementById("saveDraftGrades").addEventListener("click", async () => {
+    const season = Number(document.getElementById("draftGradesSeasonSelect").value)
+    const headline = document.getElementById("draftGradesHeadline").value.trim()
+    const body = document.getElementById("draftGradesBody").value.trim()
+
+    if (!headline || !body) {
+        alert("Headline and body are required")
+        return
+    }
+
+    const existing = await getDraftGrades(season)
+
+    if (existing) {
+        await updateDraftGrades(season, headline, body)
+    } else {
+        await addDraftGrades(season, headline, body)
+    }
+
+    alert(`Draft grades saved for ${season}`)
+
+    document.getElementById("draftGradesHeadline").value = ""
+    document.getElementById("draftGradesBody").value = ""
+    document.getElementById("draftGradesAdminNotes").value = ""
+    document.getElementById("draftGradesPromptOutput").value = ""
+})
+
+populateDraftGradesSeasonSelect()
 
 passwordSubmit.addEventListener("click", () => {
     const inputValue = document.getElementById("passwordInput").value
