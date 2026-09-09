@@ -707,10 +707,10 @@ document.getElementById("storySeasonSelect").addEventListener("change", () => {
 })
 
 document.getElementById("generateDraftGradesInput").addEventListener("click", async () => {
-    const season = Number(document.getElementById("draftGrafesSeasonSelect").value)
+    const season = Number(document.getElementById("draftGradesSeasonSelect").value)
     const notes = document.getElementById("draftGradesAdminNotes").value.trim()
 
-    const draftLines = await getDraftGradesFacts(season)
+    const draftLines = await getDraftGradeFacts(season)
     const prompt = buildDraftGradesPrompt(season, draftLines, notes)
     document.getElementById("draftGradesPromptOutput").value = prompt
 })
