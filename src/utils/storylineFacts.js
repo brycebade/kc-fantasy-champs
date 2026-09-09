@@ -2,34 +2,6 @@ import { getAllCompletedMatchups } from "../api/matchupsApi.js"
 import { getStandings } from "../api/standingsApi.js"
 import { getAllTeamHistory, getTeamHistory } from "../api/teamsHistoryApi.js"
 import { getOwners } from "../api/ownersApi.js"
-import { getDraftResults}
-
-export const getDraftGradeFacts = async (season) => {
-    const draftResults = await getDraftResultsByYear(season)
-    const teams = await getTeams()
-
-    const byTeam = {}
-    draftResults.forEach((pick) => {
-        if (!byTeam[pick.team_id]) byTeam[pick.team_id] = []
-        byTeam[pick.team_id].push(pick)
-    })
-
-    const lines = Object.entries(byTeam).map(([teamId, picks]) => {
-        const team = teams.find((t) => t.id teamId)
-        const teamName = team?.current_name || teamId
-        const pickLines = picks
-            .sort((a, b) => a.round - b.round)
-            .map((p) => `Rd ${p.round}: ${p.player} (${p.position}, ${p.nfl_team})`)
-            .join(": ")
-        return `${teamName}: ${pickLines}`
-    })
-
-    return lines.join("\n\n")
-}
-
-export const buildDraftGradesPrompt = (draftLines) => {
-    return `Here are this season's fantasy football draft results for all 12 teams. Grade each team's drafts (A+ to F) based on value, positional balance, and upside. Write one punchy headline covering the overall draft class, and a 2-3 sentence blurb calling out the biggest steals, reaches, and best/worst overall drafts.\n\n${draftLines}`
-}
 
 export const getStorylineFacts = async () => {
     const [matchups, teamHistory, owners] = await Promise.all([
