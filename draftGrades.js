@@ -2,6 +2,20 @@ import { renderNavbar } from "./src/components/navbar.js"
 import { getCurrentSeasonSettings } from "./src/api/seasonSettingsApi.js"
 import { getDraftGrades } from "./src/api/draftGradesApi.js"
 
+const formatDraftGradesBody = (body) => {
+    return body
+        .split("\n")
+        .map((line) => {
+            const trimmed = line.trim()
+            const match = trimmed.match(/^(.+?)\s+—\s+([A-F][+-]?)$/)
+            if (match) {
+                return `<p class="font-bold text-primary mt-4">${match[1]} - ${match[2]}</p>`
+            }
+            return `<p>${line}</p>`
+        })
+        .join("")
+}
+
 const renderDraftGrades = async () => {
     const container = document.getElementById("draftGradesContainer")
     const settings = await getCurrentSeasonSettings()
@@ -18,8 +32,8 @@ const renderDraftGrades = async () => {
                 <h2 class="font-bold uppercase tracking-wide text-sm">${grades.season} Draft Grades</h2>
             </div>
             <div class="card-body p-4">
-                <h1 class="text-xl font-bold text-primary mb-3">${grades.headlines}</h1>
-                <p class="text-sm leading-relaxed whitespace-pre-line">${grades.body}</p>
+                <h1 class="text-xl font-bold text-primary mb-3">${grades.headline}</h1>
+                <p class="text-sm leading-relaxed space-y-2">${formatDraftGradesBody(grades.body)}</p>
             </div>
         </div>
     `
