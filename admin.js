@@ -504,11 +504,11 @@ const loadRosterEditor = async () => {
                 ${p.is_on_roster ? `
                     <label class="text-xs flex items-center gap-1">
                         IR
-                        <input type="checkbox" class="checkbox checkbox-xs" ${p.is_on_ir ? "checked" : ""}
+                        <input type="checkbox" class="checkbox checkbox-xs border border-base-content/40" ${p.is_on_ir ? "checked" : ""}
                             data-ir-source="${p.source}" data-ir-id="${p.id}">
                     </label>
                 ` : ""}
-                <input type="checkbox" class="toggle toggle-sm toggle-primary" ${p.is_on_roster ? "checked" : ""}
+                <input type="checkbox" class="checkbox checkbox-sm border border-base-content/40" ${p.is_on_roster ? "checked" : ""}
                     data-source="${p.source}" data-id="${p.id}">
             </div>
         </div>
@@ -600,6 +600,17 @@ const addFAPickup = async () => {
 
     const settings = await getCurrentSeasonSettings()
     const season = settings.season
+
+    const [draft, pickups] = await Promise.all([
+        getDraftResultsByTeamAndYear(teamId, season),
+        getAllFAPickupsByTeam(teamId, season)
+    ])
+    const activeCount = [...draft, ...pickups].filter((p) => p.is_on_roster && !p.is_on_ir).length
+
+    if (activeCount >= ROSTER_LIMIT) {
+        alert("Roster full - need to drop a player to add")
+        return
+    }
 
     const player = document.getElementById("faPlayer").value.trim()
     const position = document.getElementById("faPosition").value.trim()
