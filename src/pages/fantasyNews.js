@@ -1,7 +1,5 @@
 const FUNCTION_URL = "https://gqpbcujbwtgqgiepdihc.supabase.co/functions/v1/fantasy-news"
 
-
-
 export const renderFantasyNews = async () => {
     const container = document.getElementById("fantasyNewsContainer")
     if (!container) return
