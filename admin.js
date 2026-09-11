@@ -452,6 +452,9 @@ const populateRosterTeams = async () => {
     })
 }
 
+const ROSTER_LIMIT = 15
+const IR_LIMIT = 1
+
 const loadRosterEditor = async () => {
     const teamId = document.getElementById("rosterTeamSelect").value
     const container = document.getElementById("rosterEditorContainer")
@@ -482,35 +485,108 @@ const loadRosterEditor = async () => {
 
     players.sort((a, b) => (b.is_on_roster === true) - (a.is_on_roster === true))
 
+    const activeCount = players.filter((p) => p.is_on_roster && !p.is_on_ir).length
+    const irCount = players.filter((p) => p.is_on_roster && p.is_on_ir).length
+
     addSection.style.display = "block"
-    container.innerHTML = players.map((p) => `
+    container.innerHTML = `
+        <p class="text-xs font-semibold mb-3 ${activeCount >= ROSTER_LIMIT ? "text-error" : "opacity-70"}">
+            Active Roster: ${activeCount} / ${ROSTER_LIMIT} • IR: ${irCount} / ${IR_LIMIT}
+        </p>
+    ` + players.map((p) => `
         <div class="flex items-center justify-between gap-3 py-2 border-b border-base-300 ${p.is_on_roster ? "" : "opacity-50"}">
             <span class="text-sm">
                 <span class="font-semibold">${p.player}</span>
                 <span class="opacity-60">• ${p.position} • ${p.nfl_team} • Rd ${p.keeperCost}</span>
+                ${p.is_on_ir ? `<span class="badge badge-error badge-xs ml-1">IR</span>` : ""}
             </span>
-            <input type="checkbox" class="toggle toggle-sm toggle-primary" ${p.is_on_roster ? "checked" : ""}
-                data-source="${p.source}" data-id="${p.id}">
+            <div class="flex items-center gap-2">
+                ${p.is_on_roster ? `
+                    <label class="text-xs flex items-center gap-1">
+                        IR
+                        <input type="checkbox" class="checkbox checkbox-xs" ${p.is_on_ir ? "checked" : ""}
+                            data-ir-source="${p.source}" data-ir-id="${p.id}">
+                    </label>
+                ` : ""}
+                <input type="checkbox" class="toggle toggle-sm toggle-primary" ${p.is_on_roster ? "checked" : ""}
+                    data-source="${p.source}" data-id="${p.id}">
+            </div>
         </div>
     `).join("")
 
-    container.querySelectorAll("input[type=checkbox]").forEach((box) => {
-        box.addEventListener("change", () => toggleOnRoster(box))
+    container.querySelectorAll("input[data-source]").forEach((box) => {
+        box.addEventListener("change", () => toggleOnRoster(box, teamId))
+    })
+
+    container.querySelectorAll("input[data-ir-source]").forEach((box) => {
+        box.addEventListener("change", () => toggleOnIR(box, teamId))
     })
 }
 
-const toggleOnRoster = async (box) => {
+const toggleOnRoster = async (box, teamId) => {
     const source = box.getAttribute("data-source")
     const id = box.getAttribute("data-id")
     const isOn = box.checked
 
+    if (isOn) {
+        const settings = await getCurrentSeasonSettings()
+        const [draft, pickups] = await Promise.all([
+            getDraftResultsByTeamAndYear(teamId, settings.season),
+            getAllFAPickupsByTeam(teamId, settings.season)
+        ])
+        const activeCount = [...draft, ...pickups].filter((p) => p.is_on_roster && !p.is_on_ir).length
+
+        if (activeCount >= ROSTER_LIMIT) {
+            alert("Roster full - need to drop a player to add")
+            box.checked = false
+            return
+        }
+    }
+
+    const updates = { is_on_roster: isOn }
+    if (!isOn) updates.is_on_roster = false
+
     const { error } = await supabase
         .from(source)
-        .update({ is_on_roster: isOn })
+        .update(updates)
         .eq("id", id)
 
     if (error) {
         console.error("Error updating roster:", error)
+        box.checked = !isOn
+        return
+    }
+
+    loadRosterEditor()
+}
+
+const toggleOnIR = async (box, teamId) => {
+    const source = box.getAttribute("data-ir-source")
+    const id = box.getAttribute("data-ir-id")
+    const isOn = box.checked
+
+    if (isOn) {
+        const settings = await getCurrentSeasonSettings()
+        const [draft, pickups] = await Promise.all([
+            getDraftResultsByTeamAndYear(teamId, settings.season),
+            getAllFAPickupsByTeam(teamId, settings.season)
+        ])
+        const irCount = [...draft, ...pickups].filter((p) => p.is_on_roster && p.is_on_ir).length
+
+        if (irCount >= IR_LIMIT) {
+            alert("IR slot full - only 1 player allowed on IR")
+            box.checked = false
+            return
+        }
+    }
+
+    const { error } = await supabase
+        .from(source)
+        .update({ is_on_ir: isOn })
+        .eq("id", id)
+    
+    if (error) {
+        console.error("Error updating IR status:", error)
         box.checked = !isOn
         return
     }
