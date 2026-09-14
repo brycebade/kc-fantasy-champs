@@ -1,8 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
-const corsHeader = {
+const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS"
 }
 
 const supabase = createClient(
@@ -13,16 +14,25 @@ const supabase = createClient(
 const PLAYER_STATS_URL = "https://github.com/nflverse/nflverse-data/releases/download/player_stats/player_stats.csv"
 const SCHEDULES_URL = "https://github.com/nflverse/nflverse-data/releases/download/schedules/schedules.csv"
 
-const parseCsv = (text) => {
-    const [headerLine, ...lines] = text.trim().split("\n")
-    const headers = headerLine.split(",")
+const parseCsvFiltered = (text, season, week) => {
+    const lines = text.split("\n")
+    const headers = lines[0].split(",")
+    const seasonIdx = headers.indexOf("season")
+    const weekIdx = headers.indexOf("week")
 
-    return lines.map((line) => {
+    const results = []
+    for (let i = 1; i < lines.length; i++) {
+        const line = lines[i]
+        if (!line) continue
+
         const values = line.split(",")
+        if (Number(values[seasonIdx]) !== season || Number(values[weekIdx]) !== week) continue
+
         const row = {}
-        headers.forEach((h, i) => { row[h] = values[i] })
-        return row
-    })
+        headers.forEach((h, idx) => { row[h] = values[idx] })
+        results.push(row)
+    }
+    return results
 }
 
 const classifyGameWindow = (weekday, gametime) => {
@@ -56,22 +66,18 @@ Deno.serve(async (req) => {
         const statsText = await statsRes.text()
         const schedulesText = await schedulesRes.text()
 
-        const allStats = parseCsv(statsText)
-        const allSchedules = parseCsv(schedulesText)
-
-        const weekStats = allStats.filter((s) => 
-            Number(s.season) === season && Number(s.week) === week
-        )
-
-        const weekSchedules = allSchedules.filter((s) => 
-            Number(s.season) === season && Number(s.week) === week
-        )
+        const weekStats = parseCsvFiltered(statsText, season, week)
+        const weekSchedules = parseCsvFiltered(schedulesText, season, week)
 
         return new Response(JSON.stringify({
             statsCount: weekStats.length,
             schedulesCount: weekSchedules.length,
             sampleStat: weekStats[0] || null,
-            sampleSchedule: weekSchedules[0] || null
+            sampleSchedule: weekSchedules[0] || null,
+            debugStatsHeaderLine: statsText.split("\n")[0],
+            debugStatsFirstDataLine: statsText.split("\n")[1],
+            debugSchedulesHeaderLine: schedulesText.split("\n")[0],
+            debugSchedulesFirstDataLine: schedulesText.split("\n")[1]
         }), { headers: { ...corsHeaders, "Content-Type": "application/json" } })
 
     } catch (error) {
