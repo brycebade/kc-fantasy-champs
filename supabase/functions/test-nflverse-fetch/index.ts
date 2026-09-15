@@ -12,11 +12,33 @@ const supabase = createClient(
 )
 
 const PLAYER_STATS_URL = "https://github.com/nflverse/nflverse-data/releases/download/player_stats/player_stats.csv"
-const SCHEDULES_URL = "https://github.com/nflverse/nflverse-data/releases/download/schedules/schedules.csv"
+const SCHEDULES_URL = "https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv"
+
+const splitCsvLine = (line) => {
+    const values = []
+    let current = ""
+    let inQuotes = false
+
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i]
+
+        if (char === '"') {
+            inQuotes = !inQuotes
+        } else if (char === "," && !inQuotes) {
+            values.push(current)
+            current = ""
+        } else {
+            current += char
+        }
+    }
+    values.push(current)
+
+    return values
+}
 
 const parseCsvFiltered = (text, season, week) => {
     const lines = text.split("\n")
-    const headers = lines[0].split(",")
+    const headers = splitCsvLine(lines[0])
     const seasonIdx = headers.indexOf("season")
     const weekIdx = headers.indexOf("week")
 
@@ -25,7 +47,7 @@ const parseCsvFiltered = (text, season, week) => {
         const line = lines[i]
         if (!line) continue
 
-        const values = line.split(",")
+        const values = splitCsvLine(line)
         if (Number(values[seasonIdx]) !== season || Number(values[weekIdx]) !== week) continue
 
         const row = {}
@@ -50,6 +72,48 @@ const classifyGameWindow = (weekday, gametime) => {
     return weekday || "Unknown"
 }
 
+const calculateFantasyPoints = (stat) => {
+    let points = 0
+
+    points += (Number(stat.passing_yards) || 0) / 25
+    points += (Number(stat.passing_tds) || 0) * 4
+    points += (Number(stat.interceptions) || 0) * -2
+
+    points += (Number(stat.rushing_yards) || 0) / 10
+    points += (Number(stat.rushing_tds) || 0) * 6
+    points += (Number(stat.rushing_fumbles_lost) || 0) * -2
+
+    points += (Number(stat.receptions) || 0) * 1
+    points += (Number(stat.receiving_yards) || 0) / 10
+    points += (Number(stat.receiving_tds) || 0) * 6
+    points += (Number(stat.receiving_fumbles_lost) || 0) * -2
+
+    points += (Number(stat.sack_fumbles_lost) || 0) * -2
+
+    points += (Number(stat.passing_2pt_conversions) || 0) * 2
+    points += (Number(stat.rushing_2pt_conversions) || 0) * 2
+    points += (Number(stat.receiving_2pt_conversions) || 0) * 2
+
+    points += (Number(stat.special_teams_tds) || 0) * 6
+
+    return Math.round(points * 100) / 100
+}
+
+const normalizeName = (name) => {
+    return name
+        .toLowerCase()
+        .replace(/[^a-z\s]/g, "")
+        .split(/[\s,]+/)
+        .filter(Boolean)
+        .sort()
+        .join(" ")
+}
+
+const findPlayerStat = (rosterPlayerName, weekStats) => {
+    const normalizedRosterName = normalizeName(rosterPlayerName)
+    return weekStats.find((s) => normalizeName(s.player_display_name) === normalizedRosterName)
+}
+
 Deno.serve(async (req) => {
     if (req.method === "OPTIONS") {
         return new Response("ok", { headers: corsHeaders })
@@ -58,9 +122,11 @@ Deno.serve(async (req) => {
     try {
         const { season, week } = await req.json()
 
-        const [statsRes, schedulesRes] = await Promise.all([
+        const [statsRes, schedulesRes, draftRes, faRes] = await Promise.all([
             fetch(PLAYER_STATS_URL),
-            fetch(SCHEDULES_URL)
+            fetch(SCHEDULES_URL),
+            supabase.from("draft_results_by_year").select("*").eq("season", season).eq("is_on_roster", true),
+            supabase.from("fa_pickups").select("*").eq("season", season).eq("is_on_roster", true)
         ])
 
         const statsText = await statsRes.text()
@@ -69,15 +135,58 @@ Deno.serve(async (req) => {
         const weekStats = parseCsvFiltered(statsText, season, week)
         const weekSchedules = parseCsvFiltered(schedulesText, season, week)
 
+        const rosteredPlayers = [
+            ...(draftRes.data || []),
+            ...(faRes.data || [])
+        ]
+
+        const teamWindowMap = {}
+        weekSchedules.forEach((game) => {
+            const windowLabel = classifyGameWindow(game.weekday, game.gametime)
+            teamWindowMap[game.home_team] = windowLabel
+            teamWindowMap[game.away_team] = windowLabel
+        })
+
+        const rowsToInsert = []
+        const unmatched = []
+
+        rosteredPlayers.forEach((rosterPlayer) => {
+            const normalizedRosterName = normalizeName(rosterPlayer.player)
+            const matches = weekStats.filter((s) => normalizeName(s.player_display_name) === normalizedRosterName)
+
+            if (matches.length !== 1) {
+                unmatched.push({ player: rosterPlayer.player, matchCount: matches.length })
+                return
+            }
+
+            const stat = matches[0]
+            const fantasyPoints = calculateFantasyPoints(stat)
+            const gameWindow = teamWindowMap[stat.recent_team] || "Unknown"
+
+            rowsToInsert.push({
+                id: `${season}_${week}_${rosterPlayer.team_id}_${rosterPlayer.player.replace(/[^a-zA-Z]/g, "")}`,
+                season,
+                week,
+                player_name: stat.player_display_name,
+                team_id: rosterPlayer.team_id,
+                position: stat.position,
+                nfl_team: stat.recent_team,
+                opponent_team: stat.opponent_team,
+                game_window: gameWindow,
+                fantasy_points: fantasyPoints,
+                raw_stats: stat
+            })
+        })
+
+        const { error: insertError } = await supabase
+            .from("weekly_player_stats")
+            .upsert(rowsToInsert, { onConflict: "id"})
+
         return new Response(JSON.stringify({
-            statsCount: weekStats.length,
-            schedulesCount: weekSchedules.length,
-            sampleStat: weekStats[0] || null,
-            sampleSchedule: weekSchedules[0] || null,
-            debugStatsHeaderLine: statsText.split("\n")[0],
-            debugStatsFirstDataLine: statsText.split("\n")[1],
-            debugSchedulesHeaderLine: schedulesText.split("\n")[0],
-            debugSchedulesFirstDataLine: schedulesText.split("\n")[1]
+            insertedCount: rowsToInsert.length,
+            unmatchedCount: unmatched.length,
+            unmatched,
+            insertError: insertError?.message || null
         }), { headers: { ...corsHeaders, "Content-Type": "application/json" } })
 
     } catch (error) {
