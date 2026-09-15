@@ -11,8 +11,11 @@ const supabase = createClient(
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
 )
 
-const PLAYER_STATS_URL = "https://github.com/nflverse/nflverse-data/releases/download/player_stats/player_stats.csv"
-const SCHEDULES_URL = "https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv"
+const getPlayerStatsUrl = (season) =>
+    `https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_${season}.csv`
+
+const getSchedulesUrl = () =>
+    "https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv"
 
 const splitCsvLine = (line) => {
     const values = []
@@ -123,8 +126,8 @@ Deno.serve(async (req) => {
         const { season, week } = await req.json()
 
         const [statsRes, schedulesRes, draftRes, faRes] = await Promise.all([
-            fetch(PLAYER_STATS_URL),
-            fetch(SCHEDULES_URL),
+            fetch(getPlayerStatsUrl(season)),
+            fetch(getSchedulesUrl()),
             supabase.from("draft_results_by_year").select("*").eq("season", season).eq("is_on_roster", true),
             supabase.from("fa_pickups").select("*").eq("season", season).eq("is_on_roster", true)
         ])
@@ -161,7 +164,7 @@ Deno.serve(async (req) => {
 
             const stat = matches[0]
             const fantasyPoints = calculateFantasyPoints(stat)
-            const gameWindow = teamWindowMap[stat.recent_team] || "Unknown"
+            const gameWindow = teamWindowMap[stat.team] || "Unknown"
 
             rowsToInsert.push({
                 id: `${season}_${week}_${rosterPlayer.team_id}_${rosterPlayer.player.replace(/[^a-zA-Z]/g, "")}`,
@@ -170,7 +173,7 @@ Deno.serve(async (req) => {
                 player_name: stat.player_display_name,
                 team_id: rosterPlayer.team_id,
                 position: stat.position,
-                nfl_team: stat.recent_team,
+                nfl_team: stat.team,
                 opponent_team: stat.opponent_team,
                 game_window: gameWindow,
                 fantasy_points: fantasyPoints,
@@ -185,7 +188,15 @@ Deno.serve(async (req) => {
         return new Response(JSON.stringify({
             insertedCount: rowsToInsert.length,
             unmatchedCount: unmatched.length,
+            weekStatsCount: weekStats.length,
             unmatched,
+            debugStatsHeaderLine: statsText.split("\n")[0],
+            debugStatsFirstDataLine: statsText.split("\n")[1],
+            debugSchedulesHeaderLine: schedulesText.split("\n")[0],
+            debugSchedulesFirstDataLine: schedulesText.split("\n")[1],
+            debugStatsTextLength: statsText.length,
+            debugStatsLineCount: statsText.split("\n").length,
+            debugStatsLastLine: statsText.trim().split("\n").slice(-1)[0],
             insertError: insertError?.message || null
         }), { headers: { ...corsHeaders, "Content-Type": "application/json" } })
 
