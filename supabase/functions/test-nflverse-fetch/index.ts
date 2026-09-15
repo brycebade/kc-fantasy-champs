@@ -69,7 +69,7 @@ const classifyGameWindow = (weekday, gametime) => {
     if (weekday === "Sunday") {
         const hour = Number(gametime?.split(":")[0])
         if (hour < 16) return "Sunday Early"
-        if (hour > 19) return "Sunday Late"
+        if (hour >= 16 && hour < 20) return "Sunday Late"
         return "Sunday Night"
     }
     return weekday || "Unknown"
