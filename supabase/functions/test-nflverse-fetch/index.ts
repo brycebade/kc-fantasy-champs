@@ -17,6 +17,9 @@ const getPlayerStatsUrl = (season) =>
 const getSchedulesUrl = () =>
     "https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv"
 
+const getTeamStatsUrl = (season) =>
+    `https://github.com/nflverse/nflverse-data/releases/download/stats_team/stats_team_week_${season}.csv`
+
 const splitCsvLine = (line) => {
     const values = []
     let current = ""
@@ -75,12 +78,28 @@ const classifyGameWindow = (weekday, gametime) => {
     return weekday || "Unknown"
 }
 
+const TEAM_MASCOT_TO_ABBR = {
+    cardinals: "ARI", falcons: "ATL", ravens: "BAL", bills: "BUF",
+    panthers: "CAR", bears: "CHI", bengals: "CIN", browns: "CLE",
+    cowboys: "DAL", broncos: "DEN", lions: "DET", packers: "GB",
+    texans: "HOU", colts: "IND", jaguars: "JAX", chiefs: "KC",
+    raiders: "LV", chargers: "LAC", rams: "LAR", dolphins: "MIA",
+    vikings: "MIN", patriots: "NE", saints: "NO", giants: "NYG",
+    jets: "NYJ", eagles: "PHI", steelers: "PIT", "49ers": "SF",
+    seahawks: "SEA", buccaneers: "TB", titans: "TEN", commanders: "WAS"
+}
+
+const getTeamAbbr = (rosterPlayerName) => {
+    const mascot = rosterPlayerName.split(",")[0].trim().toLowerCase()
+    return TEAM_MASCOT_TO_ABBR[mascot] || null
+}
+
 const calculateFantasyPoints = (stat) => {
     let points = 0
 
     points += (Number(stat.passing_yards) || 0) / 25
     points += (Number(stat.passing_tds) || 0) * 4
-    points += (Number(stat.interceptions) || 0) * -2
+    points += (Number(stat.passing_interceptions) || 0) * -2
 
     points += (Number(stat.rushing_yards) || 0) / 10
     points += (Number(stat.rushing_tds) || 0) * 6
@@ -98,6 +117,30 @@ const calculateFantasyPoints = (stat) => {
     points += (Number(stat.receiving_2pt_conversions) || 0) * 2
 
     points += (Number(stat.special_teams_tds) || 0) * 6
+
+    return Math.round(points * 100) / 100
+}
+
+const getPointsAllowedScore = (pointsAllowed) => {
+    if (pointsAllowed === 0) return 10
+    if (pointsAllowed <= 6) return 7
+    if (pointsAllowed <= 13) return 4
+    if (pointsAllowed <= 20) return 1
+    if (pointsAllowed <= 27) return 0
+    if (pointsAllowed <= 34) return -1
+    return -4
+}
+
+const calculateDefensePoints = (stat, pointsAllowed) => {
+    let points = 0
+
+    points += (Number(stat.def_tds) || 0) * 6
+    points += (Number(stat.special_teams_tds) || 0) * 6
+    points += (Number(stat.def_sacks) || 0) * 1
+    points += (Number(stat.def_interceptions) || 0) * 2
+    points += (Number(stat.fumble_recovery_opp) || 0) * 2
+    points += (Number(stat.def_safeties) || 0) * 2
+    points += getPointsAllowedScore(pointsAllowed)
 
     return Math.round(points * 100) / 100
 }
@@ -125,18 +168,21 @@ Deno.serve(async (req) => {
     try {
         const { season, week } = await req.json()
 
-        const [statsRes, schedulesRes, draftRes, faRes] = await Promise.all([
+        const [statsRes, schedulesRes, teamStatsRes, draftRes, faRes] = await Promise.all([
             fetch(getPlayerStatsUrl(season)),
             fetch(getSchedulesUrl()),
+            fetch(getTeamStatsUrl(season)),
             supabase.from("draft_results_by_year").select("*").eq("season", season).eq("is_on_roster", true),
             supabase.from("fa_pickups").select("*").eq("season", season).eq("is_on_roster", true)
         ])
 
         const statsText = await statsRes.text()
         const schedulesText = await schedulesRes.text()
+        const teamStatsText = await teamStatsRes.text()
 
         const weekStats = parseCsvFiltered(statsText, season, week)
         const weekSchedules = parseCsvFiltered(schedulesText, season, week)
+        const weekTeamStats = parseCsvFiltered(teamStatsText, season, week)
 
         const rosteredPlayers = [
             ...(draftRes.data || []),
@@ -150,10 +196,45 @@ Deno.serve(async (req) => {
             teamWindowMap[game.away_team] = windowLabel
         })
 
+        const teamPointsAllowedMap = {}
+        weekSchedules.forEach((game) => {
+            teamPointsAllowedMap[game.home_team] = Number(game.away_score)
+            teamPointsAllowedMap[game.away_team] = Number(game.home_score)
+        })
+
         const rowsToInsert = []
         const unmatched = []
 
         rosteredPlayers.forEach((rosterPlayer) => {
+            const teamAbbr = getTeamAbbr(rosterPlayer.player)
+
+            if (teamAbbr) {
+                const stat = weekTeamStats.find((s) => s.team === teamAbbr)
+                if (!stat) {
+                    unmatched.push({ player: rosterPlayer.player, matchCount: 0 })
+                    return
+                }
+
+                const pointsAllowed = teamPointsAllowedMap[teamAbbr] ?? 0
+                const fantasyPoints = calculateDefensePoints(stat, pointsAllowed)
+                const gameWindow = teamWindowMap[teamAbbr] || "Unknown"
+
+                rowsToInsert.push({
+                    id: `${season}_${week}_${rosterPlayer.team_id}_${teamAbbr}`,
+                    season,
+                    week,
+                    player_name: rosterPlayer.player,
+                    team_id: rosterPlayer.team_id,
+                    position: "DEF",
+                    nfl_team: teamAbbr,
+                    opponent_team: stat.opponent_team,
+                    game_window: gameWindow,
+                    fantasy_points: fantasyPoints,
+                    raw_stats: stat
+                })
+                return
+            }
+
             const normalizedRosterName = normalizeName(rosterPlayer.player)
             const matches = weekStats.filter((s) => normalizeName(s.player_display_name) === normalizedRosterName)
 
@@ -197,6 +278,13 @@ Deno.serve(async (req) => {
             debugStatsTextLength: statsText.length,
             debugStatsLineCount: statsText.split("\n").length,
             debugStatsLastLine: statsText.trim().split("\n").slice(-1)[0],
+            debugSearchLines: statsText.split("\n").filter((l) => l.includes("Jacobs") || l.includes("Bowers")),
+            debugTeamStatsHeaderLine: teamStatsText.split("\n")[0],
+            debugTeamStatsFirstDataLine: teamStatsText.split("\n")[1],
+            debugDraftError: draftRes.error?.message || null,
+            debugFaError: faRes.error?.message || null,
+            debugDraftCount: draftRes.data?.length ?? 0,
+            debugFaCount: faRes.data?.length ?? 0,
             insertError: insertError?.message || null
         }), { headers: { ...corsHeaders, "Content-Type": "application/json" } })
 
