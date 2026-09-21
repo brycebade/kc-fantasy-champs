@@ -83,7 +83,7 @@ const TEAM_MASCOT_TO_ABBR = {
     panthers: "CAR", bears: "CHI", bengals: "CIN", browns: "CLE",
     cowboys: "DAL", broncos: "DEN", lions: "DET", packers: "GB",
     texans: "HOU", colts: "IND", jaguars: "JAX", chiefs: "KC",
-    raiders: "LV", chargers: "LAC", rams: "LAR", dolphins: "MIA",
+    raiders: "LV", chargers: "LAC", rams: "LA", dolphins: "MIA",
     vikings: "MIN", patriots: "NE", saints: "NO", giants: "NYG",
     jets: "NYJ", eagles: "PHI", steelers: "PIT", "49ers": "SF",
     seahawks: "SEA", buccaneers: "TB", titans: "TEN", commanders: "WAS"
@@ -141,6 +141,20 @@ const calculateDefensePoints = (stat, pointsAllowed) => {
     points += (Number(stat.fumble_recovery_opp) || 0) * 2
     points += (Number(stat.def_safeties) || 0) * 2
     points += getPointsAllowedScore(pointsAllowed)
+
+    return Math.round(points * 100) / 100
+}
+
+const calculateKickingPoints = (stat) => {
+    let points = 0
+
+    points += (Number(stat.fg_made_0_19) || 0) * 3
+    points += (Number(stat.fg_made_20_29) || 0) * 3
+    points += (Number(stat.fg_made_30_39) || 0) * 3
+    points += (Number(stat.fg_made_40_49) || 0) * 3
+    points += (Number(stat.fg_made_50_59) || 0) * 5
+    points += (Number(stat.fg_made_60_) || 0) * 5
+    points += (Number(stat.pat_made) || 0) * 1
 
     return Math.round(points * 100) / 100
 }
@@ -244,7 +258,7 @@ Deno.serve(async (req) => {
             }
 
             const stat = matches[0]
-            const fantasyPoints = calculateFantasyPoints(stat)
+            const fantasyPoints = stat.position === "K" ? calculateKickingPoints(stat) : calculateFantasyPoints(stat)
             const gameWindow = teamWindowMap[stat.team] || "Unknown"
 
             rowsToInsert.push({
@@ -285,6 +299,7 @@ Deno.serve(async (req) => {
             debugFaError: faRes.error?.message || null,
             debugDraftCount: draftRes.data?.length ?? 0,
             debugFaCount: faRes.data?.length ?? 0,
+            debugKickerRows: rowsToInsert.filter((r) => r.position === "K"),
             insertError: insertError?.message || null
         }), { headers: { ...corsHeaders, "Content-Type": "application/json" } })
 
