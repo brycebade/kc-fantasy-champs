@@ -51,6 +51,7 @@
                     <a role="tab" class="tab" data-tab="blurb">Blurb</a>
                     <a role="tab" class="tab" data-tab="roster">Roster</a>
                     <a role="tab" class="tab" data-tab="storylines">Storylines</a>
+                    <a role="tab" class="tab" data-tab="weeklyRecap">Weekly Recap</a>
                     <a role="tab" class="tab" data-tab="leagueStory">League Story</a>
                     <a role="tab" class="tab" data-tab="draftGrades">Draft Grades</a>
                 </div>
@@ -177,6 +178,23 @@
 
                     <div class="divider text-xs opacity-60">Existing Storylines</div>
                     <div id="storylinesListContainer"></div>
+                </div>
+            </div>
+        </div>
+
+        <div data-panel="weeklyRecap" style="display: none">
+            <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl mb-6">
+                <div class="card-body p-4">
+                    <h2 class="card-title text-primary mb-2">Weekly Recap</h2>
+
+                    <div class="flex gap-4 mb-4">
+                        <input type="number" id="recapSeason" placeholder="Season" value="2026" class="input input-bordered w-32">
+                        <input type="number" id="recapWeek" placeholder="Week" value="1" class="input input-bordered w-24">
+                        <button id="runWeeklyRecap" class="btn btn-primary">Run Weekly Recap</button>
+                    </div>
+
+                    <div id="recapStatus" class="mb-2"></div>
+                    <div id="recapResults" class="text-sm"></div>
                 </div>
             </div>
         </div>

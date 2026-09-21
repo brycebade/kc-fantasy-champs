@@ -300,6 +300,7 @@ Deno.serve(async (req) => {
             debugDraftCount: draftRes.data?.length ?? 0,
             debugFaCount: faRes.data?.length ?? 0,
             debugKickerRows: rowsToInsert.filter((r) => r.position === "K"),
+            debugSearchLines: statsText.split("\n").filter((l) => l.includes("Jacobs") || l.includes("Bowers") || l.includes("Gainwell")),
             insertError: insertError?.message || null
         }), { headers: { ...corsHeaders, "Content-Type": "application/json" } })
 

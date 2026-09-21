@@ -830,6 +830,44 @@ document.getElementById("saveDraftGrades").addEventListener("click", async () =>
 
 populateDraftGradesSeasonSelect()
 
+document.getElementById("runWeeklyRecap").addEventListener("click", async () => {
+    const season = Number(document.getElementById("recapSeason").value)
+    const week = Number(document.getElementById("recapWeek").value)
+    const statusEl = document.getElementById("recapStatus")
+    const resultsEl = document.getElementById("recapResults")
+
+    statusEl.textContent = "Running..."
+    resultsEl.textContent = ""
+
+    try {
+        const res = await fetch("https://gqpbcujbwtgqgiepdihc.supabase.co/functions/v1/test-nflverse-fetch", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "apiKey": "sb_publishable__dvY-8NXMMayXkKBGhzSRA_LnAOvsjn",
+                "Authorization": "Bearer sb_publishable__dvY-8NXMMayXkKBGhzSRA_LnAOvsjn"
+            },
+            body: JSON.stringify({season, week})
+        })
+        const data = await res.json()
+
+        if (data.insertError) {
+            statusEl.innerHTML = `<span class="text-error">Insert error: ${data.insertError}</span>`
+            return
+        }
+
+        statusEl.innerHTML = `<span class="text-success">Done.</span> Inserted ${data.insertedCount}, unmatched ${data.unmatchedCount}`
+
+        if (data.unmatched.length > 0) {
+            resultsEl.innerHTML = "<strong>Unmatched:</strong><ul class='list-disc list-inside'>" +
+                data.unmatched.map((u) => `<li>${u.player}</li>`).join("") +
+                "</ul>"
+        }
+    } catch (error) {
+        statusEl.innerHTML = `<span class="text-error">Request failed: ${error.message}</span>`
+    }
+})
+
 passwordSubmit.addEventListener("click", () => {
     const inputValue = document.getElementById("passwordInput").value
     
