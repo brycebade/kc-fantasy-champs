@@ -2,7 +2,7 @@ import { supabase } from "../supabaseClient.js"
 
 export const getPowerRankingNote = async (season, week) => {
     const { data, error } = await supabase
-        .from("power_ranking_notes")
+        .from("power_rankings_notes")
         .select("*")
         .eq("season", season)
         .eq("week", week)
@@ -18,7 +18,7 @@ export const getPowerRankingNote = async (season, week) => {
 export const savePowerRankingNote = async (season, week, note) => {
     const id = `${season}_week${week}`
     const { data, error } = await supabase
-        .from("power_ranking_notes")
+        .from("power_rankings_notes")
         .upsert({ id, season, week, note }, { onConflict: "id" })
         .select()
         .single()
