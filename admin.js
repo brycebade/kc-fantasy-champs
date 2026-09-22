@@ -286,7 +286,7 @@ const calculateStreak = (teamMatchups, teamId) => {
 
     for (let i = sorted.length -1; i >= 0; i--) {
         const m = sorted[i]
-        const is myTeam1 = m.team_1_id === teamId
+        const isTeam1 = m.team_1_id === teamId
         const myScore = isTeam1 ? m.team_1_score : m.team_2_score
         const oppScore = isTeam1 ? m.team_2_score : m.team_1_score
 
