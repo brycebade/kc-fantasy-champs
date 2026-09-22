@@ -278,6 +278,33 @@ const submitScores = async () => {
     alert("Scores submitted successfully!")
 }
 
+const calculateStreak = (teamMatchups, teamId) => {
+    const sorted = [...teamMatchups].sort((a, b) => a.week - b.week)
+
+    let streak = 0
+    let type = null
+
+    for (let i = sorted.length -1; i >= 0; i--) {
+        const m = sorted[i]
+        const is myTeam1 = m.team_1_id === teamId
+        const myScore = isTeam1 ? m.team_1_score : m.team_2_score
+        const oppScore = isTeam1 ? m.team_2_score : m.team_1_score
+
+        const result = myScore > oppScore ? "W" : myScore < oppScore ? "L" : "T"
+
+        if (type === null) {
+            type = result
+            streak = 1
+        } else if (result === type) {
+            streak++
+        } else {
+            break
+        }
+    }
+
+    return type ? `${type}${streak}` : ""
+}
+
 const recalculateStandings = async (season) => {
     const allMatchups = await getMatchups(season)
 
@@ -315,6 +342,7 @@ const recalculateStandings = async (season) => {
 
         pointsFor = Math.round(pointsFor * 100) / 100
         pointsAgainst = Math.round(pointsAgainst * 100) / 100
+        const streak = calculateStreak(teamMatchups, team.id)
 
         const { error } = await supabase
             .from("standings")
@@ -325,7 +353,8 @@ const recalculateStandings = async (season) => {
                 win: wins,
                 loss: losses,
                 points_for: pointsFor,
-                points_against: pointsAgainst
+                points_against: pointsAgainst,
+                streak: streak
             }, { onConflict: "team_id, season" })
 
         if (error) {
