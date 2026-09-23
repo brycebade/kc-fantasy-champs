@@ -60,49 +60,49 @@ export const renderTeamAwards = async (ownerId) => {
     }
 
     const statAwards = []
-    seasons.forEach((season) => {
-        computeSeasonAwards(season, bySeason[season])
-            .filter((award) => ownsTeamSeason(award.teamId, season))
-            .forEach((award) => statAwards.push({ ...award, season }))
-    })
-
-    container.innerHTML = ""
-
-    if (titleAwards.length === 0 && statAwards.length === 0) {
-        container.innerHTML = `<p class="p-4 text-sm opacity-70">No Awards Yet</p>`
-        return
-    }
-
-    titleAwards
-        .sort((a, b) => b.season - a.season)
-        .forEach((award) => {
-            const color = award.title === "Champion" ? "text-secondary" : "text-error"
-            const row = document.createElement("div")
-            row.className = "px-4 py-2"
-            row.innerHTML = `
-                <p class="text-xs uppercase tracking-wide text-primary font-bold">${award.season}</p>
-                <span class="font-bold ${color}">${award.title}</span>
-                <span class="text-xs opacity-60 ml-2">${award.seasonName}</span>
-            `
-            container.appendChild(row)
+        seasons.forEach((season) => {
+            computeSeasonAwards(season, bySeason[season])
+                .filter((award) => ownsTeamSeason(award.teamId, season))
+                .forEach((award) => statAwards.push({ ...award, season }))
         })
 
-    statAwards
-        .sort((a, b) => b.season - a.season)
-        .forEach((award) => {
-            const detail = award.week
-                ? `${award.value} pts • Week ${award.week} vs ${nameFor(award.opponentId)}`
-                : `${award.value} pts`  
+        container.innerHTML = ""
 
-        const row = document.createElement("div")
-        row.className = "px-4 py-2"
-        row.innerHTML = `
-            <p class="text-xs uppercase tracking-wide text-primary font-bold">${award.season}</p>
-            <div class="flex items-center justify-between">
-                <span class="font-semibold">${award.title}</span>
-                <span class="text-sm opacity-80">${detail}</span>
-            </div>
-        `
-        container.appendChild(row)
-    })
+        if (titleAwards.length === 0 && statAwards.length === 0) {
+            container.innerHTML = `<p class="p-4 text-sm opacity-70">No Awards Yet</p>`
+            return
+        }
+
+        titleAwards
+            .sort((a, b) => b.season - a.season)
+            .forEach((award) => {
+                const color = award.title === "Champion" ? "text-secondary" : "text-error"
+                const row = document.createElement("div")
+                row.className = "px-4 py-2"
+                row.innerHTML = `
+                    <p class="text-xs uppercase tracking-wide text-primary font-bold">${award.season}</p>
+                    <span class="font-bold ${color}">${award.title}</span>
+                    <span class="text-xs opacity-60 ml-2">${award.seasonName}</span>
+                `
+                container.appendChild(row)
+            })
+
+        // statAwards
+        //     .sort((a, b) => b.season - a.season)
+        //     .forEach((award) => {
+        //         const detail = award.week
+        //             ? `${award.value} pts • Week ${award.week} vs ${nameFor(award.opponentId)}`
+        //             : `${award.value} pts`  
+
+        //         const row = document.createElement("div")
+        //         row.className = "px-4 py-2"
+        //         row.innerHTML = `
+        //             <p class="text-xs uppercase tracking-wide text-primary font-bold">${award.season}</p>
+        //             <div class="flex items-center justify-between">
+        //                 <span class="font-semibold">${award.title}</span>
+        //                 <span class="text-sm opacity-80">${detail}</span>
+        //             </div>
+        //         `
+        //         container.appendChild(row)
+        //     })
 }

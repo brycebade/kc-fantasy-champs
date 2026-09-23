@@ -6,6 +6,8 @@ const findHighest = (items, getValue) =>
 const findLowest = (items, getValue) => 
     items.reduce((best, item) => (getValue(item) < getValue(best) ? item : best))
 
+const roundTo2 = (n) => Math.round(n * 100) / 100
+
 export const computeSeasonAwards = (season, matchups) => {
     if (season < AWARDS_START_SEASON) return []
 
@@ -53,26 +55,26 @@ export const computeSeasonAwards = (season, matchups) => {
         {
             title: "Highest Score", 
             teamId: highestScore.teamId,
-            value: highestScore.score,
+            value: roundTo2(highestScore.score),
             week: highestScore.week,
             opponentId: highestScore.opponentId
         },
         {
             title: "Stinker of the Year",
             teamId: lowestScore.teamId,
-            value: lowestScore.score,
+            value: roundTo2(lowestScore.score),
             week: lowestScore.week,
             opponentId: lowestScore.opponentId
         },
         {
             title: "Offensive Juggernaut",
             teamId: topScorerId,
-            value: Math.round(seasonTotals[topScorerId] * 10) / 10
+            value: roundTo2(seasonTotals[topScorerId])
         },
         {
             title: "Biggest Blowout",
             teamId: biggestBlowout.winner_team_id,
-            value: Math.abs(biggestBlowout.team_1_score - biggestBlowout.team_2_score),
+            value: roundTo2(Math.abs(biggestBlowout.team_1_score - biggestBlowout.team_2_score)),
             week: biggestBlowout.week,
             opponentId: biggestBlowout.loser_team_id
         }
@@ -83,7 +85,7 @@ export const computeSeasonAwards = (season, matchups) => {
         awards.push({
             title: "Backed In",
             teamId: lowestScoringWin.teamId,
-            value: lowestScoringWin.score,
+            value: roundTo2(lowestScoringWin.score),
             week: lowestScoringWin.week,
             opponentId: lowestScoringWin.opponentId
         })
@@ -93,7 +95,7 @@ export const computeSeasonAwards = (season, matchups) => {
         awards.push({
             title: "Hard Luck",
             teamId: highestScoringLoss.teamId,
-            value: highestScoringLoss.score,
+            value: roundTo2(highestScoringLoss.score),
             week: highestScoringLoss.week,
             opponentId: highestScoringLoss.opponentId
         })
@@ -103,7 +105,7 @@ export const computeSeasonAwards = (season, matchups) => {
         awards.push({
             title: "Nail-Biter",
             teamId: closestGame.winner_team_id,
-            value: Math.abs(closestGame.team_1_score - closestGame.team_2_score),
+            value: roundTo2(Math.abs(closestGame.team_1_score - closestGame.team_2_score)),
             week: closestGame.week,
             opponentId: closestGame.loser_team_id
         })
@@ -125,7 +127,7 @@ export const computeSeasonAwards = (season, matchups) => {
         awards.push({
             title: "Unluckiest",
             teamId: unluckiestId,
-            value: Math.round(seasonTotals[unluckiestId] * 10) / 10
+            value: roundTo2(seasonTotals[unluckiestId])
         })
     }
 

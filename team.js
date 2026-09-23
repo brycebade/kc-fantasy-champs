@@ -144,7 +144,7 @@ const loadTeamHistory = async (team) => {
             (h.end_year == null || season <= h.end_year)
         )
     
-    const ownerStandings = standings.filter((s) => ownsSeason(s.season))
+    const ownerStandings = standings.filter((s) => ownsSeason(s.season) && s.final_rank != null)
 
     const container = document.getElementById("teamHistoryContainer")
     container.innerHTML = ""
