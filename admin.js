@@ -15,6 +15,7 @@ import { getSeasonStoryFacts, buildSeasonStoryPrompt } from "./src/utils/leagueS
 import { getLeagueStory, addLeagueStoryChapter, updateLeagueStoryChapter } from "./src/api/leagueStoryApi.js"
 import { getDraftGradeFacts, buildDraftGradesPrompt } from "./src/utils/draftGradesFacts.js"
 import { getDraftGrades, addDraftGrades, updateDraftGrades } from "./src/api/draftGradesApi.js"
+import { getWeeklyLineup, saveWeeklyLineup } from "./src/api/weeklyLineupsApi.js"
 
 const passwordSubmit = document.getElementById("passwordSubmit")
 const adminDashboard = document.getElementById("adminDashboard")
@@ -552,6 +553,72 @@ const loadRosterEditor = async () => {
     })
 }
 
+const populateLineupWeekDropdown = () => {
+    const select = document.getElementById("lineupWeekSelect")
+    select.innerHTML = ""
+    for (let i = 1; i <= 17; i++) {
+        const option = document.createElement("option")
+        option.value = i
+        option.textContent = `Week ${i}`
+        select.appendChild(option)
+    }
+}
+
+const loadLineupEditor = async () => {
+    const teamId = document.getElementById("rosterTeamSelect").value
+    const week = Number(document.getElementById("lineupWeekSelect").value)
+    const container = document.getElementById("lineupEditorContainer")
+
+    if (!teamId) {
+        container.innerHTML = ""
+        return
+    }
+
+    const settings = await getCurrentSeasonSettings()
+    const season = settings.season
+
+    const [draft, pickups, existingLineup] = await Promise.all([
+        getDraftResultsByTeamAndYear(teamId, season),
+        getAllFAPickupsByTeam(teamId, season),
+        getWeeklyLineup(teamId, season, week)
+    ])
+
+    const rosteredPlayers = [...draft, ...pickups].filter((p) => p.is_on_roster)
+    const starterSet = new Set(existingLineup.filter((l) => l.is_starter).map((l) => l.player))
+
+    container.innerHTML = rosteredPlayers.map((p) => `
+        <label class="flex items-center justify-between gap-3 py-1 text-sm">
+            <span>${p.player} <span class="opacity-60">• ${p.position}</span></span>
+            <input type="checkbox" class="checkbox checkbox-sm" data-starter-player="${p.player}" ${starterSet.has(p.player) ? "checked" : ""}>
+        </label>
+    `).join("")
+}
+
+const confirmLineup = async () => {
+    const teamId = document.getElementById("rosterTeamSelect").value
+    const week = Number(document.getElementById("lineupWeekSelect").value)
+    if (!teamid) return
+
+    const settings = await getCurrentSeasonSettings()
+    const season = settings.season
+
+    const checkboxes = document.querySelectorAll("#lineupEditorContainer input[data-starter-player]")
+    const rows = Array.from(checkboxes).map((box) => {
+        const player = box.getAttribute("data-starter-player")
+        return {
+            id: `${season}_${week}_${teamId}_${player.replace(/[^a-zA-Z]/g, "")}`,
+            season,
+            week,
+            team_id: teamId,
+            player,
+            is_starter: box.checked
+        }
+    })
+
+    const success = await saveWeeklyLineup(rows)
+    alert(success ? `Lineup confirmed for Week ${week}` : "Error saving Lineup")
+}
+
 const toggleOnRoster = async (box, teamId) => {
     const source = box.getAttribute("data-source")
     const id = box.getAttribute("data-id")
@@ -911,6 +978,7 @@ passwordSubmit.addEventListener("click", () => {
         populateGameTeams()
         loadMatchups()
         populateRosterTeams()
+        populateLineupWeekDropdown()
 
         document.getElementById("weekSelect").addEventListener("change", loadMatchups)
         document.getElementById("seasonSelect").addEventListener("change", loadMatchups)
@@ -924,7 +992,10 @@ passwordSubmit.addEventListener("click", () => {
         document.getElementById("saveFinalRankings").addEventListener("click", saveFinalRankings)
         document.getElementById("saveBlurb").addEventListener("click", saveBlurb)
         document.getElementById("rosterTeamSelect").addEventListener("change", loadRosterEditor)
-        document.getElementById("addFAPickup").addEventListener("click", addFAPickup)   
+        document.getElementById("addFAPickup").addEventListener("click", addFAPickup)
+        document.getElementById("rosterTeamSelect").addEventListener("change", loadLineupEditor)
+        document.getElementById("lineupWeekSelect").addEventListener("change", loadLineupEditor)
+        document.getElementById("confirmLineup").addEventListener("click", confirmLineup)
     } else {
        document.getElementById('errorMessage').textContent = "Incorrect Password"
     }
