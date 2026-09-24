@@ -513,7 +513,11 @@ const loadRosterEditor = async () => {
         })
     ]
 
-    players.sort((a, b) => (b.is_on_roster === true) - (a.is_on_roster === true))
+    players.sort((a, b) => {
+        const rosterDiff = (b.is_on_roster === true) - (a.is_on_roster === true)
+        if (rosterDiff !== 0) return rosterDiff
+        return (POSITION_ORDER[a.position] ?? 99) - (POSITION_ORDER[b.position] ?? 99)
+    })
 
     const activeCount = players.filter((p) => p.is_on_roster && !p.is_on_ir).length
     const irCount = players.filter((p) => p.is_on_roster && p.is_on_ir).length
@@ -564,6 +568,8 @@ const populateLineupWeekDropdown = () => {
     }
 }
 
+const POSITION_ORDER = { QB: 0, RB: 1, WR:2, TE: 3, DEF: 4, K: 5 }
+
 const loadLineupEditor = async () => {
     const teamId = document.getElementById("rosterTeamSelect").value
     const week = Number(document.getElementById("lineupWeekSelect").value)
@@ -583,12 +589,21 @@ const loadLineupEditor = async () => {
         getWeeklyLineup(teamId, season, week)
     ])
 
-    const rosteredPlayers = [...draft, ...pickups].filter((p) => p.is_on_roster)
+    const currentlyRostered = [...draft, ...pickups].filter((p) => p.is_on_roster)
+    const currentNames = new Set(currentlyRostered.map((p) => p.player))
+
+    const droppedButSaved = existingLineup
+        .filter((l) => !currentNames.has(l.player))
+        .map((l) => ({ player: l.player, position: "-", dropped: true }))
+
+    const rosteredPlayers = [...currentlyRostered, ...droppedButSaved]
+        .sort((a, b) => (POSITION_ORDER[a.position] ?? 99) - (POSITION_ORDER[b.position] ?? 99))
+
     const starterSet = new Set(existingLineup.filter((l) => l.is_starter).map((l) => l.player))
 
     container.innerHTML = rosteredPlayers.map((p) => `
         <label class="flex items-center justify-between gap-3 py-1 text-sm">
-            <span>${p.player} <span class="opacity-60">• ${p.position}</span></span>
+            <span>${p.player} <span class="opacity-60">• ${p.position}</span>${p.dropped ? ` <span class="badge badge-ghost badge-xs">dropped</span>` : ""}</span>
             <input type="checkbox" class="checkbox checkbox-sm border border-base-content/40" data-starter-player="${p.player}" ${starterSet.has(p.player) ? "checked" : ""}>
         </label>
     `).join("")
@@ -654,6 +669,7 @@ const toggleOnRoster = async (box, teamId) => {
     }
 
     loadRosterEditor()
+    loadLineupEditor()
 }
 
 const toggleOnIR = async (box, teamId) => {
@@ -688,6 +704,7 @@ const toggleOnIR = async (box, teamId) => {
     }
 
     loadRosterEditor()
+    loadLineupEditor()
 }
 
 const addFAPickup = async () => {
@@ -735,6 +752,7 @@ const addFAPickup = async () => {
     document.getElementById("faPosition").value = ""
     document.getElementById("faNFLTeam").value = ""
     loadRosterEditor()
+    loadLineupEditor()
 }
 
 const renderStorylinesList = async () => {
