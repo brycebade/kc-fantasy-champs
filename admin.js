@@ -597,7 +597,7 @@ const loadLineupEditor = async () => {
 const confirmLineup = async () => {
     const teamId = document.getElementById("rosterTeamSelect").value
     const week = Number(document.getElementById("lineupWeekSelect").value)
-    if (!teamid) return
+    if (!teamId) return
 
     const settings = await getCurrentSeasonSettings()
     const season = settings.season
