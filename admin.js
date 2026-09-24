@@ -589,7 +589,7 @@ const loadLineupEditor = async () => {
     container.innerHTML = rosteredPlayers.map((p) => `
         <label class="flex items-center justify-between gap-3 py-1 text-sm">
             <span>${p.player} <span class="opacity-60">• ${p.position}</span></span>
-            <input type="checkbox" class="checkbox checkbox-sm" data-starter-player="${p.player}" ${starterSet.has(p.player) ? "checked" : ""}>
+            <input type="checkbox" class="checkbox checkbox-sm border border-base-content/40" data-starter-player="${p.player}" ${starterSet.has(p.player) ? "checked" : ""}>
         </label>
     `).join("")
 }
