@@ -15,7 +15,7 @@ import { getSeasonStoryFacts, buildSeasonStoryPrompt } from "./src/utils/leagueS
 import { getLeagueStory, addLeagueStoryChapter, updateLeagueStoryChapter } from "./src/api/leagueStoryApi.js"
 import { getDraftGradeFacts, buildDraftGradesPrompt } from "./src/utils/draftGradesFacts.js"
 import { getDraftGrades, addDraftGrades, updateDraftGrades } from "./src/api/draftGradesApi.js"
-import { getWeeklyLineup, saveWeeklyLineup } from "./src/api/weeklyLineupsApi.js"
+import { getWeeklyLineup, saveWeeklyLineup, getTeamBoxScore } from "./src/api/weeklyLineupsApi.js"
 
 const passwordSubmit = document.getElementById("passwordSubmit")
 const adminDashboard = document.getElementById("adminDashboard")
@@ -980,6 +980,15 @@ document.getElementById("runWeeklyRecap").addEventListener("click", async () => 
     } catch (error) {
         statusEl.innerHTML = `<span class="text-error">Request failed: ${error.message}</span>`
     }
+})
+
+document.getElementById("testBoxScore").addEventListener("click", async () => {
+    const teamId = document.getElementById("rosterTeamSelect").value
+    const season = Number(document.getElementById("recapSeason").value)
+    const week = Number(document.getElementById("recapWeek").value)
+
+    const result = await getTeamBoxScore(teamId, season, week)
+    document.getElementById("testBoxScoreOutput").textContent = JSON.stringify(result, null, 2)
 })
 
 passwordSubmit.addEventListener("click", () => {

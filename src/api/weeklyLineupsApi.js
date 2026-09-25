@@ -26,3 +26,33 @@ export const saveWeeklyLineup = async (rows) => {
     }
     return true
 }
+
+export const getTeamBoxScore = async (teamId, season, week) => {
+    const { data: lineup, error: lineupError } = await supabase
+        .from("weekly_lineups")
+        .select("*")
+        .eq("team_id", teamId)
+        .eq("season", season)
+        .eq("week", week)
+        .eq("is_starter", true)
+
+    if (lineupError) {
+        console.error("Error fetching lineup:", lineupError)
+        return []
+    }
+
+    const starterIds = lineup.map((l) => l.id)
+    if (starterIds.length === 0) return []
+
+    const { data: stats, error: statsError } = await supabase
+        .from("weekly_player_stats")
+        .select("*")
+        .in("id", starterIds)
+
+    if (statsError) {
+        console.error("Error fetching stats:", statsError)
+        return []
+    }
+
+    return stats
+}
