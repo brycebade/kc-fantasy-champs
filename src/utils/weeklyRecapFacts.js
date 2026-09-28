@@ -1,6 +1,6 @@
-import { getMatchups } from "../api/matchupsApi";
-import { getTeams } from "../api/teamsApi";
-import { getTeamBoxScore } from "../api/weeklyLineupsApi";
+import { getMatchups } from "../api/matchupsApi.js";
+import { getTeams } from "../api/teamsApi.js";
+import { getTeamBoxScore } from "../api/weeklyLineupsApi.js";
 import { formatBoxScoreLine } from "./boxScoreFormat.js"
 
 export const getWeeklyRecapFacts = async (season, week) => {
@@ -12,14 +12,14 @@ export const getWeeklyRecapFacts = async (season, week) => {
     const weekMatchups = allMatchups.filter((m) => m.week === week && m.matchup_type === "regular")
     const nameFor = (teamId) => teams.find((t) => t.id === teamId)?.current_name || teamId
 
-    const mathcupFacts = []
+    const matchupFacts = []
     for (const matchup of weekMatchups) {
         const [team1Box, team2Box] = await Promise.all([
             getTeamBoxScore(matchup.team_1_id, season, week),
             getTeamBoxScore(matchup.team_2_id, season, week)
         ])
 
-        mathcupFacts.push({
+        matchupFacts.push({
             team1Name: nameFor(matchup.team_1_id),
             team1Score: matchup.team_1_score,
             team1Starters: team1Box.map((s) => ({
@@ -38,7 +38,7 @@ export const getWeeklyRecapFacts = async (season, week) => {
                 gameWindow: s.game_window,
                 line: formatBoxScoreLine(s.raw_stats)
             })),
-            winner: matchup.winner_team_id ? nameFar(matchup.winner_team_id) : null,
+            winner: matchup.winner_team_id ? nameFor(matchup.winner_team_id) : null,
             isTie: matchup.is_tie
         })
     }

@@ -16,6 +16,8 @@ import { getLeagueStory, addLeagueStoryChapter, updateLeagueStoryChapter } from 
 import { getDraftGradeFacts, buildDraftGradesPrompt } from "./src/utils/draftGradesFacts.js"
 import { getDraftGrades, addDraftGrades, updateDraftGrades } from "./src/api/draftGradesApi.js"
 import { getWeeklyLineup, saveWeeklyLineup, getTeamBoxScore } from "./src/api/weeklyLineupsApi.js"
+import { getWeeklyRecapFacts } from "./src/utils/weeklyRecapFacts.js"
+import { buildWeeklyRecapPrompt } from "./src/utils/weeklyRecapPrompt.js"
 
 const passwordSubmit = document.getElementById("passwordSubmit")
 const adminDashboard = document.getElementById("adminDashboard")
@@ -982,13 +984,13 @@ document.getElementById("runWeeklyRecap").addEventListener("click", async () => 
     }
 })
 
-document.getElementById("testBoxScore").addEventListener("click", async () => {
-    const teamId = document.getElementById("rosterTeamSelect").value
+document.getElementById("generateRecapInput").addEventListener("click", async () => {
     const season = Number(document.getElementById("recapSeason").value)
     const week = Number(document.getElementById("recapWeek").value)
+    const notes = document.getElementById("recapAdminNotes").value.trim()
 
-    const result = await getTeamBoxScore(teamId, season, week)
-    document.getElementById("testBoxScoreOutput").textContent = JSON.stringify(result, null, 2)
+    const facts = await getWeeklyRecapFacts(season, week)
+    document.getElementById("recapPromptOutput").value = buildWeeklyRecapPrompt(season, week, facts, notes)
 })
 
 passwordSubmit.addEventListener("click", () => {

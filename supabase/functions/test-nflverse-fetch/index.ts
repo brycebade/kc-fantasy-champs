@@ -234,7 +234,7 @@ Deno.serve(async (req) => {
                 const gameWindow = teamWindowMap[teamAbbr] || "Unknown"
 
                 rowsToInsert.push({
-                    id: `${season}_${week}_${rosterPlayer.team_id}_${teamAbbr}`,
+                    id: `${season}_${week}_${rosterPlayer.team_id}_${rosterPlayer.player.replace(/[^a-zA-Z]/g, "")}`,
                     season,
                     week,
                     player_name: rosterPlayer.player,

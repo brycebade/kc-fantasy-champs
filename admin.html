@@ -195,13 +195,17 @@
                     <div class="flex gap-4 mb-4">
                         <input type="number" id="recapSeason" placeholder="Season" value="2026" class="input input-bordered w-32">
                         <input type="number" id="recapWeek" placeholder="Week" value="1" class="input input-bordered w-24">
-                        <button id="runWeeklyRecap" class="btn btn-primary">Run Weekly Recap</button>
-                        <button id="testBoxScore" class="btn btn-secondary btn-sm mt-2">Test Box Score (temp)</button>
-                        <pre id="testBoxScoreOutput" class="text-xs mt-2"></pre>
                     </div>
 
+                    <button id="runWeeklyRecap" class="btn btn-secondary btn-sm mb-2">Run Weekly Recap</button>
                     <div id="recapStatus" class="mb-2"></div>
-                    <div id="recapResults" class="text-sm"></div>
+                    <div id="recapResults" class="text-sm mb-4"></div>
+
+                    <div class="divider text-xs opacity-60">Article</div>
+
+                    <textarea id="recapAdminNotes" placeholder="Add any extra context or things you've noticed (optional)" class="textarea textarea-bordered w-full h-20 mb-2"></textarea>
+                    <button id="generateRecapInput" class="btn btn-primary btn-sm mb-2">Generate Input for AI</button>
+                    <textarea id="recapPromptOutput" readonly class="textarea textarea-bordered w-full h-40 mb-4" placeholder="Click generate to build the text to paste into Claude/ChatGPT"></textarea>   
                 </div>
             </div>
         </div>
