@@ -1,4 +1,4 @@
-const formatBoxScoreLine = (stat) => {
+export const formatBoxScoreLine = (stat) => {
     const position = stat.position
 
     if (position === "QB") {
