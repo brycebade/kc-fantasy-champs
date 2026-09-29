@@ -32,3 +32,40 @@ export const saveWeeklyRecap = async (season, week, headline, articleBody) => {
         }
         return true
 }
+
+export const getTopPerformerByPosition = async (season, week) => {
+    const { data: lineups, error: lineupError } = await supabase
+        .from ("weekly_lineups")
+        .select("id")
+        .eq("season", season)
+        .eq("week", week)
+        .eq("is_starter", true)
+
+    if (lineupError) {
+        console.error("Error fetching lineups:", lineupError)
+        return []
+    }
+
+    const starterIds = lineups.map((l) => l.id)
+    if (starterIds.length === 0) return {}
+
+    const { data: stats, error: statsError } = await supabase
+        .from("weekly_player_stats")
+        .select("*")
+        .in("id", starterIds)
+
+    if (statsError) {
+        console.error("Error fetching stats:", statsError)
+        return {}
+    }
+
+    const topByPosition = {}
+    stats.forEach((row) => {
+        const current = topByPosition[row.position]
+        if (!current || row.fantasy_points > current.fantasy_points) {
+            topByPosition[row.position] = row
+        }
+    })
+
+    return topByPosition
+}
