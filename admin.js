@@ -18,6 +18,7 @@ import { getDraftGrades, addDraftGrades, updateDraftGrades } from "./src/api/dra
 import { getWeeklyLineup, saveWeeklyLineup, getTeamBoxScore } from "./src/api/weeklyLineupsApi.js"
 import { getWeeklyRecapFacts } from "./src/utils/weeklyRecapFacts.js"
 import { buildWeeklyRecapPrompt } from "./src/utils/weeklyRecapPrompt.js"
+import { getWeeklyRecap, saveWeeklyRecap } from "./src/api/weeklyRecapsApi.js"
 
 const passwordSubmit = document.getElementById("passwordSubmit")
 const adminDashboard = document.getElementById("adminDashboard")
@@ -991,6 +992,21 @@ document.getElementById("generateRecapInput").addEventListener("click", async ()
 
     const facts = await getWeeklyRecapFacts(season, week)
     document.getElementById("recapPromptOutput").value = buildWeeklyRecapPrompt(season, week, facts, notes)
+})
+
+document.getElementById("saveWeeklyRecap").addEventListener("click", async () => {
+    const season = Number(document.getElementById("recapSeason").value)
+    const week = Number(document.getElementById("recapWeek").value)
+    const headline = document.getElementById("recapHeadline").value.trim()
+    const articleBody = document.getElementById("recapArticleBody").value.trim()
+
+    if (!headline || !articleBody) {
+        alert("Headline and article body are required")
+        return
+    }
+
+    const success = await saveWeeklyRecap(season, week, headline, articleBody)
+    alert(success ? `Weekly recap saved for Week ${week}` : "Error saving weekly recap")
 })
 
 passwordSubmit.addEventListener("click", () => {
