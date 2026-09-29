@@ -28,11 +28,11 @@ export const buildWeeklyRecapPrompt = (season, week, matchupFacts, notes) => {
     
     TONE: Entertaining and a little ruthless. Roast teams that got embarrassed, celebrate the big performances, and keep it friendly since these are friends.
 
-    STRUCTURE: Cover each matchup, but spend most the time on the closest and most lopesided games. Used the game windows (Thursday, Sunday Early, Sunday Late, Sunday Night, Monday) to tell the story of how each game unfolded. For example, a team jumping out to a lead Thursday, getting overtaken Sunday, then winning or losing it on Monday night.
+    STRUCTURE: Cover each matchup, but spend the most time on the closest and most lopsided games. Use the game windows (Thursday, Sunday Early, Sunday Late, Sunday Night, Monday) to tell the story of how each game unfolded. For example, a team jumping out to a lead Thursday, getting overtaken Sunday, then winning or losing it on Monday night.
 
     RULES: 
     - Only use the stats and names listed below. Do not invent players, numbers, or events.
-    - The final score listed each game is official. Player points are only for context.
+    - The final score listed for each game is official. Player points are only for context.
     - Return the headline on its own first line, then the article body.
 
     ${notes ? `EXTRA CONTEXT FROM THE COMMISSIONER:\n${notes}\n\n` : ""}MATCHUP DATA:
