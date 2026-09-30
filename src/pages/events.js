@@ -1,6 +1,8 @@
 import { getEvents } from "../api/eventsApi.js"
+import { getRecentWeeklyRecaps } from "../api/weeklyRecapsApi.js"
+import { getCurrentSeasonSettings } from "../api/seasonSettingsApi.js"
 
-const formateDate = (date) => {
+const formatDate = (date) => {
     if (!date) return `TBD`
     return new Date(date + 'T00:00:00').toLocaleDateString(`en-US`, {
         month: `long`,
@@ -9,7 +11,7 @@ const formateDate = (date) => {
     })
 }
 
-const renderDraftGradeCard = () => {
+const renderRecapCard = () => {
     const row = document.createElement("div")
 
     row.innerHTML = `
@@ -40,7 +42,7 @@ export const renderEvents = async () => {
     events.forEach((event) => {
         const row = document.createElement("div")
 
-        const displayDate = formateDate(event.date)
+        const displayDate = formatDate(event.date)
         const displayTime = event.time ? event.time : "TBD"
 
         row.innerHTML = `

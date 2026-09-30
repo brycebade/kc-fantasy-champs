@@ -69,3 +69,18 @@ export const getTopPerformersByPosition = async (season, week) => {
 
     return topByPosition
 }
+
+export const getRecentWeeklyRecaps = async (season, limit = 4) => {
+    const { data, error } = await supabase
+        .from("weekly_recaps")
+        .select("*")
+        .eq("season", season)
+        .order("week", { ascending: false })
+        .limit(limit)
+
+    if (error) {
+        console.error("Error fetching recent recaps:", error)
+        return []
+    }
+    return data
+}
