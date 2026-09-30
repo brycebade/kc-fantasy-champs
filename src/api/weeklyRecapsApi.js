@@ -33,7 +33,7 @@ export const saveWeeklyRecap = async (season, week, headline, articleBody) => {
         return true
 }
 
-export const getTopPerformerByPosition = async (season, week) => {
+export const getTopPerformersByPosition = async (season, week) => {
     const { data: lineups, error: lineupError } = await supabase
         .from ("weekly_lineups")
         .select("id")
