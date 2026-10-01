@@ -29,7 +29,7 @@ const renderEventCard = (event) => {
 const renderRecapCard = (recap) => `
     <a href="weeklyRecap.html?season=${recap.season}&week=${recap.week}" class="card bg-base-100 shadow-md border border-base-300 rounded-xl p-4 w-full md:w-auto md:flex-1 hover:shadow-lg transition-shadow">
         <p class="text-xs uppercase tracking-wide text-primary font-bold">Breaking News - Week ${recap.week}</p>
-        <h2 class="text-lg font-bold mt-1">${recap.headline}</h2>
+        <h2 class="text-lg font-bold mt-1 line-clamp-3">${recap.headline}</h2>
     </a>
 `
 

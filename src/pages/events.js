@@ -37,7 +37,7 @@ export const renderEvents = async () => {
 
     eventListContainer.className="flex flex-col md:flex-row gap-4 mb-6"
 
-    eventListContainer.appendChild(renderDraftGradeCard())
+    eventListContainer.appendChild(renderRecapCard())
 
     events.forEach((event) => {
         const row = document.createElement("div")

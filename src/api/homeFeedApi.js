@@ -1,7 +1,7 @@
 import { getEvents } from "./eventsApi.js"
 import { getRecentActivity } from "./activityFeedApi.js"
 
-const FEED_LIMIT = 5
+const FEED_LIMIT = 4
 
 export const getHomeFeed = async () => {
     const [pinnedEvents, recentActivity] = await Promise.all([
