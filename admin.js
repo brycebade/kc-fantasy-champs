@@ -923,6 +923,7 @@ document.getElementById("saveDraftGrades").addEventListener("click", async () =>
     const season = Number(document.getElementById("draftGradesSeasonSelect").value)
     const headline = document.getElementById("draftGradesHeadline").value.trim()
     const body = document.getElementById("draftGradesBody").value.trim()
+    const cardLabel = document.getElementById("draftGradesCardLabel").value.trim()
 
     if (!headline || !body) {
         alert("Headline and body are required")
@@ -932,9 +933,9 @@ document.getElementById("saveDraftGrades").addEventListener("click", async () =>
     const existing = await getDraftGrades(season)
 
     if (existing) {
-        await updateDraftGrades(season, headline, body)
+        await updateDraftGrades(season, headline, body, cardLabel)
     } else {
-        await addDraftGrades(season, headline, body)
+        await addDraftGrades(season, headline, body, cardLabel)
     }
 
     alert(`Draft grades saved for ${season}`)
@@ -943,6 +944,7 @@ document.getElementById("saveDraftGrades").addEventListener("click", async () =>
     document.getElementById("draftGradesBody").value = ""
     document.getElementById("draftGradesAdminNotes").value = ""
     document.getElementById("draftGradesPromptOutput").value = ""
+    document.getElementById("draftGradesCardLabel").value = ""
 })
 
 populateDraftGradesSeasonSelect()
@@ -999,13 +1001,14 @@ document.getElementById("saveWeeklyRecap").addEventListener("click", async () =>
     const week = Number(document.getElementById("recapWeek").value)
     const headline = document.getElementById("recapHeadline").value.trim()
     const articleBody = document.getElementById("recapArticleBody").value.trim()
+    const cardLabel = document.getElementById("recapCardLabel").value.trim()
 
     if (!headline || !articleBody) {
         alert("Headline and article body are required")
         return
     }
 
-    const success = await saveWeeklyRecap(season, week, headline, articleBody)
+    const success = await saveWeeklyRecap(season, week, headline, articleBody, cardLabel)
     alert(success ? `Weekly recap saved for Week ${week}` : "Error saving weekly recap")
 })
 

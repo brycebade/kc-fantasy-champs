@@ -15,7 +15,7 @@ export const getWeeklyRecap = async (season, week) => {
     return data
 }
 
-export const saveWeeklyRecap = async (season, week, headline, articleBody) => {
+export const saveWeeklyRecap = async (season, week, headline, articleBody, cardLabel) => {
     const { error } = await supabase
         .from("weekly_recaps")
         .upsert({
@@ -23,7 +23,8 @@ export const saveWeeklyRecap = async (season, week, headline, articleBody) => {
             season,
             week,
             headline,
-            article_body: articleBody
+            article_body: articleBody,
+            card_label: cardLabel || null
         }, { onConflict: "id" })
 
         if (error) {

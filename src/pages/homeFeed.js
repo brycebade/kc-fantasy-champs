@@ -26,12 +26,15 @@ const renderEventCard = (event) => {
     `
 }
 
-const renderRecapCard = (recap) => `
-    <a href="weeklyRecap.html?season=${recap.season}&week=${recap.week}" class="card bg-base-100 shadow-md border border-base-300 rounded-xl p-4 w-full md:w-auto md:flex-1 hover:shadow-lg transition-shadow">
-        <p class="text-xs uppercase tracking-wide text-primary font-bold">Breaking News - Week ${recap.week}</p>
-        <h2 class="text-lg font-bold mt-1 line-clamp-3">${recap.headline}</h2>
-    </a>
-`
+const renderRecapCard = (recap) => {
+    const label = recap.card_label || `Week ${recap.week} Recap`
+    return `
+        <a href="weeklyRecap.html?season=${recap.season}&week=${recap.week}" class="card bg-base-100 shadow-md border border-base-300 rounded-xl p-4 w-full md:w-auto md:flex-1 hover:shadow-lg transition-shadow">
+            <p class="text-xs uppercase tracking-wide text-primary font-bold">Breaking News</p>
+            <h2 class="text-lg font-bold mt-1">${label}</h2>
+        </a>
+    `
+}
 
 const renderStoryCard = (chapter) => `
     <a href="leagueStory.html" class="card bg-base-100 shadow-md border border-base-300 rounded-xl p-4 w-full md:w-auto md:flex-1 hover:shadow=lg transition-shadow">
@@ -40,12 +43,15 @@ const renderStoryCard = (chapter) => `
     </a>
 `
 
-const renderDraftGradesCard = (grades) => `
-    <a href="draftGrades.html" class="card bg-base-100 shadow-md border border-base-300 rounded-xl p-4 w-full md:x-auto md:flex-1 hover:shadow-lg transition-shadow">
-        <p class="text-xs uppercase tracking-wide text-primary font-bold">Just Released! - ${grades.season}</p>
-        <h2 class="text-lg font-bold mt-1">${grades.headline}</h2>
-    </a>
-`
+const renderDraftGradesCard = (grades) => {
+    const label = grades.card_label || `${grades.season} Draft Grades`
+    return `
+        <a href="draftGrades.html" class="card bg-base-100 shadow-md border border-base-300 rounded-xl p-4 w-full md:x-auto md:flex-1 hover:shadow-lg transition-shadow">
+            <p class="text-xs uppercase tracking-wide text-primary font-bold">Just Released!</p>
+            <h2 class="text-lg font-bold mt-1">${label}</h2>
+        </a>
+    `
+}
 
 const renderCard = (item) => {
     if (item.type === "event") return renderEventCard(item.data)
