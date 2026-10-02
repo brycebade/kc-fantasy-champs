@@ -43,10 +43,10 @@ const renderArticleBody = (articleBody) => {
     const recapHtml = recapText.trim().split("\n").map((line) => {
         const trimmed = line.trim()
         if (trimmed === "###GAMEOFTHEWEEK###") {
-            return `<p class="text-center text-primary font-bold uppercase tracking-wide text-sm mt-6">Game of the Week</p>`
+            return `<p class="text-center text-primary font-bold uppercase tracking-wide text-xl mt-6">Game of the Week</p>`
         }
         if (trimmed.startsWith("## ")) {
-            return `<h3 class="text-xl font-bold text-primary mt-6 mb-2">${trimmed.slice(3)}</h3>`
+            return `<h3 class="text-sm font-bold text-primary mt-6 mb-2">${trimmed.slice(3)}</h3>`
         }
         if (trimmed === "") return ""
         return `<p class="mb-3">${trimmed}</p>`
