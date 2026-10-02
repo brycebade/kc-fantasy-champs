@@ -56,13 +56,13 @@ const renderArticleBody = (articleBody) => {
     if (awardsText) {
         const awardsLines = awardsText.trim().split("\n").filter((l) => l.trim() !== "")
         awardsHtml = `
-            <div class="divider text-sm font-bold uppercase tracking-wide opacity-80">Week Awards</div>
+            <div class="divider divider-primary text-xl font-bold uppercase tracking-wide text-primary">Week Awards</div>
             <div class="space-y-3">
                 ${awardsLines.map((line) => {
                     const trimmed = line.trim()
                     if (trimmed.includes("##")) {
                         const clean = trimmed.replace(/##/g, "").trim()
-                        return `<p class="font-bold underline text-lg text-primary mt-4">${clean}</p>`
+                        return `<p class="font-bold underline text-sm text-primary mt-4">${clean}</p>`
                     }
                     return `<p>${trimmed}</p>`
                 }).join("")}
