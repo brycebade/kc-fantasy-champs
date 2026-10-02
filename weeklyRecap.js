@@ -43,7 +43,7 @@ const renderArticleBody = (articleBody) => {
     const recapHtml = recapText.trim().split("\n").map((line) => {
         const trimmed = line.trim()
         if (trimmed === "###GAMEOFWEEK###") {
-            return `<p class="text-center text-primary font-bold uppercase tracking-wide text-sm mt-6">Game of the Week`
+            return `<p class="text-center text-primary font-bold uppercase tracking-wide text-sm mt-6">Game of the Week</p>`
         }
         if (trimmed.startsWith("## ")) {
             return `<h3 class="text-xl font-bold text-primary mt-6 mb-2">${trimmed.slice(3)}</h3>`
@@ -56,13 +56,13 @@ const renderArticleBody = (articleBody) => {
     if (awardsText) {
         const awardsLines = awardsText.trim().split("\n").filter((l) => l.trim() !== "")
         awardsHtml = `
-            <div class="divider text-xs opacity-60">Week Awards</div>
+            <div class="divider text-sm font-bold uppercase tracking-wide opacity-80">Week Awards</div>
             <div class="space-y-3">
                 ${awardsLines.map((line) => {
                     const trimmed = line.trim()
                     if (trimmed.includes("##")) {
                         const clean = trimmed.replace(/##/g, "").trim()
-                        return `<p class="font-bold text-lg text-primary mt-4">${clean},/p>`
+                        return `<p class="font-bold underline text-lg text-primary mt-4">${clean},/p>`
                     }
                     return `<p>${trimmed}</p>`
                 }).join("")}
