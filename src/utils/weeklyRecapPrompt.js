@@ -34,6 +34,9 @@ export const buildWeeklyRecapPrompt = (season, week, matchupFacts, notes) => {
     - Only use the stats and names listed below. Do not invent players, numbers, or events.
     - The final score listed for each game is official. Player points are only for context.
     - Return the headline on its own first line, then the article body.
+    - Put "## " (two hash marks and a space) directly in front of each game's subheadline, on its own line.
+    - Right before the awards section begins, include a line that says exactly: ===AWARDS===
+    -Before the single closest/most important game of the week, add a line that says exactly: ###GAMEOFTHEWEEK###
 
     ${notes ? `EXTRA CONTEXT FROM THE COMMISSIONER:\n${notes}\n\n` : ""}MATCHUP DATA:
 

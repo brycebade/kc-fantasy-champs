@@ -28,6 +28,51 @@ const populateWeekSelect = () => {
     }
 }
 
+const applyUrlParams = () => {
+    const params = new URLSearchParams(window.location.search)
+    const urlSeason = params.get("season")
+    const urlWeek = params.get("week")
+
+    if (urlSeason) document.getElementById("seasonJumpSelect").value = urlSeason
+    if (urlWeek) document.getElementById("weekJumpSelect").value = urlWeek
+}
+
+const renderArticleBody = (articleBody) => {
+    const [recapText, awardsText] = articleBody.split("===AWARDS===")
+
+    const recapHtml = recapText.trim().split("\n").map((line) => {
+        const trimmed = line.trim()
+        if (trimmed === "###GAMEOFWEEK###") {
+            return `<p class="text-center text-primary font-bold uppercase tracking-wide text-sm mt-6">Game of the Week`
+        }
+        if (trimmed.startsWith("## ")) {
+            return `<h3 class="text-xl font-bold text-primary mt-6 mb-2">${trimmed.slice(3)}</h3>`
+        }
+        if (trimmed === "") return ""
+        return `<p class="mb-3">${trimmed}</p>`
+    }).join("")
+
+    let awardsHtml = ""
+    if (awardsText) {
+        const awardsLines = awardsText.trim().split("\n").filter((l) => l.trim() !== "")
+        awardsHtml = `
+            <div class="divider text-xs opacity-60">Week Awards</div>
+            <div class="space-y-3">
+                ${awardsLines.map((line) => {
+                    const trimmed = line.trim()
+                    if (trimmed.includes("##")) {
+                        const clean = trimmed.replace(/##/g, "").trim()
+                        return `<p class="font-bold text-lg text-primary mt-4">${clean},/p>`
+                    }
+                    return `<p>${trimmed}</p>`
+                }).join("")}
+            </div>
+        `
+    }
+
+    return recapHtml + awardsHtml 
+}
+
 const loadRecap = async () => {
     const season = Number(document.getElementById("seasonJumpSelect").value)
     const week = Number(document.getElementById("weekJumpSelect").value)
@@ -40,14 +85,22 @@ const loadRecap = async () => {
         return
     }
 
-    container.innerHTML = `<h2 class="text-2xl font-bold">${recap.headline}</h2>`
+    container.innerHTML = `
+        <h2 class="text-2xl font-bold mb-4">${recap.headline}</h2>
+        <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl">
+            <div class="card-body p-6">
+                ${renderArticleBody(recap.article_body)}
+            </div>
+        </div>
+    `
 }
 
 const init = async () => {
     await renderNavbar()
     await renderArchiveNav("weeklyRecap")
     await populateSeasonSelect()
-    populateWeekSelect() 
+    populateWeekSelect()
+    applyUrlParams()
 
     document.getElementById("seasonJumpSelect").addEventListener("change", loadRecap)
     document.getElementById("weekJumpSelect").addEventListener("change", loadRecap)
