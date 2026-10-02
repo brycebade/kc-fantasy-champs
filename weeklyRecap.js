@@ -62,7 +62,7 @@ const renderArticleBody = (articleBody) => {
                     const trimmed = line.trim()
                     if (trimmed.includes("##")) {
                         const clean = trimmed.replace(/##/g, "").trim()
-                        return `<p class="font-bold underline text-lg text-primary mt-4">${clean},/p>`
+                        return `<p class="font-bold underline text-lg text-primary mt-4">${clean}</p>`
                     }
                     return `<p>${trimmed}</p>`
                 }).join("")}
