@@ -37,6 +37,33 @@ const applyUrlParams = () => {
     if (urlWeek) document.getElementById("weekJumpSelect").value = urlWeek
 }
 
+const renderBoxScores = (matchupFacts) => {
+    return matchupFacts.map((m, i) => {
+        const result = m.isTie ? "Tie" : `${m.winner} won`
+
+        return `
+            <div class="collapse collapse-arrow bg-base-100 border border-base-300 rounded-xl mb-3">
+                <input type="checkbox" />
+                <div class="collapse-title font-semibold">
+                    Game ${i + 1}: ${m.team1Name} ${m.team1Score} vs ${m.team2Name} ${m.team2Score} (${result})
+                <div>
+                <div class="collapse-content">
+                    <div class="grid md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <p class="font-bold text-primary mb-1">${m.team1Name}</p>
+                            ${m.team1Starters.map((s) => `<p class="mb-1">[${s.gameWindow}] ${s.name} (${s.position}): ${s.points} pts - ${s.line}</p>`).join("")}
+                        </div>
+                        <div>
+                            <p class="font-bold text-primary mb-1">${m.team2Name}</p>
+                            ${m.team2Starters.map((s) => `<p class="mb-1">[${s.gameWindow}] ${s.name} (${s.position}): ${s.points} pts - ${s.line}</p>`).join("")}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `
+    }).join("")
+}
+
 const renderArticleBody = (articleBody) => {
     const [recapText, awardsText] = articleBody.split("===AWARDS===")
 
@@ -85,6 +112,8 @@ const loadRecap = async () => {
         return
     }
 
+    const matchupFacts = await getWeeklyRecapFacts(season, week)
+
     container.innerHTML = `
         <h2 class="text-2xl font-bold mb-4">${recap.headline}</h2>
         <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl">
@@ -92,9 +121,11 @@ const loadRecap = async () => {
                 ${renderArticleBody(recap.article_body)}
             </div>
         </div>
+        <h3 class="text-xl font-bold text-primary mb-3">Box Scores</h3>
+        ${renderBoxScores(matchupFacts)}
     `
 }
-
+``
 const init = async () => {
     await renderNavbar()
     await renderArchiveNav("weeklyRecap")
