@@ -5,6 +5,32 @@ import { getWeeklyRecapFacts } from "./src/utils/weeklyRecapFacts.js"
 import { formatBoxScoreLine } from "./src/utils/boxScoreFormat.js"
 import { getCurrentSeasonSettings } from "./src/api/seasonSettingsApi.js"
 
+const CATEGORY_ORDER = [
+    { label: "Passing", positions: ["QB"] },
+    { label: "Rushing", positions: ["RB"] },
+    { label: "Receiving", positions: ["WR", "TE"] },
+    { label: "Defense", positions: ["DEF"] },
+    { label: "Kicking", positions: ["K"] }
+]
+
+const renderTeamBoxScores = (starters) => {
+    return CATEGORY_ORDER.map((category) => {
+        const players = starters.filter((s) => category.positions.includes(s.position))
+        if (players.length === 0) return ""
+
+        return `
+            <p class="font-bold underline text-sm uppercase mt-4 mb-1">${category.label}</p>
+            ${players.map((s) => `
+                <p class="mb-1">
+                    <span class="font-semibold">${s.name}</span>
+                    <span class="opacity-60">${s.line}</span>
+                    <span class="font-bold text-primary float-right">${s.points} pts</span>
+                </p>
+            `).join("")}
+        `
+    }).join("")
+}
+
 const populateSeasonSelect = async () => {
     const select = document.getElementById("seasonJumpSelect")
     const settings = await getCurrentSeasonSettings()
@@ -45,17 +71,17 @@ const renderBoxScores = (matchupFacts) => {
             <div class="collapse collapse-arrow bg-base-100 border border-base-300 rounded-xl mb-3">
                 <input type="checkbox" />
                 <div class="collapse-title font-semibold">
-                    Game ${i + 1}: ${m.team1Name} ${m.team1Score} vs ${m.team2Name} ${m.team2Score} (${result})
-                <div>
+                    Game ${i + 1}: ${m.team1Name} ${m.team1Score} vs ${m.team2Name} ${m.team2Score}
+                </div>
                 <div class="collapse-content">
-                    <div class="grid md:grid-cols-2 gap-4 text-sm">
+                    <div class="grid md:grid-cols-2 gap-6 text-sm">
                         <div>
-                            <p class="font-bold text-primary mb-1">${m.team1Name}</p>
-                            ${m.team1Starters.map((s) => `<p class="mb-1">[${s.gameWindow}] ${s.name} (${s.position}): ${s.points} pts - ${s.line}</p>`).join("")}
+                            <p class="font-bold text-primary text-base">${m.team1Name}</p>
+                            ${renderTeamBoxScores(m.team1Starters)}
                         </div>
                         <div>
-                            <p class="font-bold text-primary mb-1">${m.team2Name}</p>
-                            ${m.team2Starters.map((s) => `<p class="mb-1">[${s.gameWindow}] ${s.name} (${s.position}): ${s.points} pts - ${s.line}</p>`).join("")}
+                            <p class="font-bold text-primary text-base">${m.team2Name}</p>
+                            ${renderTeamBoxScores(m.team2Starters)}
                         </div>
                     </div>
                 </div>
@@ -125,7 +151,7 @@ const loadRecap = async () => {
         ${renderBoxScores(matchupFacts)}
     `
 }
-``
+
 const init = async () => {
     await renderNavbar()
     await renderArchiveNav("weeklyRecap")
