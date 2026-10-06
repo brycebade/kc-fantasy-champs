@@ -27,7 +27,8 @@ export const getWeeklyRecapFacts = async (season, week) => {
                 position: s.position,
                 points: s.fantasy_points,
                 gameWindow: s.game_window,
-                line: formatBoxScoreLine({ ...s.raw_stats, position: s.position })
+                line: formatBoxScoreLine({ ...s.raw_stats, position: s.position }),
+                raw_stats: s.raw_stats
             })),
             team2Name: nameFor(matchup.team_2_id),
             team2Score: matchup.team_2_score,
@@ -36,7 +37,8 @@ export const getWeeklyRecapFacts = async (season, week) => {
                 position: s.position,
                 points: s.fantasy_points,
                 gameWindow: s.game_window,
-                line: formatBoxScoreLine({ ...s.raw_stats, position: s.position })
+                line: formatBoxScoreLine({ ...s.raw_stats, position: s.position }),
+                raw_stats: s.raw_stats
             })),
             winner: matchup.winner_team_id ? nameFor(matchup.winner_team_id) : null,
             isTie: matchup.is_tie
