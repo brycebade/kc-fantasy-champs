@@ -5,26 +5,96 @@ import { getWeeklyRecapFacts } from "./src/utils/weeklyRecapFacts.js"
 import { formatBoxScoreLine } from "./src/utils/boxScoreFormat.js"
 import { getCurrentSeasonSettings } from "./src/api/seasonSettingsApi.js"
 
-const CATEGORY_ORDER = [
-    { label: "Passing", positions: ["QB"] },
-    { label: "Rushing", positions: ["RB"] },
-    { label: "Receiving", positions: ["WR", "TE"] },
-    { label: "Defense", positions: ["DEF"] },
-    { label: "Kicking", positions: ["K"] }
-]
+const CATEGORY_LABELS = ["Passing", "Rushing", "Receiving", "Defense", "Kicking"]
+
+const formatBoxScoreEntries = (stat) => {
+    const entries = []
+
+    const completions = Number(stat.completions) || 0
+    const attempts = Number(stat.attempts) || 0
+    if (attempts > 0) {
+        const passYds = Number(stat.passing_yards) || 0
+        const passTds = Number(stat.passing_tds) || 0
+        const ints = Number(stat.passing_interceptions) || 0
+        const passPoints = passYds / 25 + passTds * 4 + ints * -2 + (Number(stat.passing_2pt_conversions) || 0) * 2
+        entries.push({
+            category: "Passing",
+            line: `${completions}/${attempts}, ${passYds} yds, ${passTds} TD, ${ints} INT`,
+            points: Math.round(passPoints * 100) / 100
+        })
+    }
+
+    const carries = Number(stat.carries) || 0
+    if (carries > 0) {
+        const rushYds = Number(stat.rushing_yards) || 0
+        const rushTds = Number(stat.rushing_tds) || 0
+        const rushAvg = (rushYds / carries).toFixed(1)
+        const rushPoints = rushYds / 10 + rushTds * 6 + (Number(stat.rushing_fumbles_lost) || 0) * -2 + (Number(stat.rushing_2pt_conversions) || 0) * 2
+        entries.push({
+            category: "Rushing",
+            line: `${carries} car, ${rushYds} yds, (${rushAvg} avg), ${rushTds} TD`,
+            points: Math.round(rushPoints * 100) / 100
+        })
+    }
+
+    const targets = Number(stat.targets) || 0
+    if (targets > 0) {
+        const recYds = Number(stat.receiving_yards) || 0
+        const recTds = Number(stat.receiving_tds) || 0
+        const receptions = Number(stat.receptions) || 0
+        const recPoints = receptions * 1 + recYds / 10 + recTds * 6 + (Number(stat.receiving_fumbles_lost) || 0) * -2 + (Number(stat.receiving_2pt_conversions) || 0) * 2
+        entries.push({
+            category: "Receiving",
+            line: `${receptions}/${targets} rec, ${recYds} yds, ${recTds} TD`,
+            points: Math.round(recPoints * 100) / 100
+        })
+    }
+
+    if (stat.position === "K") {
+        const fgMade = stat.fg_made || 0
+        const fgAtt = stat.fg_att || 0
+        const long = stat.fg_long || 0
+        const patMade = stat.pat_made || 0
+        const patAtt = stat.pat_att || 0
+        entries.push({
+            category: "Kicking",
+            line: `${fgMade}/${fgAtt} FG (long ${long}), ${patMade}/${patAtt} PAT`,
+            points: Number(stat.fantasy_points) || 0
+        })
+    }
+
+    if (stat.position === "DEF") {
+        const sacks = Number(stat.def_sacks) || 0
+        const ints = Number(stat.def_interceptions) || 0
+        const fumRec = Number(stat.fumble_recovery_opp) || 0
+        const defTd = Number(stat.def_tds) || 0
+        const stTd = Number(stat.special_teams_tds) || 0
+        entries.push({
+            category: "Defense",
+            line: `${sacks} sacks, ${ints} INT, ${fumRec} FR, ${defTd + stTd} TD`,
+            points: Number(stat.fantasy_points) || 0
+        })
+    }
+
+    return entries
+}
 
 const renderTeamBoxScores = (starters) => {
-    return CATEGORY_ORDER.map((category) => {
-        const players = starters.filter((s) => category.positions.includes(s.position))
-        if (players.length === 0) return ""
+    const allEntries = starters.flatMap((s) => 
+        formatBoxScoreEntries(s.raw_stats).map((entry) => ({ ...entry, name: s.name }))
+    )
+
+    return CATEGORY_LABELS.map((category) => {
+        const entries = allEntries.filter((e) => e.category === category)
+        if (entries.length === 0) return ""
 
         return `
-            <p class="font-bold underline text-sm uppercase mt-4 mb-1">${category.label}</p>
-            ${players.map((s) => `
+            <p class="font-bold underline text-sm uppercase mt-4 mb-1">${category}</p>
+            ${entries.map((e) => `
                 <p class="mb-1">
-                    <span class="font-semibold">${s.name}</span>
-                    <span class="opacity-60">${s.line}</span>
-                    <span class="font-bold text-primary float-right">${s.points} pts</span>
+                    <span class="font-semibold">${e.name}</span>
+                    <span class="opacity-60">${e.line}</span>
+                    <span class="font-bold text-primary float-right">${e.points} pts</span>
                 </p>
             `).join("")}
         `
