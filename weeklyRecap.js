@@ -4,8 +4,40 @@ import { getWeeklyRecap, getTopPerformersByPosition } from "./src/api/weeklyReca
 import { getWeeklyRecapFacts } from "./src/utils/weeklyRecapFacts.js"
 import { formatBoxScoreLine } from "./src/utils/boxScoreFormat.js"
 import { getCurrentSeasonSettings } from "./src/api/seasonSettingsApi.js"
+import { getTeams } from "./src/api/teamsApi.js"
 
 const CATEGORY_LABELS = ["Passing", "Rushing", "Receiving", "Defense", "Kicking"]
+const POSITION_DISPLAY_ORDER = ["QB", "RB", "WR", "TE", "K", "DEF"]
+
+const renderTopPerformers = (topByPosition, teams) => {
+    const nameFor = (teamId) => teams.find((t) => t.id === teamId)?.current_name || teamId
+
+    const cards = POSITION_DISPLAY_ORDER
+        .filter((pos) => topByPosition[pos])
+        .map((pos) => {
+            const row = topByPosition[pos]
+            const line = formatBoxScoreLine({ ...row.raw_stats, position: row.position })
+
+            return `
+                <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl p-4">
+                    <p class="text-xs uppercase tracking-wide opacity-60">${pos}</p>
+                    <p class="font-bold text-primary">${row.player_name}</p>
+                    <p class="text-xs opacity-70 mb-2">${nameFor(row.team_id)}</p>
+                    <p class="text-sm">${line}</p>
+                    <p class="font-bold text-lg mt-1">${row.fantasy_points} pts</p>
+                </div>
+            `
+        }).join("")
+
+        if (cards === "") return ""
+
+        return `
+            <h3 class="text-xl font-bold text-primary mb-3">Top Performers</h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                ${cards}
+            </div>
+        `
+}
 
 const formatBoxScoreEntries = (stat, totalPoints, position) => {
     const entries = []
@@ -212,7 +244,12 @@ const loadRecap = async () => {
         return
     }
 
-    const matchupFacts = await getWeeklyRecapFacts(season, week)
+    const [matchupFacts, topByPosition, teams] = await Promise.all([
+        getWeeklyRecapFacts(season, week),
+        getTopPerformersByPosition(season, week),
+        getTeams()
+    ])
+        
 
     container.innerHTML = `
         <h2 class="text-2xl font-bold mb-4">${recap.headline}</h2>
@@ -221,6 +258,7 @@ const loadRecap = async () => {
                 ${renderArticleBody(recap.article_body)}
             </div>
         </div>
+        ${renderTopPerformers(topByPosition, teams)}
         <h3 class="text-xl font-bold text-primary mb-3">Box Scores</h3>
         ${renderBoxScores(matchupFacts)}
     `

@@ -15,7 +15,7 @@ const getPlayerStatsUrl = (season) =>
     `https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_${season}.csv`
 
 const getSchedulesUrl = () =>
-    "https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv"
+    "https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv"
 
 const getTeamStatsUrl = (season) =>
     `https://github.com/nflverse/nflverse-data/releases/download/stats_team/stats_team_week_${season}.csv`
@@ -198,6 +198,12 @@ Deno.serve(async (req) => {
         const weekSchedules = parseCsvFiltered(schedulesText, season, week)
         const weekTeamStats = parseCsvFiltered(teamStatsText, season, week)
 
+        if (!schedulesRes.ok || weekSchedules.length === 0) {
+            return new Response(JSON.stringify({
+                error: `Schedule not loaded (status ${schedulesRes.status}, ${weekSchedules.length} games for week ${week})`
+            }), { status: 500, headers: corsHeaders })
+        }   
+
         const rosteredPlayers = [
             ...(draftRes.data || []),
             ...(faRes.data || [])
@@ -301,6 +307,13 @@ Deno.serve(async (req) => {
             debugFaCount: faRes.data?.length ?? 0,
             debugKickerRows: rowsToInsert.filter((r) => r.position === "K"),
             debugSearchLines: statsText.split("\n").filter((l) => l.includes("Jacobs") || l.includes("Bowers") || l.includes("Gainwell")),
+            debugWeekSchedulesCount: weekSchedules.length,
+            debugWeekSchedulesSample: weekSchedules.slice(0, 3).map((g) => ({
+                matchup: `${g.away_team}@${g.home_team}`,
+                gameday: g.gameday,
+                weekday: g.weekday,
+                gametime: g.gametime
+            })),
             insertError: insertError?.message || null
         }), { headers: { ...corsHeaders, "Content-Type": "application/json" } })
 

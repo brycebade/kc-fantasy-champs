@@ -970,6 +970,11 @@ document.getElementById("runWeeklyRecap").addEventListener("click", async () => 
         })
         const data = await res.json()
 
+        if (data.error) {
+            statusEl.innerHTML = `<span class="text-error">Function error: ${data.error}</span>`
+            return
+        }
+
         if (data.insertError) {
             statusEl.innerHTML = `<span class="text-error">Insert error: ${data.insertError}</span>`
             return
