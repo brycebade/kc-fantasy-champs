@@ -159,12 +159,15 @@ const calculateKickingPoints = (stat) => {
     return Math.round(points * 100) / 100
 }
 
+const NAME_SUFFIXES = new Set(["jr", "sr", "ii", "iii", "iv", "v"])
+
 const normalizeName = (name) => {
     return name
         .toLowerCase()
         .replace(/[^a-z\s]/g, "")
         .split(/[\s,]+/)
         .filter(Boolean)
+        .filter((word) => !NAME_SUFFIXES.has(word))
         .sort()
         .join(" ")
 }
