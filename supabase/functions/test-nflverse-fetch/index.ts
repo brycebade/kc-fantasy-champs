@@ -172,11 +172,6 @@ const normalizeName = (name) => {
         .join(" ")
 }
 
-const findPlayerStat = (rosterPlayerName, weekStats) => {
-    const normalizedRosterName = normalizeName(rosterPlayerName)
-    return weekStats.find((s) => normalizeName(s.player_display_name) === normalizedRosterName)
-}
-
 Deno.serve(async (req) => {
     if (req.method === "OPTIONS") {
         return new Response("ok", { headers: corsHeaders })
@@ -294,30 +289,9 @@ Deno.serve(async (req) => {
             unmatchedCount: unmatched.length,
             weekStatsCount: weekStats.length,
             unmatched,
-            debugStatsHeaderLine: statsText.split("\n")[0],
-            debugStatsFirstDataLine: statsText.split("\n")[1],
-            debugSchedulesHeaderLine: schedulesText.split("\n")[0],
-            debugSchedulesFirstDataLine: schedulesText.split("\n")[1],
-            debugStatsTextLength: statsText.length,
-            debugStatsLineCount: statsText.split("\n").length,
-            debugStatsLastLine: statsText.trim().split("\n").slice(-1)[0],
-            debugSearchLines: statsText.split("\n").filter((l) => l.includes("Jacobs") || l.includes("Bowers")),
-            debugTeamStatsHeaderLine: teamStatsText.split("\n")[0],
-            debugTeamStatsFirstDataLine: teamStatsText.split("\n")[1],
-            debugDraftError: draftRes.error?.message || null,
-            debugFaError: faRes.error?.message || null,
-            debugDraftCount: draftRes.data?.length ?? 0,
-            debugFaCount: faRes.data?.length ?? 0,
-            debugKickerRows: rowsToInsert.filter((r) => r.position === "K"),
-            debugSearchLines: statsText.split("\n").filter((l) => l.includes("Jacobs") || l.includes("Bowers") || l.includes("Gainwell")),
-            debugWeekSchedulesCount: weekSchedules.length,
-            debugWeekSchedulesSample: weekSchedules.slice(0, 3).map((g) => ({
-                matchup: `${g.away_team}@${g.home_team}`,
-                gameday: g.gameday,
-                weekday: g.weekday,
-                gametime: g.gametime
-            })),
-            insertError: insertError?.message || null
+            DraftError: draftRes.error?.message || null,
+            FaError: faRes.error?.message || null,
+            insertError: insertError?.message || null            
         }), { headers: { ...corsHeaders, "Content-Type": "application/json" } })
 
     } catch (error) {

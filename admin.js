@@ -980,6 +980,11 @@ document.getElementById("runWeeklyRecap").addEventListener("click", async () => 
             return
         }
 
+        if (data.draftError || data.faError) {
+            statusEl.innerHTML = `<span class="text-error">Roster query failed (${data.draftError || data.faError}). Run it again.</span>`
+            return
+        }
+
         statusEl.innerHTML = `<span class="text-success">Done.</span> Inserted ${data.insertedCount}, unmatched ${data.unmatchedCount}`
 
         if (data.unmatched.length > 0) {
