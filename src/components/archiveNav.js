@@ -4,7 +4,7 @@ export const renderArchiveNav = (activePage) => {
 
     const links = [
         { label: "League History", href: "leagueHistory.html", key: "history" },
-        { label: "League Records", href: "records.html", key: "records" },
+        { label: "Records", href: "records.html", key: "records" },
         { label: "Former Owners", href: "formerOwners.html", key: "former" },
         { label: "Weekly Recaps", href: "weeklyRecap.html", key: "story" },
         { label: "League Story", href: "leagueStory.html", key: "story" }
