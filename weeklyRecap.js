@@ -1,6 +1,6 @@
 import { renderNavbar } from "./src/components/navbar.js"
 import { renderArchiveNav } from "./src/components/archiveNav.js"
-import { getWeeklyRecap, getTopPerformersByPosition } from "./src/api/weeklyRecapsApi.js"
+import { getWeeklyRecap, getTopPerformersByPosition, getLatestWeeklyRecap } from "./src/api/weeklyRecapsApi.js"
 import { getWeeklyRecapFacts } from "./src/utils/weeklyRecapFacts.js"
 import { formatBoxScoreLine } from "./src/utils/boxScoreFormat.js"
 import { getCurrentSeasonSettings } from "./src/api/seasonSettingsApi.js"
@@ -160,13 +160,22 @@ const populateWeekSelect = () => {
     }
 }
 
-const applyUrlParams = () => {
+const applyUrlParams = async () => {
     const params = new URLSearchParams(window.location.search)
     const urlSeason = params.get("season")
     const urlWeek = params.get("week")
 
-    if (urlSeason) document.getElementById("seasonJumpSelect").value = urlSeason
-    if (urlWeek) document.getElementById("weekJumpSelect").value = urlWeek
+    if (urlSeason || urlWeek) {
+        if (urlSeason) document.getElementById("seasonJumpSelect").value = urlSeason
+        if (urlWeek) document.getElementById("weekJumpSelect").value = urlWeek
+        return
+    }
+
+    const latest = await getLatestWeeklyRecap()
+    if (latest) {
+        document.getElementById("seasonJumpSelect").value = latest.season
+        document.getElementById("weekJumpSelect").value = latest.week
+    }
 }
 
 const renderBoxScores = (matchupFacts) => {
@@ -269,7 +278,7 @@ const init = async () => {
     await renderArchiveNav("weeklyRecap")
     await populateSeasonSelect()
     populateWeekSelect()
-    applyUrlParams()
+    await applyUrlParams()
 
     document.getElementById("seasonJumpSelect").addEventListener("change", loadRecap)
     document.getElementById("weekJumpSelect").addEventListener("change", loadRecap)

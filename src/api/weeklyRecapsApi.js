@@ -85,3 +85,19 @@ export const getRecentWeeklyRecaps = async (season, limit = 4) => {
     }
     return data
 }
+
+export const getLatestWeeklyRecap = async () => {
+    const { data, error } = await supabase  
+        .from("weekly_recaps")
+        .select("season, week")
+        .order("season", { ascending: false })
+        .order("week", { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+    if (error) {
+        console.error("Error fetching latest recap:", error)
+        return null
+    }
+    return data
+}
