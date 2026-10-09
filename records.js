@@ -151,7 +151,7 @@ const renderSingleGameRecords = async () => {
 
     container.innerHTML =
         card("Highest Scores", rankedList(topHighest, (p) => `${round1(p.score)} — ${seasonNameFor(p.teamId, p.season)} (${p.season} Wk ${p.week})`)) +
-        card("Lowest Scores", rankedList(topLowest, (p) => `${round1(p.score)} — ${seasonNameFor(p.teamId, p.season)} (${p.season} WK ${p.week})`)) +
+        card("Lowest Scores", rankedList(topLowest, (p) => `${round1(p.score)} — ${seasonNameFor(p.teamId, p.season)} (${p.season} Wk ${p.week})`)) +
         card("Biggest Blowouts", rankedList(topBlowouts, (b) => `${b.margin} — ${seasonNameFor(b.winnerId, b.season)} over ${seasonNameFor(b.loserId, b.season)} (${b.season} Wk ${b.week})`))
 }
 
