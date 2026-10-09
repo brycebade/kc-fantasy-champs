@@ -5,8 +5,72 @@ import { getAllTeamHistory } from "./src/api/teamsHistoryApi.js"
 import { getStandings } from "./src/api/standingsApi.js"
 import { getOwners } from "./src/api/ownersApi.js"
 import { renderArchiveNav } from "./src/components/archiveNav.js"
+import { getTopPlayerGames, getTopPlayerGamesByPosition } from "./src/api/playerRecordsApi.js"
+
+const POSITION_SECTIONS = [
+    { position: "QB", title: "Top Quarterback Games" },
+    { position: "RB", title: "Top Running Back Games" },
+    { position: "WR", title: "Top Wide Receiver Games" },
+    { position: "TE", title: "Top Tight End Games" },
+    { position: "K", title: "Top Kicker Games" },
+    { position: "DEF", title: "Top Defense Games" }
+]
 
 const round1 = (n) => Math.round(n * 10) / 10
+
+const renderPlayerRecords = async () => {
+        const container = document.getElementById("recordsContainer")
+        if (!container) return
+
+        const [topOverall, teams, teamHistory, ...byPosition] = await Promise.all([
+            getTopPlayerGames(10),
+            getTeams(),
+            getAllTeamHistory(),
+            ...POSITION_SECTIONS.map((s) => getTopPlayerGamesByPosition(s.position, 5))
+        ])
+
+        const seasonNameFor = (teamId, season) => {
+            const h = teamHistory.find((h) => 
+                h.team_id === teamId &&
+                season >= h.start_year &&
+                (h.end_year == null || season <= h.end_year)
+            )
+            if (h) return h.name
+            const team = teams.find((t) => t.id === teamId)
+            return team?.current_name || teamId
+        }
+
+        const round2 = (n) => Math.round(n * 100) / 100
+
+        const rankedList = (items, renderItem) =>
+            items.length === 0
+                ? `<p class="text-sm opacity-60">None yet</p>`
+                : items.map((item, i) => `
+                    <div class="flex items-center justify-between gap-3 py-2 border-b border-base-300 last:border-0">
+                        <span class="text-sm"><span class="font-bold text-primary mr-2">${i + 1}</span>${renderItem(item)}</span>
+                    </div>
+                `).join("")
+
+        const card = (title, body) => `
+            <div class="card bg-base-100 shadow-md border border-base-300 rounded-xl overflow-hidden mb-6">
+                <div class="bg-neutral text-white px-4 py-2">
+                    <h2 class="font-bold uppercase tracking-wide text-sm">${title}</h2>
+                </div>
+                <div class="card-body p-4">${body}</div>
+            </div>
+        `
+
+        const line = (g, showPosition) => `${round2(g.fantasy_points)} — ${g.player_name}${showPosition ? ` (${g.position})` : ""} <span class="opacity-60">(${seasonNameFor(g.team_id, g.season)}, ${g.season} Wk ${g.week})</span>`
+
+        const positionCards = POSITION_SECTIONS.map((section, i) =>
+            card(section.title, rankedList(byPosition[i], (g) => line(g, false)))
+        ).join("")
+
+        container.innerHTML =
+            `<p class="text-xs opacity-60 mb-4">Starters only. Player records begin in 2026.</p>` +
+            card("Top 10 Player Games", rankedList(topOverall, (g) => line(g, true))) +
+            positionCards
+    }
 
 const init = async () => {
     await renderNavbar()
@@ -21,7 +85,8 @@ const init = async () => {
 const renderView = async (view) => {
     if (view === "single-game") await renderSingleGameRecords()
     else if (view === "single-season") await renderSingleSeasonRecords()
-    else if (view === "career") await renderCareerRecords()        
+    else if (view === "career") await renderCareerRecords() 
+    else if (view === "player-games") await renderPlayerRecords()    
 }
 
 const renderSingleGameRecords = async () => {
