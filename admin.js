@@ -989,7 +989,7 @@ document.getElementById("runWeeklyRecap").addEventListener("click", async () => 
 
         if (data.unmatched.length > 0) {
             resultsEl.innerHTML = "<strong>Unmatched:</strong><ul class='list-disc list-inside'>" +
-                data.unmatched.map((u) => `<li>${u.player}</li>`).join("") +
+                data.unmatched.map((u) => `<li>${u.player} (${u.matchCount})</li>`).join("") +
                 "</ul>"
         }
     } catch (error) {

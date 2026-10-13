@@ -254,7 +254,12 @@ Deno.serve(async (req) => {
             }
 
             const normalizedRosterName = normalizeName(rosterPlayer.player)
-            const matches = weekStats.filter((s) => normalizeName(s.player_display_name) === normalizedRosterName)
+            let matches = weekStats.filter((s) => normalizeName(s.player_display_name) === normalizedRosterName)
+
+            if (matches.length > 1 && rosterPlayer.position) {
+                const samePosition = matches.filter((s) => s.position === rosterPlayer.position)
+                if (samePosition.length > 0) matches = samePosition
+            }
 
             if (matches.length !== 1) {
                 unmatched.push({ player: rosterPlayer.player, matchCount: matches.length })
@@ -291,11 +296,12 @@ Deno.serve(async (req) => {
             unmatched,
             DraftError: draftRes.error?.message || null,
             FaError: faRes.error?.message || null,
-            insertError: insertError?.message || null            
+            insertError: insertError?.message || null,
+            debugTeamsInWeek: [...new Set(weekStats.map((s) => s.team))].sort()            
         }), { headers: { ...corsHeaders, "Content-Type": "application/json" } })
 
     } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), { 
+        return new Response(JSON.stringify({ error: error.message, stack: error.stack }), { 
             status: 500,
             headers: corsHeaders
         })
